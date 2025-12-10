@@ -14,6 +14,9 @@ import {
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/integrations/supabase/auth";
+import ReportDetailModal from "@/components/reports/ReportDetailModal";
+import { useState } from "react";
+import { logReportView } from "@/utils/activity-logger";
 
 // Helper function to render report type badge
 const ReportTypeBadge = ({ type }: { type: DailyReport['type'] }) => {
@@ -36,8 +39,18 @@ const ReportTypeBadge = ({ type }: { type: DailyReport['type'] }) => {
 };
 
 const ViewReports = () => {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const { data: reports, isLoading, isError } = useDailyReports();
+  const [selectedReport, setSelectedReport] = useState<DailyReport | null>(null);
+
+  const handleViewDetails = (report: DailyReport) => {
+    setSelectedReport(report);
+    
+    // Log activity if the viewer is not the submitter
+    if (user && user.id !== report.user_id) {
+        logReportView(user.id, report.user_id, report.type);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -82,12 +95,16 @@ const ViewReports = () => {
                   <TableHead>Submitter</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Report Type</TableHead>
-                  <TableHead className="text-right">Details</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {reports.map((report) => (
-                  <TableRow key={report.id}>
+                  <TableRow 
+                    key={report.id} 
+                    onClick={() => handleViewDetails(report)}
+                    className="cursor-pointer hover:bg-muted/50 transition-colors"
+                  >
                     <TableCell className="font-medium">
                       {format(new Date(report.report_date), 'PPP')}
                     </TableCell>
@@ -101,8 +118,7 @@ const ViewReports = () => {
                       <ReportTypeBadge type={report.type} />
                     </TableCell>
                     <TableCell className="text-right">
-                      {/* Placeholder for future detail view */}
-                      <Badge variant="outline">View</Badge>
+                      <Badge variant="outline">View Details</Badge>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -111,6 +127,12 @@ const ViewReports = () => {
           </div>
         </CardContent>
       </Card>
+      
+      <ReportDetailModal 
+        report={selectedReport} 
+        isOpen={!!selectedReport} 
+        onClose={() => setSelectedReport(null)} 
+      />
     </DashboardLayout>
   );
 };
