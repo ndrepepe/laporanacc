@@ -3,6 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { useLpkEntries } from "@/hooks/use-lpk-entries";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface ReportDetailModalProps {
     report: DailyReport | null;
@@ -41,26 +43,61 @@ const renderCashierDetails = (report: CashierReport) => (
     </div>
 );
 
-const renderConsignmentStaffDetails = (report: ConsignmentStaffReport) => (
-    <div className="space-y-4">
-        <DetailItem label="Received LPK" value={report.received_lpk ? "Yes" : "No"} />
-        <DetailItem label="LPK Entered Bsoft" value={report.lpk_entered_bsoft} />
-        
-        <Separator />
-        <h4 className="font-semibold mt-4">Tasks Completed</h4>
-        <p className="text-sm text-muted-foreground whitespace-pre-wrap">{report.tasks_completed}</p>
-        
-        <h4 className="font-semibold mt-4">Issues Encountered</h4>
-        <p className="text-sm text-muted-foreground whitespace-pre-wrap">{report.issues_encountered}</p>
+const renderConsignmentStaffDetails = (report: ConsignmentStaffReport) => {
+    const { data: lpkEntries, isLoading: isLoadingLpk } = useLpkEntries(report.id);
 
-        {report.suggestions && (
-            <>
-                <h4 className="font-semibold mt-4">Suggestions</h4>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{report.suggestions}</p>
-            </>
-        )}
-    </div>
-);
+    return (
+        <div className="space-y-4">
+            <DetailItem label="Received LPK" value={report.received_lpk ? "Yes" : "No"} />
+            <DetailItem label="LPK Entered Bsoft" value={report.lpk_entered_bsoft} />
+            
+            {report.received_lpk && (
+                <>
+                    <Separator />
+                    <h4 className="font-semibold mt-4">LPK Entries Received</h4>
+                    {isLoadingLpk ? (
+                        <p className="text-sm text-muted-foreground">Loading LPK entries...</p>
+                    ) : lpkEntries && lpkEntries.length > 0 ? (
+                        <div className="border rounded-md">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Branch Name</TableHead>
+                                        <TableHead className="text-right">Count</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {lpkEntries.map((entry) => (
+                                        <TableRow key={entry.id}>
+                                            <TableCell>{entry.branch_name}</TableCell>
+                                            <TableCell className="text-right">{entry.lpk_count}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    ) : (
+                        <p className="text-sm text-muted-foreground">No LPK entries recorded for this report.</p>
+                    )}
+                </>
+            )}
+
+            <Separator />
+            <h4 className="font-semibold mt-4">Tasks Completed</h4>
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{report.tasks_completed}</p>
+            
+            <h4 className="font-semibold mt-4">Issues Encountered</h4>
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{report.issues_encountered}</p>
+
+            {report.suggestions && (
+                <>
+                    <h4 className="font-semibold mt-4">Suggestions</h4>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{report.suggestions}</p>
+                </>
+            )}
+        </div>
+    );
+};
 
 const renderSupervisorManagerDetails = (report: SupervisorManagerReport) => (
     <div className="space-y-4">

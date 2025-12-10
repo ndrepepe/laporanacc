@@ -16,6 +16,15 @@ export type BaseReport = {
     profile: Profile; // Joined profile data
 };
 
+// LPK Entry Type
+export type LPKEntry = {
+    id: string;
+    report_id: string;
+    branch_name: string;
+    lpk_count: number;
+    created_at: string;
+};
+
 // Specific Report Types
 export type AccountingReport = BaseReport & {
     type: 'accounting';
@@ -42,7 +51,7 @@ export type ConsignmentStaffReport = BaseReport & {
     tasks_completed: string;
     issues_encountered: string;
     suggestions: string | null;
-    // Note: LPK entries are in a separate table, we might fetch them separately or rely on RLS to handle the join.
+    lpk_entries?: LPKEntry[]; // Add optional LPK entries
 };
 
 export type SupervisorManagerReport = BaseReport & {
