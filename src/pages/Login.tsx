@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/integrations/supabase/auth';
 import { useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -26,6 +26,7 @@ const Login = () => {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl text-center">Daily Reports Login</CardTitle>
+          <CardDescription className="text-center">Accounting - Cashier - Consignment</CardDescription>
         </CardHeader>
         <CardContent>
           <Auth
