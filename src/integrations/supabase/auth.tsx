@@ -8,14 +8,10 @@ import React, {
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "./client";
 import { showError } from "@/utils/toast";
+import { Profile } from "@/lib/types"; // Import Profile type
 
 // Define the structure for the user profile (matching the DB schema)
-export type UserProfile = {
-  id: string;
-  first_name: string | null;
-  last_name: string | null;
-  role: string | null;
-};
+export type UserProfile = Profile; // Use Profile from types.ts
 
 interface AuthContextType {
   session: Session | null;
