@@ -2,10 +2,10 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/integrations/supabase/auth";
 import { REPORT_ROLE_MAP, ReportType } from "@/lib/report-constants";
-import ReportFormAccounting from "../components/reports/ReportFormAccounting";
-import ReportFormCashier from "../components/reports/ReportFormCashier";
-import ReportFormConsignmentStaff from "../components/reports/ReportFormConsignmentStaff";
-import ReportFormSupervisorManager from "../components/reports/ReportFormSupervisorManager";
+import ReportFormAccounting from "@/components/reports/ReportFormAccounting";
+import ReportFormCashier from "@/components/reports/ReportFormCashier";
+import ReportFormConsignmentStaff from "@/components/reports/ReportFormConsignmentStaff";
+import ReportFormSupervisorManager from "@/components/reports/ReportFormSupervisorManager";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const ReportFormMap: Record<ReportType, React.FC> = {
