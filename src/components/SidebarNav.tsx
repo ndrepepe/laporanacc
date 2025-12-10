@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Home, LogOut, FileText, Users, Bell, BarChart } from "lucide-react";
+import { Home, LogOut, FileText, Users, Bell, BarChart, Settings } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/integrations/supabase/auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,14 +7,17 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
+import { UserRole } from "@/lib/roles";
 
-const navItems = [
+const baseNavItems = [
   { to: "/", icon: Home, label: "Dashboard" },
   { to: "/report/submit", icon: FileText, label: "Submit Report" },
   { to: "/reports/view", icon: Users, label: "View Reports" },
   { to: "/summary", icon: BarChart, label: "Summary" },
   { to: "/notifications", icon: Bell, label: "Notifications" },
 ];
+
+const ADMIN_ROLE: UserRole = 'Senior Manager';
 
 const SidebarNav = () => {
   const { profile } = useAuth();
@@ -26,6 +29,12 @@ const SidebarNav = () => {
     await supabase.auth.signOut();
     navigate('/login');
   };
+
+  // Conditionally add Admin link
+  const navItems = [...baseNavItems];
+  if (profile?.role === ADMIN_ROLE) {
+    navItems.push({ to: "/admin", icon: Settings, label: "Admin Dashboard" });
+  }
 
   const NavContent = () => (
     <div className="flex flex-col h-full p-4">

@@ -12,6 +12,8 @@ import SubmitReport from "./pages/SubmitReport";
 import ViewReports from "./pages/ViewReports";
 import Summary from "./pages/Summary";
 import Notifications from "./pages/Notifications";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminRoute from "./components/AdminRoute";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +34,12 @@ const App = () => (
               <Route path="/reports/view" element={<ViewReports />} />
               <Route path="/summary" element={<Summary />} />
               <Route path="/notifications" element={<Notifications />} />
+              
+              {/* Admin Routes (Protected by AdminRole check) */}
+              <Route element={<AdminRoute />}>
+                <Route path="/admin" element={<AdminDashboard />} />
+              </Route>
+
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             </Route>
 
