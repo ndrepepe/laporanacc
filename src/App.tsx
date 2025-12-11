@@ -9,7 +9,8 @@ import Login from "./pages/Login";
 import { AuthProvider } from "./integrations/supabase/auth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SubmitReport from "./pages/SubmitReport";
-import ViewReports from "./pages/ViewReports";
+import MyReports from "./pages/ViewReports"; // Renamed import
+import ViewSubordinateReports from "./pages/ViewSubordinateReports"; // New import
 import Summary from "./pages/Summary";
 import Notifications from "./pages/Notifications";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -31,7 +32,8 @@ const App = () => (
             <Route element={<ProtectedRoute />}>
               <Route path="/" element={<Index />} />
               <Route path="/report/submit" element={<SubmitReport />} />
-              <Route path="/reports/view" element={<ViewReports />} />
+              <Route path="/reports/view" element={<MyReports />} /> {/* Updated element name */}
+              <Route path="/reports/subordinates" element={<ViewSubordinateReports />} /> {/* New route */}
               <Route path="/summary" element={<Summary />} />
               <Route path="/notifications" element={<Notifications />} />
               

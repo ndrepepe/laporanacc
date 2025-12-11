@@ -4,20 +4,38 @@ import { useAuth } from "@/integrations/supabase/auth";
 import { DailyReport, Profile } from "@/lib/types";
 import { REPORT_TABLE_MAP, VIEW_PERMISSIONS, ReportType } from "@/lib/report-constants";
 
+type ReportScope = 'self' | 'subordinates';
+
 // Helper function to fetch reports from a single table
-const fetchReportsFromTable = async (tableName: string, reportType: ReportType): Promise<DailyReport[]> => {
-    // Crucially, we join the profile data here. RLS ensures only authorized reports are returned.
-    const { data, error } = await supabase
+const fetchReportsFromTable = async (
+    tableName: string, 
+    reportType: ReportType, 
+    userId: string, 
+    scope: ReportScope
+): Promise<DailyReport[]> => {
+    
+    let query = supabase
         .from(tableName)
         .select(`
             *,
             profile:user_id (id, first_name, last_name, role, avatar_url)
-        `)
-        .order('report_date', { ascending: false });
+        `);
+
+    if (scope === 'self') {
+        // For 'self' scope, explicitly filter by user_id.
+        query = query.eq('user_id', userId);
+    }
+    
+    // For 'subordinates' scope, we rely on RLS to filter reports based on the viewer's role,
+    // but we explicitly exclude the viewer's own reports to separate the views.
+    if (scope === 'subordinates') {
+        query = query.neq('user_id', userId);
+    }
+
+    const { data, error } = await query.order('report_date', { ascending: false });
 
     if (error) {
-        console.error(`Error fetching reports from ${tableName}:`, error);
-        // Throwing an error here allows React Query to handle the error state
+        console.error(`Error fetching reports from ${tableName} (Scope: ${scope}):`, error);
         throw new Error(`Failed to fetch reports from ${tableName}`);
     }
 
@@ -29,30 +47,50 @@ const fetchReportsFromTable = async (tableName: string, reportType: ReportType):
     })) as DailyReport[];
 };
 
-export const useDailyReports = () => {
-    const { profile, isLoading: isAuthLoading } = useAuth();
+export const useDailyReports = (scope: ReportScope = 'self') => {
+    const { profile, user, isLoading: isAuthLoading } = useAuth();
     
     const viewerRole = profile?.role;
-    const enabled = !!viewerRole && !isAuthLoading;
+    const userId = user?.id;
+    const enabled = !!viewerRole && !!userId && !isAuthLoading;
 
     return useQuery<DailyReport[], Error>({
-        queryKey: ['dailyReports', viewerRole],
+        queryKey: ['dailyReports', viewerRole, scope],
         queryFn: async () => {
-            if (!viewerRole) return [];
+            if (!viewerRole || !userId) return [];
 
-            const allowedReportTypes = VIEW_PERMISSIONS[viewerRole];
-            if (!allowedReportTypes || allowedReportTypes.length === 0) {
+            let allowedReportTypes: ReportType[] = [];
+
+            if (scope === 'self') {
+                // For 'self' scope, only fetch reports corresponding to the user's own role type
+                // We map the UserRole back to the ReportType for simplicity, assuming a 1:1 mapping for submission.
+                if (viewerRole === 'Accounting Staff') allowedReportTypes = ['accounting'];
+                else if (viewerRole === 'Cashier') allowedReportTypes = ['cashier'];
+                else if (viewerRole === 'Consignment Staff') allowedReportTypes = ['consignment_staff'];
+                else if (viewerRole === 'Consignment Supervisor' || viewerRole === 'Accounting Manager' || viewerRole === 'Senior Manager') allowedReportTypes = ['supervisor_manager'];
+                
+            } else if (scope === 'subordinates') {
+                // For 'subordinates' scope, use the defined VIEW_PERMISSIONS
+                allowedReportTypes = VIEW_PERMISSIONS[viewerRole].filter(type => {
+                    // Exclude the manager's own report type from the subordinate view
+                    // Manager/Supervisor reports are type 'supervisor_manager'.
+                    if (viewerRole === 'Accounting Manager' && type === 'supervisor_manager') return false;
+                    if (viewerRole === 'Senior Manager' && type === 'supervisor_manager') return false;
+                    return true;
+                });
+            }
+
+            if (allowedReportTypes.length === 0) {
                 return [];
             }
 
             const fetchPromises = allowedReportTypes.map(type => {
                 const tableName = REPORT_TABLE_MAP[type];
-                return fetchReportsFromTable(tableName, type);
+                return fetchReportsFromTable(tableName, type, userId, scope);
             });
 
             const results = await Promise.all(fetchPromises);
             
-            // Flatten the results from all tables into a single array
             const allReports = results.flat();
 
             // Sort all reports by report date descending

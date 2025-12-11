@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Home, LogOut, FileText, Users, Bell, BarChart, Settings } from "lucide-react";
+import { Home, LogOut, FileText, Users, Bell, BarChart, Settings, Eye } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/integrations/supabase/auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,11 +12,12 @@ import { UserRole } from "@/lib/roles";
 const baseNavItems = [
   { to: "/", icon: Home, label: "Dashboard" },
   { to: "/report/submit", icon: FileText, label: "Submit Report" },
-  { to: "/reports/view", icon: Users, label: "View Reports" },
+  { to: "/reports/view", icon: Eye, label: "My Reports" }, // Updated label and icon
   { to: "/summary", icon: BarChart, label: "Summary" },
   { to: "/notifications", icon: Bell, label: "Notifications" },
 ];
 
+const SUBORDINATE_VIEWER_ROLES: UserRole[] = ['Senior Manager', 'Accounting Manager', 'Consignment Supervisor'];
 const ADMIN_ROLE: UserRole = 'Senior Manager';
 
 const SidebarNav = () => {
@@ -30,8 +31,15 @@ const SidebarNav = () => {
     navigate('/login');
   };
 
-  // Conditionally add Admin link
   const navItems = [...baseNavItems];
+  
+  // Conditionally add View Subordinate Reports link for managers/supervisors
+  if (profile?.role && SUBORDINATE_VIEWER_ROLES.includes(profile.role)) {
+    // Insert after My Reports
+    navItems.splice(3, 0, { to: "/reports/subordinates", icon: Users, label: "View Subordinates" });
+  }
+
+  // Conditionally add Admin link
   if (profile?.role === ADMIN_ROLE) {
     navItems.push({ to: "/admin", icon: Settings, label: "Admin Dashboard" });
   }

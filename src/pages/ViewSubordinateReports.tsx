@@ -17,6 +17,9 @@ import { useAuth } from "@/integrations/supabase/auth";
 import ReportDetailModal from "@/components/reports/ReportDetailModal";
 import { useState } from "react";
 import { logReportView } from "@/utils/activity-logger";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
+import { UserRole } from "@/lib/roles";
 
 // Helper function to render report type badge
 const ReportTypeBadge = ({ type }: { type: DailyReport['type'] }) => {
@@ -38,22 +41,42 @@ const ReportTypeBadge = ({ type }: { type: DailyReport['type'] }) => {
     return <Badge className={colorClass}>{type.replace('_', ' ').toUpperCase()}</Badge>;
 };
 
-const MyReports = () => {
+const ViewSubordinateReports = () => {
   const { profile, user } = useAuth();
-  // Use 'self' scope to only fetch reports submitted by the current user
-  const { data: reports, isLoading, isError } = useDailyReports('self');
+  // Use 'subordinates' scope to fetch reports viewable by the manager/supervisor role, excluding their own.
+  const { data: reports, isLoading, isError } = useDailyReports('subordinates');
   const [selectedReport, setSelectedReport] = useState<DailyReport | null>(null);
+
+  const MANAGER_ROLES: UserRole[] = ['Senior Manager', 'Accounting Manager', 'Consignment Supervisor'];
+
+  if (!profile || !MANAGER_ROLES.includes(profile.role)) {
+    return (
+        <DashboardLayout>
+            <h1 className="text-3xl font-bold mb-6">View Subordinate Reports</h1>
+            <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Access Denied</AlertTitle>
+                <AlertDescription>
+                    You do not have permission to view subordinate reports.
+                </AlertDescription>
+            </Alert>
+        </DashboardLayout>
+    );
+  }
 
   const handleViewDetails = (report: DailyReport) => {
     setSelectedReport(report);
     
-    // Log activity is not needed here since the user is viewing their own report
+    // Log activity since the viewer is a manager/supervisor viewing another user's report
+    if (user && user.id !== report.user_id) {
+        logReportView(user.id, report.user_id, report.type);
+    }
   };
 
   if (isLoading) {
     return (
         <DashboardLayout>
-            <h1 className="text-3xl font-bold mb-6">My Daily Reports</h1>
+            <h1 className="text-3xl font-bold mb-6">View Subordinate Reports</h1>
             <Card><CardContent><Skeleton className="h-64 w-full" /></CardContent></Card>
         </DashboardLayout>
     );
@@ -62,8 +85,8 @@ const MyReports = () => {
   if (isError) {
     return (
         <DashboardLayout>
-            <h1 className="text-3xl font-bold mb-6">My Daily Reports</h1>
-            <Card><CardContent className="p-6 text-red-500">Error loading reports.</CardContent></Card>
+            <h1 className="text-3xl font-bold mb-6">View Subordinate Reports</h1>
+            <Card><CardContent className="p-6 text-red-500">Error loading subordinate reports.</CardContent></Card>
         </DashboardLayout>
     );
   }
@@ -71,18 +94,18 @@ const MyReports = () => {
   if (!reports || reports.length === 0) {
     return (
         <DashboardLayout>
-            <h1 className="text-3xl font-bold mb-6">My Daily Reports</h1>
-            <Card><CardContent className="p-6">You have not submitted any reports yet.</CardContent></Card>
+            <h1 className="text-3xl font-bold mb-6">View Subordinate Reports</h1>
+            <Card><CardContent className="p-6">No subordinate reports found for your viewing permissions.</CardContent></Card>
         </DashboardLayout>
     );
   }
 
   return (
     <DashboardLayout>
-      <h1 className="text-3xl font-bold mb-6">My Daily Reports</h1>
+      <h1 className="text-3xl font-bold mb-6">View Subordinate Reports</h1>
       <Card>
         <CardHeader>
-          <CardTitle>Reports Submitted by You ({profile?.role})</CardTitle>
+          <CardTitle>Reports Viewable by {profile?.role}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -90,6 +113,8 @@ const MyReports = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Date</TableHead>
+                  <TableHead>Submitter</TableHead>
+                  <TableHead>Role</TableHead>
                   <TableHead>Report Type</TableHead>
                   <TableHead className="text-right">Action</TableHead>
                 </TableRow>
@@ -103,6 +128,12 @@ const MyReports = () => {
                   >
                     <TableCell className="font-medium">
                       {format(new Date(report.report_date), 'PPP')}
+                    </TableCell>
+                    <TableCell>
+                      {report.profile.first_name} {report.profile.last_name}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">{report.profile.role}</Badge>
                     </TableCell>
                     <TableCell>
                       <ReportTypeBadge type={report.type} />
@@ -127,4 +158,4 @@ const MyReports = () => {
   );
 };
 
-export default MyReports;
+export default ViewSubordinateReports;
