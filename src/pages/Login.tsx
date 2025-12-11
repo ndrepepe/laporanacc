@@ -44,7 +44,6 @@ const Login = () => {
               },
             }}
             theme="light"
-            view="sign_in"
             redirectTo={window.location.origin + '/'}
           />
         </CardContent>
