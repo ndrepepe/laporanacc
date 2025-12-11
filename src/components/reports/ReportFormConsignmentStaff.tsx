@@ -12,6 +12,7 @@ import { showSuccess, showError } from "@/utils/toast";
 import { REPORT_TABLE_MAP } from "@/lib/report-constants";
 import { MinusCircle, PlusCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useQueryClient } from "@tanstack/react-query";
 
 const LPKEntrySchema = z.object({
     branch_name: z.string().min(1, "Branch name is required."),
@@ -41,6 +42,7 @@ type ConsignmentStaffFormValues = z.infer<typeof formSchema>;
 
 const ReportFormConsignmentStaff = () => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const form = useForm<ConsignmentStaffFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -117,6 +119,10 @@ const ReportFormConsignmentStaff = () => {
         issues_encountered: "",
         suggestions: "",
     });
+    // Invalidate the dailyReports query to refresh the view
+    queryClient.invalidateQueries({ queryKey: ['dailyReports'] });
+    // Invalidate LPK entries query if needed, although it's usually fetched via report ID
+    queryClient.invalidateQueries({ queryKey: ['lpkEntries'] });
   };
 
   return (

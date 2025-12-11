@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/integrations/supabase/auth";
 import { showSuccess, showError } from "@/utils/toast";
 import { REPORT_TABLE_MAP } from "@/lib/report-constants";
+import { useQueryClient } from "@tanstack/react-query";
 
 const formSchema = z.object({
   payments_count: z.coerce.number().min(0, "Must be a non-negative number."),
@@ -21,6 +22,7 @@ type CashierFormValues = z.infer<typeof formSchema>;
 
 const ReportFormCashier = () => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const form = useForm<CashierFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -55,6 +57,8 @@ const ReportFormCashier = () => {
     } else {
       showSuccess("Cashier Report submitted successfully!");
       form.reset();
+      // Invalidate the dailyReports query to refresh the view
+      queryClient.invalidateQueries({ queryKey: ['dailyReports'] });
     }
   };
 

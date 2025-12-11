@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/integrations/supabase/auth";
 import { showSuccess, showError } from "@/utils/toast";
 import { REPORT_TABLE_MAP } from "@/lib/report-constants";
+import { useQueryClient } from "@tanstack/react-query";
 
 const formSchema = z.object({
   tasks_completed: z.string().min(10, "Tasks completed description is required."),
@@ -19,6 +20,7 @@ type SupervisorManagerFormValues = z.infer<typeof formSchema>;
 
 const ReportFormSupervisorManager = () => {
   const { user, profile } = useAuth();
+  const queryClient = useQueryClient();
   const form = useForm<SupervisorManagerFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -51,6 +53,8 @@ const ReportFormSupervisorManager = () => {
     } else {
       showSuccess(`${profile?.role} Report submitted successfully!`);
       form.reset();
+      // Invalidate the dailyReports query to refresh the view
+      queryClient.invalidateQueries({ queryKey: ['dailyReports'] });
     }
   };
 

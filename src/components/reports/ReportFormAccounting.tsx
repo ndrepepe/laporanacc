@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/integrations/supabase/auth";
 import { showSuccess, showError } from "@/utils/toast";
 import { REPORT_TABLE_MAP } from "@/lib/report-constants";
+import { useQueryClient } from "@tanstack/react-query";
 
 const formSchema = z.object({
   new_customers_count: z.coerce.number().min(0, "Must be a non-negative number."),
@@ -24,6 +25,7 @@ type AccountingFormValues = z.infer<typeof formSchema>;
 
 const ReportFormAccounting = () => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const form = useForm<AccountingFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -62,6 +64,8 @@ const ReportFormAccounting = () => {
     } else {
       showSuccess("Accounting Report submitted successfully!");
       form.reset();
+      // Invalidate the dailyReports query to refresh the view
+      queryClient.invalidateQueries({ queryKey: ['dailyReports'] });
     }
   };
 
