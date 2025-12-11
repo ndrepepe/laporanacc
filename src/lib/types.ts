@@ -1,57 +1,7 @@
-import { ReportType, UserRole } from "./report-constants";
+import { UserRole } from "./roles";
+import { ReportType } from "./report-constants";
 
-export interface Profile {
-    id: string;
-    first_name: string;
-    last_name: string;
-    role: UserRole;
-    avatar_url: string | null;
-}
-
-// Base structure for all reports
-interface BaseReport {
-    id: string;
-    user_id: string;
-    report_date: string; // date string
-    created_at: string; // timestamp
-    profile: Profile; // Joined profile data
-}
-
-// Specific report types
-export interface AccountingReport extends BaseReport {
-    type: 'accounting';
-    new_customers_count: number;
-    new_customers_names: string;
-    new_sales_count: number;
-    new_sales_names: string;
-    worked_on_lph: boolean;
-    customer_confirmation_status: 'Successful' | 'Failed';
-}
-
-export interface CashierReport extends BaseReport {
-    type: 'cashier';
-    payments_count: number;
-    total_payments: number;
-    worked_on_lph: boolean;
-    customer_confirmation_done: boolean;
-}
-
-export interface ConsignmentStaffReport extends BaseReport {
-    type: 'consignment_staff';
-    received_lpk: boolean;
-    lpk_entered_bsoft: number;
-    tasks_completed: string;
-    issues_encountered: string;
-    suggestions: string | null;
-}
-
-export interface SupervisorManagerReport extends BaseReport {
-    type: 'supervisor_manager';
-    tasks_completed: string;
-    issues_encountered: string;
-    suggestions: string | null;
-}
-
+// New type for LPK entries (Fixes Error 2)
 export interface LPKEntry {
     id: string;
     report_id: string;
@@ -60,4 +10,60 @@ export interface LPKEntry {
     created_at: string;
 }
 
-export type DailyReport = AccountingReport | CashierReport | ConsignmentStaffReport | SupervisorManagerReport;
+export interface Profile {
+    id: string;
+    first_name: string | null;
+    last_name: string | null;
+    avatar_url: string | null;
+    role: UserRole;
+    updated_at: string | null;
+}
+
+// Base structure for all reports
+interface BaseReport {
+    id: string;
+    user_id: string;
+    report_date: string; // date string
+    created_at: string;
+    profile: Profile;
+    type: ReportType;
+}
+
+// Specific report interfaces
+export interface AccountingReport {
+    new_customers_count: number;
+    new_customers_names: string; // Added for Error 3
+    new_sales_count: number;
+    new_sales_names: string; // Added for Error 4
+    worked_on_lph: boolean;
+    customer_confirmation_status: string;
+}
+
+export interface CashierReport {
+    payments_count: number;
+    total_payments: number;
+    worked_on_lph: boolean; // Added for Error 5
+    customer_confirmation_done: boolean;
+}
+
+export interface ConsignmentStaffReport {
+    received_lpk: boolean;
+    lpk_entered_bsoft: number;
+    tasks_completed: string;
+    issues_encountered: string;
+    suggestions: string | null;
+}
+
+export interface SupervisorManagerReport {
+    tasks_completed: string;
+    issues_encountered: string;
+    suggestions: string | null;
+}
+
+// Union type for DailyReport
+export type DailyReport = BaseReport & (
+    | AccountingReport
+    | CashierReport
+    | ConsignmentStaffReport
+    | SupervisorManagerReport
+);

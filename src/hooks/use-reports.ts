@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/integrations/supabase/auth";
 import { DailyReport, Profile } from "@/lib/types";
 import { REPORT_TABLE_MAP, VIEW_PERMISSIONS, ReportType } from "@/lib/report-constants";
+import { UserRole } from "@/lib/roles";
 
 type ReportScope = 'self' | 'subordinates';
 
@@ -36,7 +37,7 @@ const fetchReportsFromTable = async (
 
     if (error) {
         console.error(`Error fetching reports from ${tableName} (Scope: ${scope}):`, error);
-        throw new Error(`Failed to fetch reports from ${tableName}`);
+        throw new Error(`Failed to fetch reports from ${tableName}: ${error.message}`);
     }
 
     // Map the raw data to the DailyReport type, ensuring the profile structure is correct
@@ -63,20 +64,30 @@ export const useDailyReports = (scope: ReportScope = 'self') => {
 
             if (scope === 'self') {
                 // For 'self' scope, only fetch reports corresponding to the user's own role type
-                // We map the UserRole back to the ReportType for simplicity, assuming a 1:1 mapping for submission.
-                if (viewerRole === 'Accounting Staff') allowedReportTypes = ['accounting'];
-                else if (viewerRole === 'Cashier') allowedReportTypes = ['cashier'];
-                else if (viewerRole === 'Consignment Staff') allowedReportTypes = ['consignment_staff'];
-                else if (viewerRole === 'Consignment Supervisor' || viewerRole === 'Accounting Manager' || viewerRole === 'Senior Manager') allowedReportTypes = ['supervisor_manager'];
+                switch (viewerRole as UserRole) {
+                    case 'Accounting Staff':
+                        allowedReportTypes = ['accounting'];
+                        break;
+                    case 'Cashier':
+                        allowedReportTypes = ['cashier'];
+                        break;
+                    case 'Consignment Staff':
+                        allowedReportTypes = ['consignment_staff'];
+                        break;
+                    case 'Consignment Supervisor':
+                    case 'Accounting Manager':
+                    case 'Senior Manager':
+                        allowedReportTypes = ['supervisor_manager'];
+                        break;
+                    default:
+                        allowedReportTypes = [];
+                }
                 
             } else if (scope === 'subordinates') {
                 // For 'subordinates' scope, use the defined VIEW_PERMISSIONS
-                allowedReportTypes = VIEW_PERMISSIONS[viewerRole].filter(type => {
+                allowedReportTypes = VIEW_PERMISSIONS[viewerRole as UserRole].filter(type => {
                     // Exclude the manager's own report type from the subordinate view
-                    // Manager/Supervisor reports are type 'supervisor_manager'.
-                    if (viewerRole === 'Accounting Manager' && type === 'supervisor_manager') return false;
-                    if (viewerRole === 'Senior Manager' && type === 'supervisor_manager') return false;
-                    return true;
+                    return true; 
                 });
             }
 

@@ -1,10 +1,4 @@
-export type UserRole = 
-    | 'Accounting Staff' 
-    | 'Cashier' 
-    | 'Consignment Staff' 
-    | 'Consignment Supervisor' 
-    | 'Accounting Manager' 
-    | 'Senior Manager';
+import { UserRole } from "./roles";
 
 export type ReportType = 'accounting' | 'cashier' | 'consignment_staff' | 'supervisor_manager';
 
@@ -15,13 +9,12 @@ export const REPORT_TABLE_MAP: Record<ReportType, string> = {
     supervisor_manager: 'reports_supervisor_manager',
 };
 
-// Defines which report types a specific role is allowed to view (in addition to their own reports, which RLS handles)
+// Defines which report types a specific role is allowed to view (for subordinate reports)
 export const VIEW_PERMISSIONS: Record<UserRole, ReportType[]> = {
-    'Accounting Staff': ['accounting'],
-    'Cashier': ['cashier'],
-    'Consignment Staff': ['consignment_staff'],
+    'Accounting Staff': [],
+    'Cashier': [],
+    'Consignment Staff': [],
     
-    // Managerial roles can view others' reports
     'Consignment Supervisor': ['consignment_staff', 'supervisor_manager'],
     'Accounting Manager': ['accounting', 'cashier', 'supervisor_manager'],
     'Senior Manager': ['accounting', 'cashier', 'consignment_staff', 'supervisor_manager'],
