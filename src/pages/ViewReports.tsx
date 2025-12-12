@@ -41,7 +41,7 @@ const ReportTypeBadge = ({ type }: { type: DailyReport['type'] }) => {
 const MyReports = () => {
   const { profile, user } = useAuth();
   // Use 'self' scope to only fetch reports submitted by the current user
-  const { data: reports, isLoading, isError } = useDailyReports('self');
+  const { data: reports, isLoading, isError, error } = useDailyReports('self');
   const [selectedReport, setSelectedReport] = useState<DailyReport | null>(null);
 
   const handleViewDetails = (report: DailyReport) => {
@@ -63,7 +63,7 @@ const MyReports = () => {
     return (
         <DashboardLayout>
             <h1 className="text-3xl font-bold mb-6">My Daily Reports</h1>
-            <Card><CardContent className="p-6 text-red-500">Error loading reports.</CardContent></Card>
+            <Card><CardContent className="p-6 text-red-500">Error loading reports: {error?.message || "Unknown error"}</CardContent></Card>
         </DashboardLayout>
     );
   }
