@@ -101,26 +101,29 @@ const ReportEditConsignmentStaff: React.FC<ReportEditConsignmentStaffProps> = ({
             branch_name: entry.branch_name,
             lpk_count: entry.lpk_count,
         }));
-        lpkPromises.push(supabase.from('lpk_entries').insert(insertPayload).select()); 
+        // Explicitly cast to Promise<any>
+        lpkPromises.push(supabase.from('lpk_entries').insert(insertPayload).select() as unknown as Promise<any>); 
     }
 
     // Update existing entries
     entriesToUpdate.forEach(entry => {
+        // Explicitly cast to Promise<any>
         lpkPromises.push(
             supabase.from('lpk_entries')
                 .update({ branch_name: entry.branch_name, lpk_count: entry.lpk_count })
                 .eq('id', entry.id)
-                .select() 
+                .select() as unknown as Promise<any>
         );
     });
 
     // Delete removed entries
     if (entriesToDeleteIds.length > 0) {
+        // Explicitly cast to Promise<any>
         lpkPromises.push(
             supabase.from('lpk_entries')
                 .delete()
                 .in('id', entriesToDeleteIds)
-                .select() 
+                .select() as unknown as Promise<any>
         );
     }
 
