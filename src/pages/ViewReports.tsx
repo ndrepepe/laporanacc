@@ -17,6 +17,10 @@ import { useAuth } from "@/integrations/supabase/auth";
 import ReportDetailModal from "@/components/reports/ReportDetailModal";
 import { useState } from "react";
 import { logReportView } from "@/utils/activity-logger";
+import { Button } from "@/components/ui/button";
+import { Pencil, Eye } from "lucide-react";
+import ReportEditWrapper from "@/components/reports/ReportEditWrapper";
+import { ReportType } from "@/lib/report-constants";
 
 // Helper function to render report type badge
 const ReportTypeBadge = ({ type }: { type: DailyReport['type'] }) => {
@@ -41,13 +45,30 @@ const ReportTypeBadge = ({ type }: { type: DailyReport['type'] }) => {
 const MyReports = () => {
   const { profile, user } = useAuth();
   // Use 'self' scope to only fetch reports submitted by the current user
-  const { data: reports, isLoading, isError, error } = useDailyReports('self');
+  const { data: reports, isLoading, isError, error, refetch } = useDailyReports('self');
+  
   const [selectedReport, setSelectedReport] = useState<DailyReport | null>(null);
+  
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editReportId, setEditReportId] = useState<string | null>(null);
+  const [editReportType, setEditReportType] = useState<ReportType | null>(null);
 
   const handleViewDetails = (report: DailyReport) => {
     setSelectedReport(report);
-    
-    // Log activity is not needed here since the user is viewing their own report
+  };
+  
+  const handleEditReport = (report: DailyReport) => {
+    setEditReportId(report.id);
+    setEditReportType(report.type);
+    setIsEditModalOpen(true);
+  };
+  
+  const handleEditSuccess = () => {
+    setIsEditModalOpen(false);
+    setEditReportId(null);
+    setEditReportType(null);
+    // Refetch the list of reports after a successful edit
+    refetch();
   };
 
   if (isLoading) {
@@ -91,15 +112,13 @@ const MyReports = () => {
                 <TableRow>
                   <TableHead>Date</TableHead>
                   <TableHead>Report Type</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {reports.map((report) => (
                   <TableRow 
                     key={report.id} 
-                    onClick={() => handleViewDetails(report)}
-                    className="cursor-pointer hover:bg-muted/50 transition-colors"
                   >
                     <TableCell className="font-medium">
                       {format(new Date(report.report_date), 'PPP')}
@@ -107,8 +126,21 @@ const MyReports = () => {
                     <TableCell>
                       <ReportTypeBadge type={report.type} />
                     </TableCell>
-                    <TableCell className="text-right">
-                      <Badge variant="outline">View Details</Badge>
+                    <TableCell className="text-right space-x-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => handleViewDetails(report)}
+                      >
+                        <Eye className="h-4 w-4 mr-1" /> View
+                      </Button>
+                      <Button 
+                        variant="secondary" 
+                        size="sm" 
+                        onClick={() => handleEditReport(report)}
+                      >
+                        <Pencil className="h-4 w-4 mr-1" /> Edit
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -122,6 +154,14 @@ const MyReports = () => {
         report={selectedReport} 
         isOpen={!!selectedReport} 
         onClose={() => setSelectedReport(null)} 
+      />
+      
+      <ReportEditWrapper
+        reportId={editReportId}
+        reportType={editReportType}
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSuccess={handleEditSuccess}
       />
     </DashboardLayout>
   );

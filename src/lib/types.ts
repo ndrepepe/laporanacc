@@ -36,7 +36,7 @@ export interface AccountingReport {
     new_sales_count: number;
     new_sales_names: string; // Added for Error 4
     worked_on_lph: boolean;
-    customer_confirmation_status: string;
+    customer_confirmation_status: "Successful" | "Failed"; // FIX 1
 }
 
 export interface CashierReport {

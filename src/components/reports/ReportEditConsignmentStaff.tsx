@@ -1,3 +1,4 @@
+import React, { useEffect } from 'react';
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -7,46 +8,64 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/integrations/supabase/auth";
 import { showSuccess, showError } from "@/utils/toast";
 import { REPORT_TABLE_MAP } from "@/lib/report-constants";
 import { MinusCircle, PlusCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQueryClient } from "@tanstack/react-query";
-import { sendReportSubmissionNotification } from "@/utils/notification-sender";
-import { ConsignmentStaffFormSchema, LPKEntrySchema } from "@/lib/report-schemas";
+import { ConsignmentStaffReport, DailyReport, LPKEntry } from "@/lib/types";
+import { ConsignmentStaffFormSchema } from "@/lib/report-schemas";
+import { useLpkEntries } from '@/hooks/use-lpk-entries';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type ConsignmentStaffFormValues = z.infer<typeof ConsignmentStaffFormSchema>;
 
-const ReportFormConsignmentStaff = () => {
-  const { user, profile } = useAuth();
+interface ReportEditConsignmentStaffProps {
+    report: DailyReport & ConsignmentStaffReport;
+    onSuccess: () => void;
+}
+
+const ReportEditConsignmentStaff: React.FC<ReportEditConsignmentStaffProps> = ({ report, onSuccess }) => {
   const queryClient = useQueryClient();
+  const { data: initialLpkEntries, isLoading: isLoadingLpk } = useLpkEntries(report.id);
+
+  const defaultValues: ConsignmentStaffFormValues = {
+    received_lpk: report.received_lpk ? "Yes" : "No",
+    lpk_entries: [], // Will be populated in useEffect
+    lpk_entered_bsoft: report.lpk_entered_bsoft,
+    tasks_completed: report.tasks_completed,
+    issues_encountered: report.issues_encountered,
+    suggestions: report.suggestions || "",
+  };
+
   const form = useForm<ConsignmentStaffFormValues>({
     resolver: zodResolver(ConsignmentStaffFormSchema),
-    defaultValues: {
-      received_lpk: "No",
-      lpk_entries: [],
-      lpk_entered_bsoft: 0,
-      tasks_completed: "",
-      issues_encountered: "",
-      suggestions: "",
-    },
+    defaultValues,
   });
 
   const receivedLpk = form.watch("received_lpk");
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control: form.control,
     name: "lpk_entries",
   });
 
-  const onSubmit = async (values: ConsignmentStaffFormValues) => {
-    if (!user || !profile?.role) {
-      showError("User not authenticated or role missing.");
-      return;
+  // Populate form fields with fetched LPK data
+  useEffect(() => {
+    if (initialLpkEntries) {
+        // Map LPKEntry (from DB) to LPKEntrySchema (from Zod)
+        const mappedEntries = initialLpkEntries.map(entry => ({
+            id: entry.id,
+            branch_name: entry.branch_name,
+            lpk_count: entry.lpk_count,
+        }));
+        replace(mappedEntries);
     }
+  }, [initialLpkEntries, replace]);
 
+
+  const onSubmit = async (values: ConsignmentStaffFormValues) => {
+    // 1. Update main report
     const reportPayload = {
-      user_id: user.id,
       received_lpk: values.received_lpk === "Yes",
       lpk_entered_bsoft: values.lpk_entered_bsoft,
       tasks_completed: values.tasks_completed,
@@ -54,58 +73,77 @@ const ReportFormConsignmentStaff = () => {
       suggestions: values.suggestions || null,
     };
 
-    // 1. Insert main report
-    const { data: reportData, error: reportError } = await supabase
+    const { error: reportError } = await supabase
       .from(REPORT_TABLE_MAP.consignment_staff)
-      .insert([reportPayload])
-      .select('id')
-      .single();
+      .update(reportPayload)
+      .eq('id', report.id);
 
     if (reportError) {
-      console.error("Report submission error:", reportError);
-      showError("Failed to submit report. You may have already submitted a report for today.");
+      console.error("Report update error:", reportError);
+      showError("Failed to update main report details.");
       return;
     }
 
-    const reportId = reportData.id;
+    // 2. Handle LPK entries (Insert/Update/Delete)
+    const currentLpkIds = initialLpkEntries?.map(e => e.id) || [];
+    const submittedLpkIds = values.lpk_entries?.map(e => e.id).filter(Boolean) || [];
+    
+    const entriesToInsert = values.lpk_entries?.filter(e => !e.id) || [];
+    const entriesToUpdate = values.lpk_entries?.filter(e => e.id) || [];
+    const entriesToDeleteIds = currentLpkIds.filter(id => !submittedLpkIds.includes(id));
 
-    // 2. Insert LPK entries if applicable
-    if (values.received_lpk === "Yes" && values.lpk_entries && values.lpk_entries.length > 0) {
-        const lpkPayload = values.lpk_entries.map(entry => ({
-            report_id: reportId,
+    const lpkPromises: Promise<any>[] = [];
+
+    // Insert new entries
+    if (entriesToInsert.length > 0) {
+        const insertPayload = entriesToInsert.map(entry => ({
+            report_id: report.id,
             branch_name: entry.branch_name,
             lpk_count: entry.lpk_count,
         }));
-
-        const { error: lpkError } = await supabase
-            .from('lpk_entries')
-            .insert(lpkPayload);
-
-        if (lpkError) {
-            console.error("LPK entry submission error:", lpkError);
-            showError("Report submitted, but failed to save LPK entries.");
-            // We don't return here, as the main report is still valid.
-        }
+        lpkPromises.push(supabase.from('lpk_entries').insert(insertPayload).select()); 
     }
 
-    showSuccess("Consignment Staff Report submitted successfully!");
-    form.reset({
-        received_lpk: "No",
-        lpk_entries: [],
-        lpk_entered_bsoft: 0,
-        tasks_completed: "",
-        issues_encountered: "",
-        suggestions: "",
+    // Update existing entries
+    entriesToUpdate.forEach(entry => {
+        lpkPromises.push(
+            supabase.from('lpk_entries')
+                .update({ branch_name: entry.branch_name, lpk_count: entry.lpk_count })
+                .eq('id', entry.id)
+                .select() 
+        );
     });
-    
-    // Send notification to managers
-    await sendReportSubmissionNotification(user.id, profile.role, 'consignment_staff');
 
-    // Invalidate the dailyReports query to refresh the view
+    // Delete removed entries
+    if (entriesToDeleteIds.length > 0) {
+        lpkPromises.push(
+            supabase.from('lpk_entries')
+                .delete()
+                .in('id', entriesToDeleteIds)
+                .select() 
+        );
+    }
+
+    const lpkResults = await Promise.all(lpkPromises);
+    const lpkError = lpkResults.find(res => res.error)?.error;
+
+    if (lpkError) {
+        console.error("LPK entry update error:", lpkError);
+        showError("Report updated, but failed to fully update LPK entries.");
+    } else {
+        showSuccess("Consignment Staff Report updated successfully!");
+    }
+
+    // Invalidate queries to refresh the list, single report, and LPK entries
     queryClient.invalidateQueries({ queryKey: ['dailyReports'] });
-    // Invalidate LPK entries query if needed, although it's usually fetched via report ID
-    queryClient.invalidateQueries({ queryKey: ['lpkEntries'] });
+    queryClient.invalidateQueries({ queryKey: ['singleReport', report.id] });
+    queryClient.invalidateQueries({ queryKey: ['lpkEntries', report.id] });
+    onSuccess();
   };
+
+  if (isLoadingLpk) {
+    return <Skeleton className="h-64 w-full" />;
+  }
 
   return (
     <Form {...form}>
@@ -260,10 +298,10 @@ const ReportFormConsignmentStaff = () => {
           )}
         />
 
-        <Button type="submit">Submit Consignment Staff Report</Button>
+        <Button type="submit">Save Changes</Button>
       </form>
     </Form>
   );
 };
 
-export default ReportFormConsignmentStaff;
+export default ReportEditConsignmentStaff;

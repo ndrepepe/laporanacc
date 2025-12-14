@@ -133,3 +133,42 @@ export const useDailyReports = (scope: ReportScope = 'self', filters: ReportFilt
         staleTime: 1000 * 60 * 5, // 5 minutes
     });
 };
+
+// New function to fetch a single report by ID and type
+export const fetchSingleReport = async (reportId: string, reportType: ReportType): Promise<DailyReport | null> => {
+    const tableName = REPORT_TABLE_MAP[reportType];
+    
+    const { data, error } = await supabase
+        .from(tableName)
+        .select(`
+            *,
+            profile:user_id (id, first_name, last_name, role, avatar_url)
+        `)
+        .eq('id', reportId)
+        .single();
+
+    if (error) {
+        console.error(`Error fetching single report from ${tableName}:`, error);
+        throw new Error(`Failed to fetch report: ${error.message}`);
+    }
+
+    if (!data) return null;
+
+    return {
+        ...data,
+        type: reportType,
+        profile: data.profile as Profile,
+    } as DailyReport;
+};
+
+// New hook to use the single report fetcher
+export const useSingleReport = (reportId: string | null, reportType: ReportType | null) => {
+    const enabled = !!reportId && !!reportType;
+    
+    return useQuery<DailyReport | null, Error>({
+        queryKey: ['singleReport', reportId, reportType],
+        queryFn: () => fetchSingleReport(reportId!, reportType!),
+        enabled: enabled,
+        staleTime: 0, // Always refetch when opened
+    });
+};

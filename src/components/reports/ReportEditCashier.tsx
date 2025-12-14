@@ -1,3 +1,4 @@
+import React from 'react';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -6,36 +7,36 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/integrations/supabase/auth";
 import { showSuccess, showError } from "@/utils/toast";
 import { REPORT_TABLE_MAP } from "@/lib/report-constants";
 import { useQueryClient } from "@tanstack/react-query";
-import { sendReportSubmissionNotification } from "@/utils/notification-sender";
+import { CashierReport, DailyReport } from "@/lib/types";
 import { CashierFormSchema } from "@/lib/report-schemas";
 
 type CashierFormValues = z.infer<typeof CashierFormSchema>;
 
-const ReportFormCashier = () => {
-  const { user, profile } = useAuth();
+interface ReportEditCashierProps {
+    report: DailyReport & CashierReport;
+    onSuccess: () => void;
+}
+
+const ReportEditCashier: React.FC<ReportEditCashierProps> = ({ report, onSuccess }) => {
   const queryClient = useQueryClient();
+  
+  const defaultValues: CashierFormValues = {
+    payments_count: report.payments_count,
+    total_payments: report.total_payments,
+    worked_on_lph: report.worked_on_lph ? "Yes" : "No",
+    customer_confirmation_done: report.customer_confirmation_done ? "Yes" : "No",
+  };
+
   const form = useForm<CashierFormValues>({
     resolver: zodResolver(CashierFormSchema),
-    defaultValues: {
-      payments_count: 0,
-      total_payments: 0,
-      worked_on_lph: "No",
-      customer_confirmation_done: "No",
-    },
+    defaultValues,
   });
 
   const onSubmit = async (values: CashierFormValues) => {
-    if (!user || !profile?.role) {
-      showError("User not authenticated or role missing.");
-      return;
-    }
-
     const payload = {
-      user_id: user.id,
       payments_count: values.payments_count,
       total_payments: values.total_payments,
       worked_on_lph: values.worked_on_lph === "Yes",
@@ -44,20 +45,19 @@ const ReportFormCashier = () => {
 
     const { error } = await supabase
       .from(REPORT_TABLE_MAP.cashier)
-      .insert([payload]);
+      .update(payload)
+      .eq('id', report.id);
 
     if (error) {
-      console.error("Submission error:", error);
-      showError("Failed to submit report. You may have already submitted a report for today.");
+      console.error("Update error:", error);
+      showError("Failed to update report.");
     } else {
-      showSuccess("Cashier Report submitted successfully!");
-      form.reset();
+      showSuccess("Cashier Report updated successfully!");
       
-      // Send notification to managers
-      await sendReportSubmissionNotification(user.id, profile.role, 'cashier');
-
-      // Invalidate the dailyReports query to refresh the view
+      // Invalidate queries to refresh the list and the single report view
       queryClient.invalidateQueries({ queryKey: ['dailyReports'] });
+      queryClient.invalidateQueries({ queryKey: ['singleReport', report.id] });
+      onSuccess();
     }
   };
 
@@ -155,10 +155,10 @@ const ReportFormCashier = () => {
           )}
         />
 
-        <Button type="submit">Submit Cashier Report</Button>
+        <Button type="submit">Save Changes</Button>
       </form>
     </Form>
   );
 };
 
-export default ReportFormCashier;
+export default ReportEditCashier;

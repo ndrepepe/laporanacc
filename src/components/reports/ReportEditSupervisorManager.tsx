@@ -1,3 +1,4 @@
+import React from 'react';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -5,35 +6,35 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/integrations/supabase/auth";
 import { showSuccess, showError } from "@/utils/toast";
 import { REPORT_TABLE_MAP } from "@/lib/report-constants";
 import { useQueryClient } from "@tanstack/react-query";
-import { sendReportSubmissionNotification } from "@/utils/notification-sender";
+import { DailyReport, SupervisorManagerReport } from "@/lib/types";
 import { SupervisorManagerFormSchema } from "@/lib/report-schemas";
 
 type SupervisorManagerFormValues = z.infer<typeof SupervisorManagerFormSchema>;
 
-const ReportFormSupervisorManager = () => {
-  const { user, profile } = useAuth();
+interface ReportEditSupervisorManagerProps {
+    report: DailyReport & SupervisorManagerReport;
+    onSuccess: () => void;
+}
+
+const ReportEditSupervisorManager: React.FC<ReportEditSupervisorManagerProps> = ({ report, onSuccess }) => {
   const queryClient = useQueryClient();
+  
+  const defaultValues: SupervisorManagerFormValues = {
+    tasks_completed: report.tasks_completed,
+    issues_encountered: report.issues_encountered,
+    suggestions: report.suggestions || "",
+  };
+
   const form = useForm<SupervisorManagerFormValues>({
     resolver: zodResolver(SupervisorManagerFormSchema),
-    defaultValues: {
-      tasks_completed: "",
-      issues_encountered: "",
-      suggestions: "",
-    },
+    defaultValues,
   });
 
   const onSubmit = async (values: SupervisorManagerFormValues) => {
-    if (!user || !profile?.role) {
-      showError("User not authenticated or role missing.");
-      return;
-    }
-
     const payload = {
-      user_id: user.id,
       tasks_completed: values.tasks_completed,
       issues_encountered: values.issues_encountered,
       suggestions: values.suggestions || null,
@@ -41,20 +42,19 @@ const ReportFormSupervisorManager = () => {
 
     const { error } = await supabase
       .from(REPORT_TABLE_MAP.supervisor_manager)
-      .insert([payload]);
+      .update(payload)
+      .eq('id', report.id);
 
     if (error) {
-      console.error("Submission error:", error);
-      showError("Failed to submit report. You may have already submitted a report for today.");
+      console.error("Update error:", error);
+      showError("Failed to update report.");
     } else {
-      showSuccess(`${profile?.role} Report submitted successfully!`);
-      form.reset();
+      showSuccess("Supervisor/Manager Report updated successfully!");
       
-      // Send notification to managers
-      await sendReportSubmissionNotification(user.id, profile.role, 'supervisor_manager');
-
-      // Invalidate the dailyReports query to refresh the view
+      // Invalidate queries to refresh the list and the single report view
       queryClient.invalidateQueries({ queryKey: ['dailyReports'] });
+      queryClient.invalidateQueries({ queryKey: ['singleReport', report.id] });
+      onSuccess();
     }
   };
 
@@ -104,10 +104,10 @@ const ReportFormSupervisorManager = () => {
           )}
         />
 
-        <Button type="submit">Submit Report</Button>
+        <Button type="submit">Save Changes</Button>
       </form>
     </Form>
   );
 };
 
-export default ReportFormSupervisorManager;
+export default ReportEditSupervisorManager;

@@ -1,3 +1,4 @@
+import React from 'react';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -7,38 +8,38 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/integrations/supabase/auth";
 import { showSuccess, showError } from "@/utils/toast";
 import { REPORT_TABLE_MAP } from "@/lib/report-constants";
 import { useQueryClient } from "@tanstack/react-query";
-import { sendReportSubmissionNotification } from "@/utils/notification-sender";
+import { AccountingReport, DailyReport } from "@/lib/types";
 import { AccountingFormSchema } from "@/lib/report-schemas";
 
 type AccountingFormValues = z.infer<typeof AccountingFormSchema>;
 
-const ReportFormAccounting = () => {
-  const { user, profile } = useAuth();
+interface ReportEditAccountingProps {
+    report: DailyReport & AccountingReport;
+    onSuccess: () => void;
+}
+
+const ReportEditAccounting: React.FC<ReportEditAccountingProps> = ({ report, onSuccess }) => {
   const queryClient = useQueryClient();
+  
+  const defaultValues: AccountingFormValues = {
+    new_customers_count: report.new_customers_count,
+    new_customers_names: report.new_customers_names,
+    new_sales_count: report.new_sales_count,
+    new_sales_names: report.new_sales_names,
+    worked_on_lph: report.worked_on_lph ? "Yes" : "No",
+    customer_confirmation_status: report.customer_confirmation_status,
+  };
+
   const form = useForm<AccountingFormValues>({
     resolver: zodResolver(AccountingFormSchema),
-    defaultValues: {
-      new_customers_count: 0,
-      new_customers_names: "",
-      new_sales_count: 0,
-      new_sales_names: "",
-      worked_on_lph: "No",
-      customer_confirmation_status: "Successful",
-    },
+    defaultValues,
   });
 
   const onSubmit = async (values: AccountingFormValues) => {
-    if (!user || !profile?.role) {
-      showError("User not authenticated or role missing.");
-      return;
-    }
-
     const payload = {
-      user_id: user.id,
       new_customers_count: values.new_customers_count,
       new_customers_names: values.new_customers_names,
       new_sales_count: values.new_sales_count,
@@ -49,20 +50,19 @@ const ReportFormAccounting = () => {
 
     const { error } = await supabase
       .from(REPORT_TABLE_MAP.accounting)
-      .insert([payload]);
+      .update(payload)
+      .eq('id', report.id);
 
     if (error) {
-      console.error("Submission error:", error);
-      showError("Failed to submit report. You may have already submitted a report for today.");
+      console.error("Update error:", error);
+      showError("Failed to update report.");
     } else {
-      showSuccess("Accounting Report submitted successfully!");
-      form.reset();
+      showSuccess("Accounting Report updated successfully!");
       
-      // Send notification to managers
-      await sendReportSubmissionNotification(user.id, profile.role, 'accounting');
-
-      // Invalidate the dailyReports query to refresh the view
+      // Invalidate queries to refresh the list and the single report view
       queryClient.invalidateQueries({ queryKey: ['dailyReports'] });
+      queryClient.invalidateQueries({ queryKey: ['singleReport', report.id] });
+      onSuccess();
     }
   };
 
@@ -189,10 +189,10 @@ const ReportFormAccounting = () => {
           )}
         />
 
-        <Button type="submit">Submit Accounting Report</Button>
+        <Button type="submit">Save Changes</Button>
       </form>
     </Form>
   );
 };
 
-export default ReportFormAccounting;
+export default ReportEditAccounting;
