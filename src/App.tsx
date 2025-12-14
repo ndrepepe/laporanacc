@@ -18,50 +18,56 @@ import AdminRoute from "./components/AdminRoute";
 import SummaryRoute from "./components/SummaryRoute";
 import AddUser from "./pages/AddUser"; // New import
 import UserManagementRoute from "./components/UserManagementRoute"; // New import
+import { ThemeProvider } from "./components/ThemeProvider"; // New import
+import { LanguageProvider } from "./contexts/LanguageContext"; // New import
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            
-            {/* Protected Routes */}
-            <Route element={<ProtectedRoute />}>
-              <Route path="/" element={<Index />} />
-              <Route path="/report/submit" element={<SubmitReport />} />
-              <Route path="/reports/view" element={<MyReports />} /> {/* Updated element name */}
-              <Route path="/reports/subordinates" element={<ViewSubordinateReports />} /> {/* New route */}
-              <Route path="/notifications" element={<Notifications />} />
-              
-              {/* User Management Route (Restricted to Senior Manager & Accounting Manager) */}
-              <Route element={<UserManagementRoute />}>
-                <Route path="/users/add" element={<AddUser />} />
-              </Route>
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <LanguageProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AuthProvider>
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                
+                {/* Protected Routes */}
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/report/submit" element={<SubmitReport />} />
+                  <Route path="/reports/view" element={<MyReports />} /> {/* Updated element name */}
+                  <Route path="/reports/subordinates" element={<ViewSubordinateReports />} /> {/* New route */}
+                  <Route path="/notifications" element={<Notifications />} />
+                  
+                  {/* User Management Route (Restricted to Senior Manager & Accounting Manager) */}
+                  <Route element={<UserManagementRoute />}>
+                    <Route path="/users/add" element={<AddUser />} />
+                  </Route>
 
-              {/* Summary Route (Restricted to Managers) */}
-              <Route element={<SummaryRoute />}>
-                <Route path="/summary" element={<Summary />} />
-              </Route>
-              
-              {/* Admin Routes (Protected by AdminRole check) */}
-              <Route element={<AdminRoute />}>
-                <Route path="/admin" element={<AdminDashboard />} />
-              </Route>
+                  {/* Summary Route (Restricted to Managers) */}
+                  <Route element={<SummaryRoute />}>
+                    <Route path="/summary" element={<Summary />} />
+                  </Route>
+                  
+                  {/* Admin Routes (Protected by AdminRole check) */}
+                  <Route element={<AdminRoute />}>
+                    <Route path="/admin" element={<AdminDashboard />} />
+                  </Route>
 
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            </Route>
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                </Route>
 
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </AuthProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </LanguageProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

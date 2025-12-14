@@ -3,6 +3,7 @@ import { useAuth } from "@/integrations/supabase/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
 import DashboardLayout from "@/components/DashboardLayout";
 import { UserRole } from "@/lib/roles";
+import ApplicationTools from "@/components/tools/ApplicationTools"; // New import
 
 const SUMMARY_ROLES: UserRole[] = ['Senior Manager', 'Accounting Manager'];
 const SUBORDINATE_ROLES: UserRole[] = ['Senior Manager', 'Accounting Manager', 'Consignment Supervisor'];
@@ -36,11 +37,11 @@ const Index = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <h1 className="text-4xl font-extrabold tracking-widest lg:text-5xl text-gradient">
-          Welcome, {profile?.first_name || user?.email}!
-        </h1>
-        
+      <h1 className="text-4xl font-extrabold tracking-widest lg:text-5xl text-gradient mb-6">
+        Welcome, {profile?.first_name || user?.email}!
+      </h1>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
             <CardTitle>Your Current Role</CardTitle>
@@ -54,9 +55,10 @@ const Index = () => {
             </p>
           </CardContent>
         </Card>
-
-        {/* Removed Logout Button */}
+        
+        <ApplicationTools />
       </div>
+
       <MadeWithDyad />
     </DashboardLayout>
   );
