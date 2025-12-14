@@ -19,26 +19,33 @@ const fetchDailySubmissionStatus = async (date: string): Promise<DailySubmission
         // Ensure the date is in the correct format (YYYY-MM-DD)
         const formattedDate = new Date(date).toISOString().split('T')[0];
         
-        // Create a Headers object with the query parameter
-        const headers = new Headers();
-        headers.append('x-date-param', formattedDate); // Custom header to pass date
+        // Use fetch directly to call the Edge Function with query parameters
+        // This is more reliable than using supabase.functions.invoke for query parameters
+        const functionUrl = `https://madymngifviixpttjpvp.supabase.co/functions/v1/daily-submission-status?date=${formattedDate}`;
         
-        // Pass the date as a custom header
-        const { data, error } = await supabase.functions.invoke('daily-submission-status', {
+        // Get the access token for authenticated requests
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
+        
+        const response = await fetch(functionUrl, {
             method: 'GET',
             headers: {
-                'x-date-param': formattedDate
-            }
+                'Authorization': `Bearer ${token}`,
+                'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY || '', // Fallback to anon key
+                'Content-Type': 'application/json',
+            },
         });
 
-        // Log response for debugging
-        console.log("Edge function response:", data, error);
-
-        if (error) {
-            console.error("Error invoking Edge Function:", error);
-            showError("Failed to load submission status.");
-            throw new Error(error.message);
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Edge Function HTTP Error:", response.status, errorText);
+            throw new Error(`Edge Function returned status ${response.status}: ${errorText}`);
         }
+
+        const data = await response.json();
+        
+        // Log response for debugging
+        console.log("Edge function response:", data);
 
         if (data.error) {
             console.error("Edge Function returned error:", data.error);
