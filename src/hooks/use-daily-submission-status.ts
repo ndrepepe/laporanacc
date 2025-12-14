@@ -11,31 +11,46 @@ export interface DailySubmission {
 }
 
 const fetchDailySubmissionStatus = async (date: string): Promise<DailySubmission[]> => {
-    if (!date) return [];
-
-    const { data, error } = await supabase.functions.invoke('daily-submission-status', {
-        method: 'GET',
-    });
-
-    if (error) {
-        console.error("Error invoking Edge Function:", error);
-        showError("Failed to load submission status.");
-        throw new Error(error.message);
+    if (!date) {
+        throw new Error('Date parameter is required');
     }
 
-    if (data.error) {
-        console.error("Edge Function returned error:", data.error);
-        showError("Failed to process submission status on the server.");
-        throw new Error(data.error);
-    }
+    try {
+        const { data, error } = await supabase.functions.invoke('daily-submission-status', {
+            method: 'GET',
+        });
 
-    return data.submissions || [];
+        // Log response for debugging
+        console.log("Edge function response:", data, error);
+
+        if (error) {
+            console.error("Error invoking Edge Function:", error);
+            showError("Failed to load submission status.");
+            throw new Error(error.message);
+        }
+
+        if (data.error) {
+            console.error("Edge Function returned error:", data.error);
+            showError("Failed to process submission status on the server.");
+            throw new Error(data.error);
+        }
+
+        return data.submissions || [];
+    } catch (err: unknown) {
+        console.error("Error in fetchDailySubmissionStatus:", err);
+        const errorMessage = (err as Error).message || 'Unknown error occurred';
+        showError(`Failed to fetch submission status: ${errorMessage}`);
+        throw err;
+    }
 };
 
 export const useDailySubmissionStatus = (date: string | null) => {
     return useQuery<DailySubmission[], Error>({
         queryKey: ['dailySubmissionStatus', date],
-        queryFn: () => fetchDailySubmissionStatus(date!),
+        queryFn: () => {
+            if (!date) throw new Error('Date is required');
+            return fetchDailySubmissionStatus(date);
+        },
         enabled: !!date,
         staleTime: 1000 * 60 * 5, // 5 minutes
     });

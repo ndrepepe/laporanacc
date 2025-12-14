@@ -26,18 +26,23 @@ const getServiceSupabase = () => {
   });
 };
 
-serve(async (req: Request) => { // Fixed: Added explicit type for 'req' parameter
+serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    console.log("Daily submission status function invoked");
+    
     const supabase = getServiceSupabase();
     
     const url = new URL(req.url);
     const date = url.searchParams.get('date');
 
+    console.log("Date parameter:", date);
+
     if (!date) {
+      console.error("Missing date parameter");
       return new Response(JSON.stringify({ error: 'Missing date parameter' }), {
         headers: corsHeaders,
         status: 400,
@@ -51,25 +56,35 @@ serve(async (req: Request) => { // Fixed: Added explicit type for 'req' paramete
       { name: 'reports_supervisor_manager', type: 'supervisor_manager' },
     ];
 
+    console.log("Fetching submissions for date:", date);
+    
     const submissionPromises = reportTables.map(async (table) => {
-      const { data, error } = await supabase
+      console.log(`Querying ${table.name} for date ${date}`);
+      
+      const { data, error, count } = await supabase
         .from(table.name)
-        .select('user_id')
+        .select('user_id', { count: 'exact' })
         .eq('report_date', date);
 
-      if (error) throw error;
-
-      return data.map((item: { user_id: string }) => ({ // Fixed: Added explicit type for 'item' parameter
+      if (error) {
+        console.error(`Error querying ${table.name}:`, error);
+        throw error;
+      }
+      
+      console.log(`Found ${count} submissions in ${table.name}`);
+      
+      return data.map((item: { user_id: string }) => ({
         user_id: item.user_id,
         report_type: table.type,
       }));
     });
 
     const allSubmissions = (await Promise.all(submissionPromises)).flat();
+    console.log("Total submissions found:", allSubmissions.length);
     
     // Group submissions by user_id and collect all report types submitted
     const userSubmissions = new Map<string, Set<string>>();
-    allSubmissions.forEach((sub: { user_id: string; report_type: string }) => { // Fixed: Added explicit type for 'sub' parameter
+    allSubmissions.forEach((sub: { user_id: string; report_type: string }) => {
         if (!userSubmissions.has(sub.user_id)) {
             userSubmissions.set(sub.user_id, new Set());
         }
@@ -77,8 +92,10 @@ serve(async (req: Request) => { // Fixed: Added explicit type for 'req' paramete
     });
 
     const submittedUserIds = Array.from(userSubmissions.keys());
+    console.log("Unique users who submitted:", submittedUserIds.length);
 
     if (submittedUserIds.length === 0) {
+        console.log("No submissions found for date:", date);
         return new Response(JSON.stringify({ submissions: [] }), {
             headers: corsHeaders,
             status: 200,
@@ -86,20 +103,28 @@ serve(async (req: Request) => { // Fixed: Added explicit type for 'req' paramete
     }
 
     // Fetch profiles for submitted users
+    console.log("Fetching profiles for users:", submittedUserIds);
     const { data: profiles, error: profileError } = await supabase
         .from('profiles')
         .select('id, first_name, last_name, role')
         .in('id', submittedUserIds);
 
-    if (profileError) throw profileError;
+    if (profileError) {
+        console.error("Error fetching profiles:", profileError);
+        throw profileError;
+    }
+    
+    console.log("Profiles fetched:", profiles.length);
 
-    const submissions = profiles.map((profile: { id: string; first_name: string | null; last_name: string | null; role: string | null }) => ({ // Fixed: Added explicit type for 'profile' parameter
+    const submissions = profiles.map((profile: { id: string; first_name: string | null; last_name: string | null; role: string | null }) => ({
         user_id: profile.id,
         name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown User',
         role: profile.role || 'Unknown Role',
         report_types: Array.from(userSubmissions.get(profile.id) || []),
     }));
 
+    console.log("Final submissions data:", submissions);
+    
     return new Response(
       JSON.stringify({ submissions }),
       {
@@ -107,10 +132,11 @@ serve(async (req: Request) => { // Fixed: Added explicit type for 'req' paramete
         status: 200,
       },
     );
-  } catch (error: unknown) { // Fixed: Added explicit type for 'error' parameter
+  } catch (error: unknown) {
     // Type assertion to access error.message
     const errorMessage = (error as Error).message || 'An unknown error occurred';
     console.error("Edge Function Error:", errorMessage);
+    
     return new Response(
       JSON.stringify({ error: errorMessage }),
       {
