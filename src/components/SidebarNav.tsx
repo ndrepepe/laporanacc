@@ -57,7 +57,7 @@ const SidebarNav = () => {
     <div className="flex flex-col h-full p-4">
       <div className="mb-8">
         <h2 className="text-2xl font-extrabold text-gradient tracking-widest">
-          DYAD AI
+          ANDI OFFSET
         </h2>
         <p className="text-xs text-muted-foreground mt-1">
           {profile?.role || "Loading Role..."}
