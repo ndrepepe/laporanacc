@@ -15,7 +15,9 @@ import Summary from "./pages/Summary";
 import Notifications from "./pages/Notifications";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminRoute from "./components/AdminRoute";
-import SummaryRoute from "./components/SummaryRoute"; // New import
+import SummaryRoute from "./components/SummaryRoute";
+import AddUser from "./pages/AddUser"; // New import
+import UserManagementRoute from "./components/UserManagementRoute"; // New import
 
 const queryClient = new QueryClient();
 
@@ -37,6 +39,11 @@ const App = () => (
               <Route path="/reports/subordinates" element={<ViewSubordinateReports />} /> {/* New route */}
               <Route path="/notifications" element={<Notifications />} />
               
+              {/* User Management Route (Restricted to Senior Manager & Accounting Manager) */}
+              <Route element={<UserManagementRoute />}>
+                <Route path="/users/add" element={<AddUser />} />
+              </Route>
+
               {/* Summary Route (Restricted to Managers) */}
               <Route element={<SummaryRoute />}>
                 <Route path="/summary" element={<Summary />} />
