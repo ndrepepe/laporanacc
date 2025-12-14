@@ -31,9 +31,9 @@ const getServiceSupabase = () => {
         persistSession: false,
       },
     });
-  } catch (error: unknown) { // Fixed: Added explicit type for error parameter
+  } catch (error: unknown) {
     console.error('Error creating Supabase client:', error);
-    throw new Error(`Failed to create Supabase client: ${(error as Error).message}`); // Fixed: Type assertion to access error.message
+    throw new Error(`Failed to create Supabase client: ${(error as Error).message}`);
   }
 };
 
@@ -51,6 +51,8 @@ serve(async (req: Request) => {
     // Check if required environment variables are present
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    console.log("Environment variables check:", { supabaseUrl: !!supabaseUrl, supabaseServiceRoleKey: !!supabaseServiceRoleKey });
     
     if (!supabaseUrl) {
       throw new Error('SUPABASE_URL environment variable is not set');
@@ -108,7 +110,7 @@ serve(async (req: Request) => {
           user_id: item.user_id,
           report_type: table.type,
         }));
-      } catch (tableError: unknown) { // Fixed: Added explicit type for error parameter
+      } catch (tableError: unknown) {
         console.error(`Exception querying ${table.name}:`, tableError);
         // Return empty array for this table if there's an exception
         return [];
@@ -196,7 +198,7 @@ serve(async (req: Request) => {
         status: 200,
       },
     );
-  } catch (error: unknown) { // Fixed: Added explicit type for error parameter
+  } catch (error: unknown) {
     // Type assertion to access error.message
     const errorMessage = (error as Error).message || 'An unknown error occurred';
     console.error("Edge Function Error:", errorMessage);
