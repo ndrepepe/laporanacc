@@ -6,8 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useState } from "react";
-import { UserRole } from "@/lib/roles";
+import { useState, useEffect } from "react"; // Import useEffect
 
 const baseNavItems = [
   { to: "/", icon: Home, label: "Dashboard" },
@@ -24,6 +23,12 @@ const SidebarNav = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  
+  // Initialize isSheetOpen based on isMobile state. 
+  // If isMobile is true, start closed (false). If false (desktop), start open (true).
+  // However, since useIsMobile returns true/false immediately after mount, 
+  // we can rely on the default behavior of the Sheet component being closed, 
+  // and only use the state for controlling the Sheet.
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -42,7 +47,8 @@ const SidebarNav = () => {
   // Conditionally add Summary link for Accounting Managers and Senior Managers
   if (profile?.role && SUMMARY_VIEWER_ROLES.includes(profile.role)) {
     // Insert after View Subordinates (or My Reports if View Subordinates is absent)
-    const summaryIndex = navItems.findIndex(item => item.to === "/reports/subordinates") + 1 || 3;
+    const subordinateIndex = navItems.findIndex(item => item.to === "/reports/subordinates");
+    const summaryIndex = subordinateIndex !== -1 ? subordinateIndex + 1 : 3;
     navItems.splice(summaryIndex, 0, { to: "/summary", icon: BarChart, label: "Summary" });
   }
 
@@ -92,6 +98,7 @@ const SidebarNav = () => {
     return (
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetTrigger asChild>
+          {/* Fixed position for mobile trigger button */}
           <Button variant="outline" size="icon" className="fixed top-4 left-4 z-50">
             <Home className="h-5 w-5" />
           </Button>
