@@ -16,7 +16,7 @@ const DailySubmissionStatus: React.FC = () => {
     const [selectedDate, setSelectedDate] = useState<Date>(startOfDay(new Date()));
     const dateString = format(selectedDate, 'yyyy-MM-dd');
     
-    const { data: submissions, isLoading, isError } = useDailySubmissionStatus(dateString);
+    const { data: submissions, isLoading, isError, error } = useDailySubmissionStatus(dateString);
 
     const handleDateSelect = (date: Date | undefined) => {
         if (date) {
@@ -39,9 +39,63 @@ const DailySubmissionStatus: React.FC = () => {
             case 'supervisor_manager':
                 colorClass = "bg-purple-100 text-purple-800";
                 break;
+            default:
+                colorClass = "bg-gray-200 text-gray-800";
         }
         return <Badge className={cn("text-xs", colorClass)}>{type.replace('_', ' ').toUpperCase()}</Badge>;
     };
+
+    if (isLoading) {
+        return (
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle>Daily Submission Status</CardTitle>
+                    <Button variant={"outline"} disabled>
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {format(selectedDate, "PPP")}
+                    </Button>
+                </CardHeader>
+                <CardContent className="p-0">
+                    <div className="p-6 space-y-4">
+                        <Skeleton className="h-10 w-full" />
+                        <Skeleton className="h-10 w-full" />
+                        <Skeleton className="h-10 w-full" />
+                    </div>
+                </CardContent>
+            </Card>
+        );
+    }
+
+    if (isError) {
+        return (
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle>Daily Submission Status</CardTitle>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button variant={"outline"}>
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {format(selectedDate, "PPP")}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="end">
+                            <Calendar
+                                mode="single"
+                                selected={selectedDate}
+                                onSelect={handleDateSelect}
+                                initialFocus
+                            />
+                        </PopoverContent>
+                    </Popover>
+                </CardHeader>
+                <CardContent className="p-0">
+                    <p className="p-6 text-red-500">
+                        Failed to load submission data: {error?.message || "Unknown error"}
+                    </p>
+                </CardContent>
+            </Card>
+        );
+    }
 
     return (
         <Card>
@@ -49,12 +103,7 @@ const DailySubmissionStatus: React.FC = () => {
                 <CardTitle>Daily Submission Status</CardTitle>
                 <Popover>
                     <PopoverTrigger asChild>
-                        <Button
-                            variant={"outline"}
-                            className={cn(
-                                "w-[200px] justify-start text-left font-normal",
-                            )}
-                        >
+                        <Button variant={"outline"}>
                             <CalendarIcon className="mr-2 h-4 w-4" />
                             {format(selectedDate, "PPP")}
                         </Button>
@@ -70,15 +119,7 @@ const DailySubmissionStatus: React.FC = () => {
                 </Popover>
             </CardHeader>
             <CardContent className="p-0">
-                {isLoading ? (
-                    <div className="p-6 space-y-4">
-                        <Skeleton className="h-10 w-full" />
-                        <Skeleton className="h-10 w-full" />
-                        <Skeleton className="h-10 w-full" />
-                    </div>
-                ) : isError ? (
-                    <p className="p-6 text-red-500">Failed to load submission data for this date.</p>
-                ) : submissions && submissions.length > 0 ? (
+                {submissions && submissions.length > 0 ? (
                     <div className="overflow-x-auto">
                         <Table>
                             <TableHeader>
@@ -98,7 +139,7 @@ const DailySubmissionStatus: React.FC = () => {
                                         <TableCell>{sub.role}</TableCell>
                                         <TableCell className="space-x-1">
                                             {sub.report_types.map(type => (
-                                                <ReportTypeBadge key={type} type={type} />
+                                                <ReportTypeBadge key={`${sub.user_id}-${type}`} type={type} />
                                             ))}
                                         </TableCell>
                                     </TableRow>
@@ -107,7 +148,9 @@ const DailySubmissionStatus: React.FC = () => {
                         </Table>
                     </div>
                 ) : (
-                    <p className="p-6 text-muted-foreground">No reports submitted on {format(selectedDate, 'PPP')}.</p>
+                    <p className="p-6 text-muted-foreground text-center">
+                        No reports submitted on {format(selectedDate, 'PPP')}.
+                    </p>
                 )}
             </CardContent>
         </Card>

@@ -1,4 +1,8 @@
+// NOTE: The following imports use Deno/ESM URLs which are not resolvable by the client-side TypeScript compiler.
+// This is expected and acceptable for Supabase Edge Functions.
+// @ts-ignore - Deno standard library import
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+// @ts-ignore - Supabase JS client import
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 
 const corsHeaders = {
@@ -22,7 +26,7 @@ const getServiceSupabase = () => {
   });
 };
 
-serve(async (req) => {
+serve(async (req: Request) => { // Fixed: Added explicit type for 'req' parameter
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -55,7 +59,7 @@ serve(async (req) => {
 
       if (error) throw error;
 
-      return data.map(item => ({
+      return data.map((item: { user_id: string }) => ({ // Fixed: Added explicit type for 'item' parameter
         user_id: item.user_id,
         report_type: table.type,
       }));
@@ -64,12 +68,12 @@ serve(async (req) => {
     const allSubmissions = (await Promise.all(submissionPromises)).flat();
     
     // Group submissions by user_id and collect all report types submitted
-    const userSubmissions = new Map();
-    allSubmissions.forEach(sub => {
+    const userSubmissions = new Map<string, Set<string>>();
+    allSubmissions.forEach((sub: { user_id: string; report_type: string }) => { // Fixed: Added explicit type for 'sub' parameter
         if (!userSubmissions.has(sub.user_id)) {
             userSubmissions.set(sub.user_id, new Set());
         }
-        userSubmissions.get(sub.user_id).add(sub.report_type);
+        userSubmissions.get(sub.user_id)!.add(sub.report_type);
     });
 
     const submittedUserIds = Array.from(userSubmissions.keys());
@@ -89,10 +93,10 @@ serve(async (req) => {
 
     if (profileError) throw profileError;
 
-    const submissions = profiles.map(profile => ({
+    const submissions = profiles.map((profile: { id: string; first_name: string | null; last_name: string | null; role: string | null }) => ({ // Fixed: Added explicit type for 'profile' parameter
         user_id: profile.id,
-        name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
-        role: profile.role,
+        name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown User',
+        role: profile.role || 'Unknown Role',
         report_types: Array.from(userSubmissions.get(profile.id) || []),
     }));
 
@@ -103,10 +107,12 @@ serve(async (req) => {
         status: 200,
       },
     );
-  } catch (error) {
-    console.error("Edge Function Error:", error.message);
+  } catch (error: unknown) { // Fixed: Added explicit type for 'error' parameter
+    // Type assertion to access error.message
+    const errorMessage = (error as Error).message || 'An unknown error occurred';
+    console.error("Edge Function Error:", errorMessage);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: errorMessage }),
       {
         headers: corsHeaders,
         status: 500,

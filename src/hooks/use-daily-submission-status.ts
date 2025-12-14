@@ -12,16 +12,9 @@ export interface DailySubmission {
 
 const fetchDailySubmissionStatus = async (date: string): Promise<DailySubmission[]> => {
     if (!date) return [];
-    
-    // Project ID: madymngifviixpttjpvp
-    // const functionUrl = `https://madymngifviixpttjpvp.supabase.co/functions/v1/daily-submission-status?date=${date}`; // Removed unused variable
 
     const { data, error } = await supabase.functions.invoke('daily-submission-status', {
         method: 'GET',
-        headers: {
-            // Pass the date via query parameter, not body
-        },
-        // Note: We rely on the Edge Function using the Service Role Key internally
     });
 
     if (error) {
@@ -36,7 +29,7 @@ const fetchDailySubmissionStatus = async (date: string): Promise<DailySubmission
         throw new Error(data.error);
     }
 
-    return data.submissions as DailySubmission[];
+    return data.submissions || [];
 };
 
 export const useDailySubmissionStatus = (date: string | null) => {
