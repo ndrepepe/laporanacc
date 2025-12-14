@@ -8,9 +8,11 @@ import ReportFormConsignmentStaff from "@/components/reports/ReportFormConsignme
 import ReportFormSupervisorManager from "@/components/reports/ReportFormSupervisorManager";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const SubmitReport = () => {
   const { profile, isLoading } = useAuth();
+  const { t } = useLanguage();
 
   if (isLoading) {
     return (
@@ -27,9 +29,9 @@ const SubmitReport = () => {
       <DashboardLayout>
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Access Denied</AlertTitle>
+          <AlertTitle>{t('access_denied')}</AlertTitle>
           <AlertDescription>
-            Could not determine user role or profile is missing.
+            {t('role_not_assigned_error')}
           </AlertDescription>
         </Alert>
       </DashboardLayout>
@@ -52,9 +54,9 @@ const SubmitReport = () => {
         return (
           <Alert variant="default">
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Unsupported Role</AlertTitle>
+            <AlertTitle>{t('unsupported_role')}</AlertTitle>
             <AlertDescription>
-              Your role ({role}) does not have a defined report submission form.
+              {t('role_no_form', { role })}
             </AlertDescription>
           </Alert>
         );
@@ -63,10 +65,10 @@ const SubmitReport = () => {
 
   return (
     <DashboardLayout>
-      <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">Submit Daily Report</h1>
+      <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">{t('submit_daily_report_title')}</h1>
       <Card>
         <CardHeader>
-          <CardTitle>Daily Report Submission ({profile.role})</CardTitle>
+          <CardTitle>{t('daily_report_submission')} ({profile.role})</CardTitle>
         </CardHeader>
         <CardContent>
           {renderForm(profile.role)}

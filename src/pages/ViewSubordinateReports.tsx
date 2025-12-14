@@ -22,6 +22,7 @@ import { AlertTriangle } from "lucide-react";
 import { UserRole } from "@/lib/roles";
 import ReportFilters from "@/components/reports/ReportFilters";
 import { Button } from "@/components/Button"; // Use custom Button
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Helper function to render report type badge
 const ReportTypeBadge = ({ type }: { type: DailyReport['type'] }) => {
@@ -45,6 +46,7 @@ const ReportTypeBadge = ({ type }: { type: DailyReport['type'] }) => {
 
 const ViewSubordinateReports = () => {
   const { profile, user } = useAuth();
+  const { t } = useLanguage();
   const [filters, setFilters] = useState<ReportFiltersType>({});
   const { data: reports, isLoading, isError } = useDailyReports('subordinates', filters);
   const [selectedReport, setSelectedReport] = useState<DailyReport | null>(null);
@@ -54,12 +56,12 @@ const ViewSubordinateReports = () => {
   if (!profile || !MANAGER_ROLES.includes(profile.role)) {
     return (
         <DashboardLayout>
-            <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">View Subordinate Reports</h1>
+            <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">{t('view_subordinate_reports_title')}</h1>
             <Alert variant="destructive">
                 <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>Access Denied</AlertTitle>
+                <AlertTitle>{t('access_denied')}</AlertTitle>
                 <AlertDescription>
-                    You do not have permission to view subordinate reports.
+                    {t('no_permission_subordinates')}
                 </AlertDescription>
             </Alert>
         </DashboardLayout>
@@ -91,7 +93,7 @@ const ViewSubordinateReports = () => {
   if (isLoading) {
     return (
         <DashboardLayout>
-            <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">View Subordinate Reports</h1>
+            <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">{t('view_subordinate_reports_title')}</h1>
             <Card><CardContent><Skeleton className="h-64 w-full" /></CardContent></Card>
         </DashboardLayout>
     );
@@ -100,15 +102,15 @@ const ViewSubordinateReports = () => {
   if (isError) {
     return (
         <DashboardLayout>
-            <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">View Subordinate Reports</h1>
-            <Card><CardContent className="p-6 text-red-500">Error loading subordinate reports.</CardContent></Card>
+            <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">{t('view_subordinate_reports_title')}</h1>
+            <Card><CardContent className="p-6 text-red-500">{t('error_loading_subordinate_reports')}</CardContent></Card>
         </DashboardLayout>
     );
   }
 
   return (
     <DashboardLayout>
-      <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">View Subordinate Reports</h1>
+      <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">{t('view_subordinate_reports_title')}</h1>
       
       <div className="mb-6">
         <ReportFilters 
@@ -119,14 +121,14 @@ const ViewSubordinateReports = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Reports Viewable by {profile?.role}</CardTitle>
+          <CardTitle>{t('reports_viewable_by')} {profile?.role}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {filteredReports.length === 0 ? (
             <p className="p-6 text-muted-foreground">
                 {reports && reports.length > 0 
-                    ? "No reports match the current filters." 
-                    : "No subordinate reports found for your viewing permissions."
+                    ? t('no_reports_match_filters')
+                    : t('no_subordinate_reports_found')
                 }
             </p>
           ) : (
@@ -134,11 +136,11 @@ const ViewSubordinateReports = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Submitter</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Report Type</TableHead>
-                    <TableHead className="text-right">Action</TableHead>
+                    <TableHead>{t('date')}</TableHead>
+                    <TableHead>{t('submitter')}</TableHead>
+                    <TableHead>{t('role')}</TableHead>
+                    <TableHead>{t('report_type')}</TableHead>
+                    <TableHead className="text-right">{t('action')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -161,7 +163,7 @@ const ViewSubordinateReports = () => {
                         <ReportTypeBadge type={report.type} />
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button variant="outline" size="sm">View Details</Button>
+                        <Button variant="outline" size="sm">{t('view_details')}</Button>
                       </TableCell>
                     </TableRow>
                   ))}

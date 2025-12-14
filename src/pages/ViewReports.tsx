@@ -20,6 +20,7 @@ import { Button } from "@/components/Button";
 import { Pencil, Eye } from "lucide-react";
 import ReportEditWrapper from "@/components/reports/ReportEditWrapper";
 import { ReportType } from "@/lib/report-constants";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Helper function to render report type badge
 const ReportTypeBadge = ({ type }: { type: DailyReport['type'] }) => {
@@ -43,6 +44,7 @@ const ReportTypeBadge = ({ type }: { type: DailyReport['type'] }) => {
 
 const MyReports = () => {
   const { profile } = useAuth(); 
+  const { t } = useLanguage();
   // Use 'self' scope to only fetch reports submitted by the current user
   const { data: reports, isLoading, isError, error, refetch } = useDailyReports('self');
   
@@ -73,7 +75,7 @@ const MyReports = () => {
   if (isLoading) {
     return (
         <DashboardLayout>
-            <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">My Daily Reports</h1>
+            <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">{t('my_daily_reports_title')}</h1>
             <Card><CardContent><Skeleton className="h-64 w-full" /></CardContent></Card>
         </DashboardLayout>
     );
@@ -82,8 +84,8 @@ const MyReports = () => {
   if (isError) {
     return (
         <DashboardLayout>
-            <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">My Daily Reports</h1>
-            <Card><CardContent className="p-6 text-red-500">Error loading reports: {error?.message || "Unknown error"}</CardContent></Card>
+            <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">{t('my_daily_reports_title')}</h1>
+            <Card><CardContent className="p-6 text-red-500">{t('error_loading_reports')}: {error?.message || t('unknown_error')}</CardContent></Card>
         </DashboardLayout>
     );
   }
@@ -91,27 +93,27 @@ const MyReports = () => {
   if (!reports || reports.length === 0) {
     return (
         <DashboardLayout>
-            <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">My Daily Reports</h1>
-            <Card><CardContent className="p-6">You have not submitted any reports yet.</CardContent></Card>
+            <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">{t('my_daily_reports_title')}</h1>
+            <Card><CardContent className="p-6">{t('no_reports_submitted')}</CardContent></Card>
         </DashboardLayout>
     );
   }
 
   return (
     <DashboardLayout>
-      <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">My Daily Reports</h1>
+      <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">{t('my_daily_reports_title')}</h1>
       <Card>
         <CardHeader>
-          <CardTitle>Reports Submitted by You ({profile?.role})</CardTitle>
+          <CardTitle>{t('reports_submitted_by_you')} ({profile?.role})</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Report Type</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t('date')}</TableHead>
+                  <TableHead>{t('report_type')}</TableHead>
+                  <TableHead className="text-right">{t('actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -132,14 +134,14 @@ const MyReports = () => {
                         size="sm" 
                         onClick={() => handleViewDetails(report)}
                       >
-                        <Eye className="h-4 w-4 mr-1" /> View
+                        <Eye className="h-4 w-4 mr-1" /> {t('view')}
                       </Button>
                       <Button 
                         variant="secondary" 
                         size="sm" 
                         onClick={() => handleEditReport(report)}
                       >
-                        <Pencil className="h-4 w-4 mr-1" /> Edit
+                        <Pencil className="h-4 w-4 mr-1" /> {t('edit')}
                       </Button>
                     </TableCell>
                   </TableRow>

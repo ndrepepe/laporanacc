@@ -7,6 +7,7 @@ import { AlertTriangle, DollarSign, Users, FileText } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import DailySubmissionStatus from "@/components/summary/DailySubmissionStatus";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const MetricCard: React.FC<{ title: string; value: string | number; icon: React.ReactNode }> = ({ title, value, icon }) => (
     <Card className="transition-transform hover:scale-[1.02] duration-300">
@@ -30,11 +31,12 @@ const formatCurrency = (amount: number) => {
 
 const Summary = () => {
   const { data, isLoading, isError, error } = useSummaryData();
+  const { t } = useLanguage();
 
   if (isLoading) {
     return (
       <DashboardLayout>
-        <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">Statistical Summary</h1>
+        <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">{t('statistical_summary_title')}</h1>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Skeleton className="h-[100px]" />
             <Skeleton className="h-[100px]" />
@@ -49,12 +51,12 @@ const Summary = () => {
   if (isError) {
     return (
       <DashboardLayout>
-        <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">Statistical Summary</h1>
+        <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">{t('statistical_summary_title')}</h1>
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Error Loading Data</AlertTitle>
+          <AlertTitle>{t('error_loading_data')}</AlertTitle>
           <AlertDescription>
-            Failed to load summary data: {error?.message || "Unknown error."}
+            {t('failed_to_load_summary')}: {error?.message || t('unknown_error')}
           </AlertDescription>
         </Alert>
       </DashboardLayout>
@@ -73,7 +75,7 @@ const Summary = () => {
 
   return (
     <DashboardLayout>
-      <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">Statistical Summary</h1>
+      <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">{t('statistical_summary_title')}</h1>
       
       {/* Daily Submission Status Tool */}
       <div className="mb-8">
@@ -81,55 +83,55 @@ const Summary = () => {
       </div>
 
       {/* Monthly/Period Summary */}
-      <h2 className="text-2xl font-semibold mb-4 tracking-wide">Period Totals (Last 30 Days)</h2>
+      <h2 className="text-2xl font-semibold mb-4 tracking-wide">{t('period_totals_title')}</h2>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <MetricCard 
-            title="Total New Customers" 
+            title={t('total_new_customers')} 
             value={monthly.total_new_customers} 
             icon={<Users className="h-4 w-4 text-muted-foreground" />}
         />
         <MetricCard 
-            title="Total New Sales" 
+            title={t('total_new_sales')} 
             value={monthly.total_new_sales} 
             icon={<DollarSign className="h-4 w-4 text-muted-foreground" />}
         />
         <MetricCard 
-            title="Total Payments Count" 
+            title={t('total_payments_count')} 
             value={monthly.total_payments_count} 
             icon={<DollarSign className="h-4 w-4 text-muted-foreground" />}
         />
         <MetricCard 
-            title="Total Payments Amount" 
+            title={t('total_payments_amount')} 
             value={formatCurrency(monthly.total_payments_amount)} 
             icon={<DollarSign className="h-4 w-4 text-muted-foreground" />}
         />
         <MetricCard 
-            title="Total LPK Entered" 
+            title={t('total_lpk_entered')} 
             value={monthly.total_lpk_entered} 
             icon={<FileText className="h-4 w-4 text-muted-foreground" />}
         />
       </div>
 
       {/* Daily Breakdown */}
-      <h2 className="text-2xl font-semibold mt-8 mb-4 tracking-wide">Daily Breakdown</h2>
+      <h2 className="text-2xl font-semibold mt-8 mb-4 tracking-wide">{t('daily_breakdown_title')}</h2>
       <Card>
         <CardHeader>
-            <CardTitle>Daily Metrics (Last 30 Days)</CardTitle>
+            <CardTitle>{t('daily_metrics_title')}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
             {daily.length === 0 ? (
-                <p className="p-6 text-muted-foreground">No report data available for the last 30 days.</p>
+                <p className="p-6 text-muted-foreground">{t('no_report_data_available')}</p>
             ) : (
                 <div className="overflow-x-auto">
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Date</TableHead>
-                                <TableHead>New Customers</TableHead>
-                                <TableHead>New Sales</TableHead>
-                                <TableHead>Payments Count</TableHead>
-                                <TableHead>Payments Amount</TableHead>
-                                <TableHead>LPK Entered</TableHead>
+                                <TableHead>{t('date')}</TableHead>
+                                <TableHead>{t('new_customers')}</TableHead>
+                                <TableHead>{t('new_sales')}</TableHead>
+                                <TableHead>{t('payments_count')}</TableHead>
+                                <TableHead>{t('payments_amount')}</TableHead>
+                                <TableHead>{t('lpk_entered')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>

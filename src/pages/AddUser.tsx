@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { showSuccess, showError } from "@/utils/toast";
 import { UserRole } from "@/lib/roles";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const ALL_ROLES: UserRole[] = [
     'Accounting Staff',
@@ -31,6 +32,7 @@ const AddUserSchema = z.object({
 type AddUserFormValues = z.infer<typeof AddUserSchema>;
 
 const AddUser = () => {
+    const { t } = useLanguage();
     const form = useForm<AddUserFormValues>({
         resolver: zodResolver(AddUserSchema),
         defaultValues: {
@@ -45,9 +47,6 @@ const AddUser = () => {
     const onSubmit = async (values: AddUserFormValues) => {
         const { email, password, first_name, last_name, role } = values;
 
-        // Use standard Supabase signUp, passing role data via options.data
-        // The existing database trigger (handle_new_user) will read this data and set the profile role.
-        
         const { data, error } = await supabase.auth.signUp({
             email,
             password,
@@ -62,21 +61,21 @@ const AddUser = () => {
 
         if (error) {
             console.error("User creation error:", error);
-            showError(`Failed to add user: ${error.message}`);
+            showError(`${t('failed_to_add_user')}: ${error.message}`);
         } else if (data.user) {
-            showSuccess(`User ${email} created successfully! They need to confirm their email.`);
+            showSuccess(`${t('user')} ${email} ${t('created_successfully')}. ${t('email_confirmation_needed')}`);
             form.reset();
         } else {
-            showError("User creation failed unexpectedly.");
+            showError(t('user_creation_failed_unexpectedly'));
         }
     };
 
     return (
         <DashboardLayout>
-            <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">Add New Employee</h1>
+            <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">{t('add_new_employee_title')}</h1>
             <Card className="max-w-lg">
                 <CardHeader>
-                    <CardTitle>Create User Account</CardTitle>
+                    <CardTitle>{t('create_user_account')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
@@ -88,7 +87,7 @@ const AddUser = () => {
                                     name="first_name"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>First Name</FormLabel>
+                                            <FormLabel>{t('first_name')}</FormLabel>
                                             <FormControl>
                                                 <Input placeholder="John" {...field} />
                                             </FormControl>
@@ -101,7 +100,7 @@ const AddUser = () => {
                                     name="last_name"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Last Name</FormLabel>
+                                            <FormLabel>{t('last_name')}</FormLabel>
                                             <FormControl>
                                                 <Input placeholder="Doe" {...field} />
                                             </FormControl>
@@ -116,7 +115,7 @@ const AddUser = () => {
                                 name="email"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Email</FormLabel>
+                                        <FormLabel>{t('email')}</FormLabel>
                                         <FormControl>
                                             <Input placeholder="user@example.com" {...field} />
                                         </FormControl>
@@ -130,7 +129,7 @@ const AddUser = () => {
                                 name="password"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Password (Temporary)</FormLabel>
+                                        <FormLabel>{t('temporary_password')}</FormLabel>
                                         <FormControl>
                                             <Input type="password" placeholder="••••••••" {...field} />
                                         </FormControl>
@@ -144,11 +143,11 @@ const AddUser = () => {
                                 name="role"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Role</FormLabel>
+                                        <FormLabel>{t('role')}</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
                                                 <SelectTrigger>
-                                                    <SelectValue placeholder="Select employee role" />
+                                                    <SelectValue placeholder={t('select_employee_role')} />
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent className="dark:glass-effect">
@@ -162,7 +161,7 @@ const AddUser = () => {
                                 )}
                             />
 
-                            <Button type="submit" variant="gradient" className="w-full">Add User</Button>
+                            <Button type="submit" variant="gradient" className="w-full">{t('add_user_button')}</Button>
                         </form>
                     </Form>
                 </CardContent>

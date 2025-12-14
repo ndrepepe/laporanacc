@@ -5,7 +5,8 @@ export type Language = 'en' | 'id';
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: string) => string;
+  // Memperbarui tanda tangan untuk menerima parameter opsional
+  t: (key: string, params?: Record<string, string>) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -52,6 +53,87 @@ const translations: Record<Language, Record<string, string>> = {
         'action_check_notifications': 'Check your notifications',
         'action_view_summaries': 'View statistical summaries',
         'action_view_subordinate_reports': 'View subordinate reports',
+
+        // General/Report View
+        'date': 'Date',
+        'report_type': 'Report Type',
+        'actions': 'Actions',
+        'view': 'View',
+        'edit': 'Edit',
+        'view_details': 'View Details',
+        'submitter': 'Submitter',
+        'role': 'Role',
+        'action': 'Action',
+        'unknown_error': 'Unknown error',
+        'access_denied': 'Access Denied',
+        
+        // Submit Report Page
+        'submit_daily_report_title': 'Submit Daily Report',
+        'daily_report_submission': 'Daily Report Submission',
+        'role_not_assigned_error': 'Could not determine user role or profile is missing.',
+        'unsupported_role': 'Unsupported Role',
+        'role_no_form': 'Your role ({role}) does not have a defined report submission form.',
+
+        // Conjunctions
+        'and_conjunction': 'and',
+        'or_conjunction': 'or',
+
+        // My Reports Page
+        'my_daily_reports_title': 'My Daily Reports',
+        'error_loading_reports': 'Error loading reports',
+        'no_reports_submitted': 'You have not submitted any reports yet.',
+        'reports_submitted_by_you': 'Reports Submitted by You',
+
+        // Notifications Page
+        'unread': 'Unread',
+        'read': 'Read',
+        'mark_all_read': 'Mark All as Read',
+        'recent_alerts': 'Recent Alerts',
+        'error_loading_notifications': 'Error Loading Notifications',
+        'failed_to_load_notifications': 'Failed to load notifications',
+        'no_notifications': 'You have no notifications.',
+
+        // Add User Page
+        'add_new_employee_title': 'Add New Employee',
+        'create_user_account': 'Create User Account',
+        'first_name': 'First Name',
+        'last_name': 'Last Name',
+        'email': 'Email',
+        'temporary_password': 'Password (Temporary)',
+        'select_employee_role': 'Select employee role',
+        'add_user_button': 'Add User',
+        'failed_to_add_user': 'Failed to add user',
+        'user': 'User',
+        'created_successfully': 'created successfully',
+        'email_confirmation_needed': 'They need to confirm their email.',
+        'user_creation_failed_unexpectedly': 'User creation failed unexpectedly.',
+
+        // View Subordinate Reports Page
+        'view_subordinate_reports_title': 'View Subordinate Reports',
+        'no_permission_subordinates': 'You do not have permission to view subordinate reports.',
+        'error_loading_subordinate_reports': 'Error loading subordinate reports.',
+        'reports_viewable_by': 'Reports Viewable by',
+        'no_reports_match_filters': 'No reports match the current filters.',
+        'no_subordinate_reports_found': 'No subordinate reports found for your viewing permissions.',
+
+        // Summary Page
+        'statistical_summary_title': 'Statistical Summary',
+        'error_loading_data': 'Error Loading Data',
+        'failed_to_load_summary': 'Failed to load summary data',
+        'period_totals_title': 'Period Totals (Last 30 Days)',
+        'total_new_customers': 'Total New Customers',
+        'total_new_sales': 'Total New Sales',
+        'total_payments_count': 'Total Payments Count',
+        'total_payments_amount': 'Total Payments Amount',
+        'total_lpk_entered': 'Total LPK Entered',
+        'daily_breakdown_title': 'Daily Breakdown',
+        'daily_metrics_title': 'Daily Metrics (Last 30 Days)',
+        'no_report_data_available': 'No report data available for the last 30 days.',
+        'new_customers': 'New Customers',
+        'new_sales': 'New Sales',
+        'payments_count': 'Payments Count',
+        'payments_amount': 'Payments Amount',
+        'lpk_entered': 'LPK Entered',
     },
     id: {
         // Tools
@@ -93,6 +175,87 @@ const translations: Record<Language, Record<string, string>> = {
         'action_check_notifications': 'Periksa notifikasi Anda',
         'action_view_summaries': 'Lihat ringkasan statistik',
         'action_view_subordinate_reports': 'Lihat laporan bawahan',
+
+        // General/Report View
+        'date': 'Tanggal',
+        'report_type': 'Jenis Laporan',
+        'actions': 'Tindakan',
+        'view': 'Lihat',
+        'edit': 'Edit',
+        'view_details': 'Lihat Detail',
+        'submitter': 'Pengirim',
+        'role': 'Peran',
+        'action': 'Tindakan',
+        'unknown_error': 'Kesalahan tidak diketahui',
+        'access_denied': 'Akses Ditolak',
+
+        // Submit Report Page
+        'submit_daily_report_title': 'Kirim Laporan Harian',
+        'daily_report_submission': 'Pengiriman Laporan Harian',
+        'role_not_assigned_error': 'Tidak dapat menentukan peran pengguna atau profil hilang.',
+        'unsupported_role': 'Peran Tidak Didukung',
+        'role_no_form': 'Peran Anda ({role}) tidak memiliki formulir pengiriman laporan yang ditentukan.',
+
+        // Conjunctions
+        'and_conjunction': 'dan',
+        'or_conjunction': 'atau',
+
+        // My Reports Page
+        'my_daily_reports_title': 'Laporan Harian Saya',
+        'error_loading_reports': 'Kesalahan memuat laporan',
+        'no_reports_submitted': 'Anda belum mengirimkan laporan apa pun.',
+        'reports_submitted_by_you': 'Laporan yang Dikirim oleh Anda',
+
+        // Notifications Page
+        'unread': 'Belum Dibaca',
+        'read': 'Baca',
+        'mark_all_read': 'Tandai Semua Sudah Dibaca',
+        'recent_alerts': 'Peringatan Terbaru',
+        'error_loading_notifications': 'Kesalahan Memuat Notifikasi',
+        'failed_to_load_notifications': 'Gagal memuat notifikasi',
+        'no_notifications': 'Anda tidak memiliki notifikasi.',
+
+        // Add User Page
+        'add_new_employee_title': 'Tambah Karyawan Baru',
+        'create_user_account': 'Buat Akun Pengguna',
+        'first_name': 'Nama Depan',
+        'last_name': 'Nama Belakang',
+        'email': 'Email',
+        'temporary_password': 'Kata Sandi (Sementara)',
+        'select_employee_role': 'Pilih peran karyawan',
+        'add_user_button': 'Tambah Pengguna',
+        'failed_to_add_user': 'Gagal menambahkan pengguna',
+        'user': 'Pengguna',
+        'created_successfully': 'berhasil dibuat',
+        'email_confirmation_needed': 'Mereka perlu mengkonfirmasi email mereka.',
+        'user_creation_failed_unexpectedly': 'Pembuatan pengguna gagal secara tak terduga.',
+
+        // View Subordinate Reports Page
+        'view_subordinate_reports_title': 'Lihat Laporan Bawahan',
+        'no_permission_subordinates': 'Anda tidak memiliki izin untuk melihat laporan bawahan.',
+        'error_loading_subordinate_reports': 'Kesalahan memuat laporan bawahan.',
+        'reports_viewable_by': 'Laporan yang Dapat Dilihat oleh',
+        'no_reports_match_filters': 'Tidak ada laporan yang cocok dengan filter saat ini.',
+        'no_subordinate_reports_found': 'Tidak ada laporan bawahan yang ditemukan untuk izin melihat Anda.',
+
+        // Summary Page
+        'statistical_summary_title': 'Ringkasan Statistik',
+        'error_loading_data': 'Kesalahan Memuat Data',
+        'failed_to_load_summary': 'Gagal memuat data ringkasan',
+        'period_totals_title': 'Total Periode (30 Hari Terakhir)',
+        'total_new_customers': 'Total Pelanggan Baru',
+        'total_new_sales': 'Total Penjualan Baru',
+        'total_payments_count': 'Total Jumlah Pembayaran',
+        'total_payments_amount': 'Total Jumlah Pembayaran',
+        'total_lpk_entered': 'Total LPK Dimasukkan',
+        'daily_breakdown_title': 'Rincian Harian',
+        'daily_metrics_title': 'Metrik Harian (30 Hari Terakhir)',
+        'no_report_data_available': 'Tidak ada data laporan tersedia selama 30 hari terakhir.',
+        'new_customers': 'Pelanggan Baru',
+        'new_sales': 'Penjualan Baru',
+        'payments_count': 'Jumlah Pembayaran',
+        'payments_amount': 'Jumlah Pembayaran',
+        'lpk_entered': 'LPK Dimasukkan',
     },
 };
 
@@ -117,10 +280,17 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
   };
-
-  const t = (key: string): string => {
-    return translations[language][key] || key;
-  };
+  
+  // Fungsi untuk menangani penggantian string dinamis (sekarang bernama 't')
+  const t = (key: string, params?: Record<string, string>) => {
+      let message = translations[language][key] || key;
+      if (params) {
+          Object.keys(params).forEach(paramKey => {
+              message = message.replace(`{${paramKey}}`, params[paramKey]);
+          });
+      }
+      return message;
+  }
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t }}>

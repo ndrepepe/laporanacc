@@ -30,11 +30,11 @@ const Index = () => {
     if (actions.length === 1) {
         return `${t('guidance_prefix')} ${actions[0]}.`;
     } else if (actions.length === 2) {
-        return `${t('guidance_prefix')} ${actions[0]} ${t('english') === 'English' ? 'and' : 'dan'} ${actions[1]}.`;
+        return `${t('guidance_prefix')} ${actions[0]} ${t('and_conjunction')} ${actions[1]}.`;
     } else {
         const lastAction = actions.pop();
         // Use a simple comma separation for the rest
-        return `${t('guidance_prefix')} ${actions.join(', ')}, ${t('english') === 'English' ? 'and' : 'dan'} ${lastAction}.`;
+        return `${t('guidance_prefix')} ${actions.join(', ')}, ${t('and_conjunction')} ${lastAction}.`;
     }
   };
 

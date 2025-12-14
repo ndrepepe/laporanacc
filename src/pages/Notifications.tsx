@@ -7,8 +7,10 @@ import { AlertTriangle, CheckCircle, FileText, Eye, MailOpen } from "lucide-reac
 import { Button } from "@/components/Button";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const NotificationItem: React.FC<{ notification: Notification; onMarkRead: (id: string) => void }> = ({ notification, onMarkRead }) => {
+    const { t } = useLanguage();
     const Icon = notification.type === 'report_submission' ? FileText : Eye;
     const variantClass = notification.is_read ? "bg-muted/50 text-muted-foreground" : "bg-card shadow-md hover:bg-accent/10 transition-colors duration-300";
 
@@ -37,7 +39,7 @@ const NotificationItem: React.FC<{ notification: Notification; onMarkRead: (id: 
                     onClick={() => onMarkRead(notification.id)}
                     className="ml-4 flex-shrink-0 text-accent hover:text-accent/80"
                 >
-                    <CheckCircle className="h-4 w-4 mr-1" /> Read
+                    <CheckCircle className="h-4 w-4 mr-1" /> {t('read')}
                 </Button>
             )}
         </div>
@@ -46,6 +48,7 @@ const NotificationItem: React.FC<{ notification: Notification; onMarkRead: (id: 
 
 const Notifications = () => {
   const { data: notifications, isLoading, isError, error, markAllAsRead, markAsReadMutation, unreadCount } = useNotifications();
+  const { t } = useLanguage();
 
   const handleMarkRead = (id: string) => {
     markAsReadMutation.mutate([id]);
@@ -54,7 +57,7 @@ const Notifications = () => {
   if (isLoading) {
     return (
       <DashboardLayout>
-        <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">Notifications</h1>
+        <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">{t('notifications')}</h1>
         <Card><CardContent className="p-6"><Skeleton className="h-64 w-full" /></CardContent></Card>
       </DashboardLayout>
     );
@@ -63,12 +66,12 @@ const Notifications = () => {
   if (isError) {
     return (
       <DashboardLayout>
-        <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">Notifications</h1>
+        <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">{t('notifications')}</h1>
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Error Loading Notifications</AlertTitle>
+          <AlertTitle>{t('error_loading_notifications')}</AlertTitle>
           <AlertDescription>
-            Failed to load notifications: {error?.message || "Unknown error."}
+            {t('failed_to_load_notifications')}: {error?.message || t('unknown_error')}
           </AlertDescription>
         </Alert>
       </DashboardLayout>
@@ -78,7 +81,7 @@ const Notifications = () => {
   return (
     <DashboardLayout>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold tracking-wider text-gradient">Notifications ({unreadCount} Unread)</h1>
+        <h1 className="text-3xl font-bold tracking-wider text-gradient">{t('notifications')} ({unreadCount} {t('unread')})</h1>
         {unreadCount > 0 && (
             <Button 
                 onClick={markAllAsRead} 
@@ -86,14 +89,14 @@ const Notifications = () => {
                 size="sm"
                 disabled={markAsReadMutation.isPending}
             >
-                <MailOpen className="h-4 w-4 mr-2" /> Mark All as Read
+                <MailOpen className="h-4 w-4 mr-2" /> {t('mark_all_read')}
             </Button>
         )}
       </div>
       
       <Card>
         <CardHeader>
-          <CardTitle>Recent Alerts</CardTitle>
+          <CardTitle>{t('recent_alerts')}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {notifications && notifications.length > 0 ? (
@@ -107,7 +110,7 @@ const Notifications = () => {
               ))}
             </div>
           ) : (
-            <p className="p-6 text-muted-foreground">You have no notifications.</p>
+            <p className="p-6 text-muted-foreground">{t('no_notifications')}</p>
           )}
         </CardContent>
       </Card>
