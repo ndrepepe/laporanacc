@@ -15,6 +15,7 @@ import Summary from "./pages/Summary";
 import Notifications from "./pages/Notifications";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminRoute from "./components/AdminRoute";
+import SummaryRoute from "./components/SummaryRoute"; // New import
 
 const queryClient = new QueryClient();
 
@@ -34,8 +35,12 @@ const App = () => (
               <Route path="/report/submit" element={<SubmitReport />} />
               <Route path="/reports/view" element={<MyReports />} /> {/* Updated element name */}
               <Route path="/reports/subordinates" element={<ViewSubordinateReports />} /> {/* New route */}
-              <Route path="/summary" element={<Summary />} />
               <Route path="/notifications" element={<Notifications />} />
+              
+              {/* Summary Route (Restricted to Managers) */}
+              <Route element={<SummaryRoute />}>
+                <Route path="/summary" element={<Summary />} />
+              </Route>
               
               {/* Admin Routes (Protected by AdminRole check) */}
               <Route element={<AdminRoute />}>

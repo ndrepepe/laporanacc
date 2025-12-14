@@ -12,12 +12,12 @@ import { UserRole } from "@/lib/roles";
 const baseNavItems = [
   { to: "/", icon: Home, label: "Dashboard" },
   { to: "/report/submit", icon: FileText, label: "Submit Report" },
-  { to: "/reports/view", icon: Eye, label: "My Reports" }, // Updated label and icon
-  { to: "/summary", icon: BarChart, label: "Summary" },
+  { to: "/reports/view", icon: Eye, label: "My Reports" },
   { to: "/notifications", icon: Bell, label: "Notifications" },
 ];
 
 const SUBORDINATE_VIEWER_ROLES: UserRole[] = ['Senior Manager', 'Accounting Manager', 'Consignment Supervisor'];
+const SUMMARY_VIEWER_ROLES: UserRole[] = ['Senior Manager', 'Accounting Manager'];
 const ADMIN_ROLE: UserRole = 'Senior Manager';
 
 const SidebarNav = () => {
@@ -31,12 +31,19 @@ const SidebarNav = () => {
     navigate('/login');
   };
 
-  const navItems = [...baseNavItems];
+  let navItems = [...baseNavItems];
   
   // Conditionally add View Subordinate Reports link for managers/supervisors
   if (profile?.role && SUBORDINATE_VIEWER_ROLES.includes(profile.role)) {
-    // Insert after My Reports
+    // Insert after My Reports (index 3)
     navItems.splice(3, 0, { to: "/reports/subordinates", icon: Users, label: "View Subordinates" });
+  }
+  
+  // Conditionally add Summary link for Accounting Managers and Senior Managers
+  if (profile?.role && SUMMARY_VIEWER_ROLES.includes(profile.role)) {
+    // Insert after View Subordinates (or My Reports if View Subordinates is absent)
+    const summaryIndex = navItems.findIndex(item => item.to === "/reports/subordinates") + 1 || 3;
+    navItems.splice(summaryIndex, 0, { to: "/summary", icon: BarChart, label: "Summary" });
   }
 
   // Conditionally add Admin link
