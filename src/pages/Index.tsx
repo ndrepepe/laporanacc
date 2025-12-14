@@ -5,6 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DashboardLayout from "@/components/DashboardLayout";
+import { UserRole } from "@/lib/roles";
+
+const SUMMARY_ROLES: UserRole[] = ['Senior Manager', 'Accounting Manager'];
+const SUBORDINATE_ROLES: UserRole[] = ['Senior Manager', 'Accounting Manager', 'Consignment Supervisor'];
 
 const Index = () => {
   const { profile, user } = useAuth();
@@ -13,6 +17,30 @@ const Index = () => {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/login');
+  };
+
+  const getGuidanceMessage = (role: UserRole | undefined) => {
+    if (!role) {
+        return "Use the sidebar navigation to navigate the application.";
+    }
+
+    let actions = ["Submit your daily report", "View your reports", "Check your notifications"];
+
+    if (SUMMARY_ROLES.includes(role)) {
+        actions.push("View statistical summaries");
+    } else if (SUBORDINATE_ROLES.includes(role)) {
+        actions.push("View subordinate reports");
+    }
+
+    // Format the list of actions into a readable sentence
+    if (actions.length === 1) {
+        return `Use the sidebar navigation to ${actions[0]}.`;
+    } else if (actions.length === 2) {
+        return `Use the sidebar navigation to ${actions[0]} and ${actions[1]}.`;
+    } else {
+        const lastAction = actions.pop();
+        return `Use the sidebar navigation to ${actions.join(', ')}, and ${lastAction}.`;
+    }
   };
 
   return (
@@ -31,7 +59,7 @@ const Index = () => {
               {profile?.role || "Role not assigned"}
             </p>
             <p className="text-sm text-muted-foreground mt-2">
-              Use the sidebar navigation to submit your daily report or view summaries.
+              {getGuidanceMessage(profile?.role)}
             </p>
           </CardContent>
         </Card>
