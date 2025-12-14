@@ -25,7 +25,7 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md dark:neon-glow">
         <CardHeader>
-          <CardTitle className="text-3xl text-center tracking-wider text-gradient">AI Daily Reports</CardTitle>
+          <CardTitle className="text-3xl text-center tracking-wider text-gradient">AO Daily Reports</CardTitle>
           <CardDescription className="text-center text-sm">Accounting - Cashier - Consignment</CardDescription>
         </CardHeader>
         <CardContent>
