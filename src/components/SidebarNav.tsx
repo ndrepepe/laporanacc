@@ -3,7 +3,7 @@ import { Home, LogOut, FileText, Users, Bell, BarChart, Settings, Eye } from "lu
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/integrations/supabase/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/Button"; // Use custom Button
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
@@ -25,11 +25,6 @@ const SidebarNav = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   
-  // Initialize isSheetOpen based on isMobile state. 
-  // If isMobile is true, start closed (false). If false (desktop), start open (true).
-  // However, since useIsMobile returns true/false immediately after mount, 
-  // we can rely on the default behavior of the Sheet component being closed, 
-  // and only use the state for controlling the Sheet.
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -61,8 +56,10 @@ const SidebarNav = () => {
   const NavContent = () => (
     <div className="flex flex-col h-full p-4">
       <div className="mb-8">
-        <h2 className="text-xl font-bold text-primary">Daily Reports</h2>
-        <p className="text-sm text-muted-foreground mt-1">
+        <h2 className="text-2xl font-extrabold text-gradient tracking-widest">
+          DYAD AI
+        </h2>
+        <p className="text-xs text-muted-foreground mt-1">
           {profile?.role || "Loading Role..."}
         </p>
       </div>
@@ -74,9 +71,10 @@ const SidebarNav = () => {
             onClick={() => isMobile && setIsSheetOpen(false)}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-accent hover:text-accent-foreground",
+                "flex items-center gap-3 rounded-lg px-3 py-2 transition-all duration-300",
+                "hover:bg-accent/20 hover:text-accent-foreground",
                 isActive
-                  ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
+                  ? "bg-primary/20 text-primary font-semibold border border-primary/50 neon-glow"
                   : "text-muted-foreground",
               )
             }
@@ -104,7 +102,7 @@ const SidebarNav = () => {
             <Home className="h-5 w-5" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-[250px] p-0">
+        <SheetContent side="left" className="w-[250px] p-0 bg-sidebar dark:bg-background">
           <NavContent />
         </SheetContent>
       </Sheet>
@@ -112,7 +110,7 @@ const SidebarNav = () => {
   }
 
   return (
-    <div className="hidden md:flex flex-col w-64 border-r bg-sidebar h-screen sticky top-0">
+    <div className="hidden md:flex flex-col w-64 border-r border-border bg-sidebar dark:bg-card h-screen sticky top-0 shadow-2xl dark:shadow-primary/10">
       <NavContent />
     </div>
   );

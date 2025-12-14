@@ -1,5 +1,5 @@
 import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
 import { useSummaryData, DailyMetric, MonthlyMetric } from "@/hooks/use-summary-data";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -9,13 +9,13 @@ import { format } from "date-fns";
 import DailySubmissionStatus from "@/components/summary/DailySubmissionStatus";
 
 const MetricCard: React.FC<{ title: string; value: string | number; icon: React.ReactNode }> = ({ title, value, icon }) => (
-    <Card>
+    <Card className="transition-transform hover:scale-[1.02] duration-300">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{title}</CardTitle>
+            <CardTitle className="text-sm font-medium tracking-wider">{title}</CardTitle>
             {icon}
         </CardHeader>
         <CardContent>
-            <div className="text-2xl font-bold">{value}</div>
+            <div className="text-3xl font-bold text-primary">{value}</div>
         </CardContent>
     </Card>
 );
@@ -34,7 +34,7 @@ const Summary = () => {
   if (isLoading) {
     return (
       <DashboardLayout>
-        <h1 className="text-3xl font-bold mb-6">Statistical Summary</h1>
+        <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">Statistical Summary</h1>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Skeleton className="h-[100px]" />
             <Skeleton className="h-[100px]" />
@@ -49,7 +49,7 @@ const Summary = () => {
   if (isError) {
     return (
       <DashboardLayout>
-        <h1 className="text-3xl font-bold mb-6">Statistical Summary</h1>
+        <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">Statistical Summary</h1>
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Error Loading Data</AlertTitle>
@@ -73,7 +73,7 @@ const Summary = () => {
 
   return (
     <DashboardLayout>
-      <h1 className="text-3xl font-bold mb-6">Statistical Summary</h1>
+      <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">Statistical Summary</h1>
       
       {/* Daily Submission Status Tool */}
       <div className="mb-8">
@@ -81,7 +81,7 @@ const Summary = () => {
       </div>
 
       {/* Monthly/Period Summary */}
-      <h2 className="text-2xl font-semibold mb-4">Period Totals (Last 30 Days)</h2>
+      <h2 className="text-2xl font-semibold mb-4 tracking-wide">Period Totals (Last 30 Days)</h2>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <MetricCard 
             title="Total New Customers" 
@@ -111,7 +111,7 @@ const Summary = () => {
       </div>
 
       {/* Daily Breakdown */}
-      <h2 className="text-2xl font-semibold mt-8 mb-4">Daily Breakdown</h2>
+      <h2 className="text-2xl font-semibold mt-8 mb-4 tracking-wide">Daily Breakdown</h2>
       <Card>
         <CardHeader>
             <CardTitle>Daily Metrics (Last 30 Days)</CardTitle>

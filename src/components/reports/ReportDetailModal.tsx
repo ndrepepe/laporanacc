@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { useLpkEntries } from "@/hooks/use-lpk-entries";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Card } from "@/components/Card"; // Use custom Card
 
 interface ReportDetailModalProps {
     report: DailyReport | null;
@@ -14,9 +15,9 @@ interface ReportDetailModalProps {
 }
 
 const DetailItem = ({ label, value }: { label: string; value: string | number | boolean }) => (
-    <div className="flex justify-between py-1 border-b last:border-b-0">
-        <span className="text-sm font-medium text-gray-600">{label}</span>
-        <span className="text-sm font-semibold text-gray-800">
+    <div className="flex justify-between py-2 border-b border-border/50 last:border-b-0">
+        <span className="text-sm font-medium text-muted-foreground">{label}</span>
+        <span className="text-sm font-semibold text-foreground">
             {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value}
         </span>
     </div>
@@ -32,10 +33,10 @@ const renderAccountingDetails = (report: DailyReport) => {
             <DetailItem label="Worked on LPH" value={accReport.worked_on_lph} />
             <DetailItem label="Customer Confirmation Status" value={accReport.customer_confirmation_status} />
             
-            <h4 className="font-semibold mt-4">New Customer Names</h4>
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{accReport.new_customers_names}</p>
+            <h4 className="font-semibold mt-4 pt-4 border-t border-border/50">New Customer Names</h4>
+            <p className="text-sm text-foreground/80 whitespace-pre-wrap p-2 bg-muted/50 rounded-md">{accReport.new_customers_names}</p>
             <h4 className="font-semibold mt-4">New Sales Names</h4>
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{accReport.new_sales_names}</p>
+            <p className="text-sm text-foreground/80 whitespace-pre-wrap p-2 bg-muted/50 rounded-md">{accReport.new_sales_names}</p>
         </div>
     );
 };
@@ -63,16 +64,23 @@ const renderConsignmentStaffDetails = (report: DailyReport) => {
             <div className="space-y-2">
                 <DetailItem label="Received LPK" value={consignmentReport.received_lpk} />
                 <DetailItem label="LPK Entered BSoft" value={consignmentReport.lpk_entered_bsoft} />
-                <DetailItem label="Tasks Completed" value={consignmentReport.tasks_completed} />
-                <DetailItem label="Issues Encountered" value={consignmentReport.issues_encountered} />
-                {consignmentReport.suggestions && <DetailItem label="Suggestions" value={consignmentReport.suggestions} />}
+                <h4 className="font-semibold mt-4 pt-4 border-t border-border/50">Tasks Completed</h4>
+                <p className="text-sm text-foreground/80 whitespace-pre-wrap p-2 bg-muted/50 rounded-md">{consignmentReport.tasks_completed}</p>
+                <h4 className="font-semibold mt-4">Issues Encountered</h4>
+                <p className="text-sm text-foreground/80 whitespace-pre-wrap p-2 bg-muted/50 rounded-md">{consignmentReport.issues_encountered}</p>
+                {consignmentReport.suggestions && (
+                    <>
+                        <h4 className="font-semibold mt-4">Suggestions</h4>
+                        <p className="text-sm text-foreground/80 whitespace-pre-wrap p-2 bg-muted/50 rounded-md">{consignmentReport.suggestions}</p>
+                    </>
+                )}
             </div>
 
-            <h3 className="text-lg font-bold mt-6">LPK Entries</h3>
+            <h3 className="text-lg font-bold mt-6 tracking-wide border-t pt-4 border-border/50">LPK Entries</h3>
             {isLoadingLpk ? (
                 <Skeleton className="h-24 w-full" />
             ) : lpkEntries && lpkEntries.length > 0 ? (
-                <div className="border rounded-lg overflow-hidden">
+                <Card className="overflow-hidden p-0">
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -89,7 +97,7 @@ const renderConsignmentStaffDetails = (report: DailyReport) => {
                             ))}
                         </TableBody>
                     </Table>
-                </div>
+                </Card>
             ) : (
                 <p className="text-sm text-muted-foreground">No LPK entries recorded for this report.</p>
             )}
@@ -101,9 +109,16 @@ const renderSupervisorManagerDetails = (report: DailyReport) => {
     const smReport = report as SupervisorManagerReport & DailyReport;
     return (
         <div className="space-y-2">
-            <DetailItem label="Tasks Completed" value={smReport.tasks_completed} />
-            <DetailItem label="Issues Encountered" value={smReport.issues_encountered} />
-            {smReport.suggestions && <DetailItem label="Suggestions" value={smReport.suggestions} />}
+            <h4 className="font-semibold mt-4">Tasks Completed</h4>
+            <p className="text-sm text-foreground/80 whitespace-pre-wrap p-2 bg-muted/50 rounded-md">{smReport.tasks_completed}</p>
+            <h4 className="font-semibold mt-4">Issues Encountered</h4>
+            <p className="text-sm text-foreground/80 whitespace-pre-wrap p-2 bg-muted/50 rounded-md">{smReport.issues_encountered}</p>
+            {smReport.suggestions && (
+                <>
+                    <h4 className="font-semibold mt-4">Suggestions</h4>
+                    <p className="text-sm text-foreground/80 whitespace-pre-wrap p-2 bg-muted/50 rounded-md">{smReport.suggestions}</p>
+                </>
+            )}
         </div>
     );
 };
@@ -128,11 +143,11 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({ report, isOpen, o
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col">
+            <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col dark:glass-effect">
                 <DialogHeader>
-                    <DialogTitle className="flex items-center justify-between">
+                    <DialogTitle className="flex items-center justify-between text-xl tracking-wide">
                         Report Details
-                        <Badge variant="secondary" className="ml-2">
+                        <Badge variant="secondary" className="ml-2 neon-glow">
                             {report.type.replace('_', ' ').toUpperCase()}
                         </Badge>
                     </DialogTitle>
@@ -140,14 +155,14 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({ report, isOpen, o
                 
                 <ScrollArea className="flex-grow pr-4">
                     <div className="space-y-4 pb-4">
-                        <div className="grid grid-cols-2 gap-x-4 text-sm border-b pb-3">
+                        <div className="grid grid-cols-2 gap-x-4 text-sm border-b pb-3 border-border/50">
                             <div>
-                                <p className="font-medium">Date Submitted:</p>
-                                <p className="text-muted-foreground">{format(new Date(report.report_date), 'PPP')}</p>
+                                <p className="font-medium text-muted-foreground">Date Submitted:</p>
+                                <p className="text-foreground font-semibold">{format(new Date(report.report_date), 'PPP')}</p>
                             </div>
                             <div>
-                                <p className="font-medium">Submitted By:</p>
-                                <p className="text-muted-foreground">{report.profile.first_name} {report.profile.last_name} ({report.profile.role})</p>
+                                <p className="font-medium text-muted-foreground">Submitted By:</p>
+                                <p className="text-foreground font-semibold">{report.profile.first_name} {report.profile.last_name} ({report.profile.role})</p>
                             </div>
                         </div>
                         

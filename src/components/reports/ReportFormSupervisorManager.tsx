@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/Button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
@@ -104,7 +104,7 @@ const ReportFormSupervisorManager = () => {
           )}
         />
 
-        <Button type="submit">Submit Report</Button>
+        <Button type="submit" variant="gradient">Submit Report</Button>
       </form>
     </Form>
   );

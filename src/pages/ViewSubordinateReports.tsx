@@ -1,5 +1,5 @@
 import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
 import { useDailyReports } from "@/hooks/use-reports";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DailyReport, ReportFilters as ReportFiltersType } from "@/lib/types";
@@ -21,22 +21,23 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import { UserRole } from "@/lib/roles";
 import ReportFilters from "@/components/reports/ReportFilters";
+import { Button } from "@/components/Button"; // Use custom Button
 
 // Helper function to render report type badge
 const ReportTypeBadge = ({ type }: { type: DailyReport['type'] }) => {
     let colorClass = "bg-gray-200 text-gray-800";
     switch (type) {
         case 'accounting':
-            colorClass = "bg-blue-100 text-blue-800 hover:bg-blue-200";
+            colorClass = "bg-blue-500 text-white dark:bg-blue-800 dark:text-blue-100";
             break;
         case 'cashier':
-            colorClass = "bg-green-100 text-green-800 hover:bg-green-200";
+            colorClass = "bg-green-500 text-white dark:bg-green-800 dark:text-green-100";
             break;
         case 'consignment_staff':
-            colorClass = "bg-yellow-100 text-yellow-800 hover:bg-yellow-200";
+            colorClass = "bg-yellow-500 text-white dark:bg-yellow-800 dark:text-yellow-100";
             break;
         case 'supervisor_manager':
-            colorClass = "bg-purple-100 text-purple-800 hover:bg-purple-200";
+            colorClass = "bg-purple-500 text-white dark:bg-purple-800 dark:text-purple-100";
             break;
     }
     return <Badge className={colorClass}>{type.replace('_', ' ').toUpperCase()}</Badge>;
@@ -53,7 +54,7 @@ const ViewSubordinateReports = () => {
   if (!profile || !MANAGER_ROLES.includes(profile.role)) {
     return (
         <DashboardLayout>
-            <h1 className="text-3xl font-bold mb-6">View Subordinate Reports</h1>
+            <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">View Subordinate Reports</h1>
             <Alert variant="destructive">
                 <AlertTriangle className="h-4 w-4" />
                 <AlertTitle>Access Denied</AlertTitle>
@@ -90,7 +91,7 @@ const ViewSubordinateReports = () => {
   if (isLoading) {
     return (
         <DashboardLayout>
-            <h1 className="text-3xl font-bold mb-6">View Subordinate Reports</h1>
+            <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">View Subordinate Reports</h1>
             <Card><CardContent><Skeleton className="h-64 w-full" /></CardContent></Card>
         </DashboardLayout>
     );
@@ -99,7 +100,7 @@ const ViewSubordinateReports = () => {
   if (isError) {
     return (
         <DashboardLayout>
-            <h1 className="text-3xl font-bold mb-6">View Subordinate Reports</h1>
+            <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">View Subordinate Reports</h1>
             <Card><CardContent className="p-6 text-red-500">Error loading subordinate reports.</CardContent></Card>
         </DashboardLayout>
     );
@@ -107,7 +108,7 @@ const ViewSubordinateReports = () => {
 
   return (
     <DashboardLayout>
-      <h1 className="text-3xl font-bold mb-6">View Subordinate Reports</h1>
+      <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">View Subordinate Reports</h1>
       
       <div className="mb-6">
         <ReportFilters 
@@ -145,7 +146,7 @@ const ViewSubordinateReports = () => {
                     <TableRow 
                       key={report.id} 
                       onClick={() => handleViewDetails(report)}
-                      className="cursor-pointer hover:bg-muted/50 transition-colors"
+                      className="cursor-pointer hover:bg-accent/10 transition-colors"
                     >
                       <TableCell className="font-medium">
                         {format(new Date(report.report_date), 'PPP')}
@@ -160,7 +161,7 @@ const ViewSubordinateReports = () => {
                         <ReportTypeBadge type={report.type} />
                       </TableCell>
                       <TableCell className="text-right">
-                        <Badge variant="outline">View Details</Badge>
+                        <Button variant="outline" size="sm">View Details</Button>
                       </TableCell>
                     </TableRow>
                   ))}

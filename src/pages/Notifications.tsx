@@ -1,16 +1,16 @@
 import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
 import { useNotifications, Notification } from "@/hooks/use-notifications";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, CheckCircle, FileText, Eye, MailOpen } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/Button";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 
 const NotificationItem: React.FC<{ notification: Notification; onMarkRead: (id: string) => void }> = ({ notification, onMarkRead }) => {
     const Icon = notification.type === 'report_submission' ? FileText : Eye;
-    const variantClass = notification.is_read ? "bg-muted/50 text-muted-foreground" : "bg-card shadow-md hover:bg-accent/50";
+    const variantClass = notification.is_read ? "bg-muted/50 text-muted-foreground" : "bg-card shadow-md hover:bg-accent/10 transition-colors duration-300";
 
     return (
         <div 
@@ -19,7 +19,7 @@ const NotificationItem: React.FC<{ notification: Notification; onMarkRead: (id: 
                 variantClass
             )}
         >
-            <div className={cn("p-2 rounded-full mr-4", notification.is_read ? "bg-gray-200" : "bg-primary text-primary-foreground")}>
+            <div className={cn("p-2 rounded-full mr-4", notification.is_read ? "bg-gray-700 text-gray-300" : "bg-primary text-primary-foreground neon-glow")}>
                 <Icon className="h-5 w-5" />
             </div>
             <div className="flex-grow">
@@ -35,7 +35,7 @@ const NotificationItem: React.FC<{ notification: Notification; onMarkRead: (id: 
                     variant="ghost" 
                     size="sm" 
                     onClick={() => onMarkRead(notification.id)}
-                    className="ml-4 flex-shrink-0 text-primary hover:text-primary/80"
+                    className="ml-4 flex-shrink-0 text-accent hover:text-accent/80"
                 >
                     <CheckCircle className="h-4 w-4 mr-1" /> Read
                 </Button>
@@ -54,7 +54,7 @@ const Notifications = () => {
   if (isLoading) {
     return (
       <DashboardLayout>
-        <h1 className="text-3xl font-bold mb-6">Notifications</h1>
+        <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">Notifications</h1>
         <Card><CardContent className="p-6"><Skeleton className="h-64 w-full" /></CardContent></Card>
       </DashboardLayout>
     );
@@ -63,7 +63,7 @@ const Notifications = () => {
   if (isError) {
     return (
       <DashboardLayout>
-        <h1 className="text-3xl font-bold mb-6">Notifications</h1>
+        <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">Notifications</h1>
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Error Loading Notifications</AlertTitle>
@@ -78,7 +78,7 @@ const Notifications = () => {
   return (
     <DashboardLayout>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Notifications ({unreadCount} Unread)</h1>
+        <h1 className="text-3xl font-bold tracking-wider text-gradient">Notifications ({unreadCount} Unread)</h1>
         {unreadCount > 0 && (
             <Button 
                 onClick={markAllAsRead} 

@@ -1,9 +1,9 @@
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { useAuth } from "@/integrations/supabase/auth";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/Button";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
 import DashboardLayout from "@/components/DashboardLayout";
 import { UserRole } from "@/lib/roles";
 
@@ -46,7 +46,7 @@ const Index = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl">
+        <h1 className="text-4xl font-extrabold tracking-widest lg:text-5xl text-gradient">
           Welcome, {profile?.first_name || user?.email}!
         </h1>
         
@@ -55,10 +55,10 @@ const Index = () => {
             <CardTitle>Your Current Role</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-semibold text-primary">
+            <p className="text-3xl font-bold text-primary tracking-wider">
               {profile?.role || "Role not assigned"}
             </p>
-            <p className="text-sm text-muted-foreground mt-2">
+            <p className="text-sm text-muted-foreground mt-4">
               {getGuidanceMessage(profile?.role)}
             </p>
           </CardContent>

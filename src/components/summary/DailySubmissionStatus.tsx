@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/Button';
 import { CalendarIcon, User } from 'lucide-react';
 import { format, startOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -28,16 +28,16 @@ const DailySubmissionStatus: React.FC = () => {
         let colorClass = "bg-gray-200 text-gray-800";
         switch (type) {
             case 'accounting':
-                colorClass = "bg-blue-100 text-blue-800";
+                colorClass = "bg-blue-500 text-white dark:bg-blue-800 dark:text-blue-100";
                 break;
             case 'cashier':
-                colorClass = "bg-green-100 text-green-800";
+                colorClass = "bg-green-500 text-white dark:bg-green-800 dark:text-green-100";
                 break;
             case 'consignment_staff':
-                colorClass = "bg-yellow-100 text-yellow-800";
+                colorClass = "bg-yellow-500 text-white dark:bg-yellow-800 dark:text-yellow-100";
                 break;
             case 'supervisor_manager':
-                colorClass = "bg-purple-100 text-purple-800";
+                colorClass = "bg-purple-500 text-white dark:bg-purple-800 dark:text-purple-100";
                 break;
             default:
                 colorClass = "bg-gray-200 text-gray-800";
@@ -78,7 +78,7 @@ const DailySubmissionStatus: React.FC = () => {
                                 {format(selectedDate, "PPP")}
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="end">
+                        <PopoverContent className="w-auto p-0 dark:glass-effect" align="end">
                             <Calendar
                                 mode="single"
                                 selected={selectedDate}
@@ -108,7 +108,7 @@ const DailySubmissionStatus: React.FC = () => {
                             {format(selectedDate, "PPP")}
                         </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="end">
+                    <PopoverContent className="w-auto p-0 dark:glass-effect" align="end">
                         <Calendar
                             mode="single"
                             selected={selectedDate}

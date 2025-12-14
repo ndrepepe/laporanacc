@@ -2,7 +2,7 @@ import React from 'react';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/Button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -155,7 +155,7 @@ const ReportEditCashier: React.FC<ReportEditCashierProps> = ({ report, onSuccess
           )}
         />
 
-        <Button type="submit">Save Changes</Button>
+        <Button type="submit" variant="gradient">Save Changes</Button>
       </form>
     </Form>
   );

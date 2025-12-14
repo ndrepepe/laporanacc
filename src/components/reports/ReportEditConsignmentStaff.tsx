@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/Button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { showSuccess, showError } from "@/utils/toast";
 import { REPORT_TABLE_MAP } from "@/lib/report-constants";
 import { MinusCircle, PlusCircle } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
 import { useQueryClient } from "@tanstack/react-query";
 import { ConsignmentStaffReport, DailyReport } from "@/lib/types";
 import { ConsignmentStaffFormSchema } from "@/lib/report-schemas";
@@ -186,11 +186,11 @@ const ReportEditConsignmentStaff: React.FC<ReportEditConsignmentStaffProps> = ({
         {receivedLpk === "Yes" && (
             <Card className="p-4">
                 <CardHeader className="p-0 pb-4">
-                    <CardTitle className="text-lg">LPK Entries (Multiple)</CardTitle>
+                    <CardTitle className="text-lg tracking-wide">LPK Entries (Multiple)</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0 space-y-4">
                     {fields.map((field, index) => (
-                        <div key={field.id} className="flex gap-4 items-end border-b pb-4 last:border-b-0 last:pb-0">
+                        <div key={field.id} className="flex gap-4 items-end border-b border-border/50 pb-4 last:border-b-0 last:pb-0">
                             <FormField
                                 control={form.control}
                                 name={`lpk_entries.${index}.branch_name`}
@@ -301,7 +301,7 @@ const ReportEditConsignmentStaff: React.FC<ReportEditConsignmentStaffProps> = ({
           )}
         />
 
-        <Button type="submit">Save Changes</Button>
+        <Button type="submit" variant="gradient">Save Changes</Button>
       </form>
     </Form>
   );

@@ -48,9 +48,9 @@ const ReportEditWrapper: React.FC<ReportEditWrapperProps> = ({ reportId, reportT
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col">
+            <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col dark:glass-effect">
                 <DialogHeader>
-                    <DialogTitle>Edit Daily Report ({reportType?.replace('_', ' ').toUpperCase()})</DialogTitle>
+                    <DialogTitle className="text-xl tracking-wide">Edit Daily Report ({reportType?.replace('_', ' ').toUpperCase()})</DialogTitle>
                 </DialogHeader>
                 
                 <ScrollArea className="flex-grow pr-4">

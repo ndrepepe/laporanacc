@@ -1,5 +1,5 @@
 import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
 import { useDailyReports } from "@/hooks/use-reports";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DailyReport } from "@/lib/types";
@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/integrations/supabase/auth";
 import ReportDetailModal from "@/components/reports/ReportDetailModal";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/Button";
 import { Pencil, Eye } from "lucide-react";
 import ReportEditWrapper from "@/components/reports/ReportEditWrapper";
 import { ReportType } from "@/lib/report-constants";
@@ -26,23 +26,23 @@ const ReportTypeBadge = ({ type }: { type: DailyReport['type'] }) => {
     let colorClass = "bg-gray-200 text-gray-800";
     switch (type) {
         case 'accounting':
-            colorClass = "bg-blue-100 text-blue-800 hover:bg-blue-200";
+            colorClass = "bg-blue-500 text-white dark:bg-blue-800 dark:text-blue-100";
             break;
         case 'cashier':
-            colorClass = "bg-green-100 text-green-800 hover:bg-green-200";
+            colorClass = "bg-green-500 text-white dark:bg-green-800 dark:text-green-100";
             break;
         case 'consignment_staff':
-            colorClass = "bg-yellow-100 text-yellow-800 hover:bg-yellow-200";
+            colorClass = "bg-yellow-500 text-white dark:bg-yellow-800 dark:text-yellow-100";
             break;
         case 'supervisor_manager':
-            colorClass = "bg-purple-100 text-purple-800 hover:bg-purple-200";
+            colorClass = "bg-purple-500 text-white dark:bg-purple-800 dark:text-purple-100";
             break;
     }
     return <Badge className={colorClass}>{type.replace('_', ' ').toUpperCase()}</Badge>;
 };
 
 const MyReports = () => {
-  const { profile } = useAuth(); // Fixed: Removed unused 'user'
+  const { profile } = useAuth(); 
   // Use 'self' scope to only fetch reports submitted by the current user
   const { data: reports, isLoading, isError, error, refetch } = useDailyReports('self');
   
@@ -73,7 +73,7 @@ const MyReports = () => {
   if (isLoading) {
     return (
         <DashboardLayout>
-            <h1 className="text-3xl font-bold mb-6">My Daily Reports</h1>
+            <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">My Daily Reports</h1>
             <Card><CardContent><Skeleton className="h-64 w-full" /></CardContent></Card>
         </DashboardLayout>
     );
@@ -82,7 +82,7 @@ const MyReports = () => {
   if (isError) {
     return (
         <DashboardLayout>
-            <h1 className="text-3xl font-bold mb-6">My Daily Reports</h1>
+            <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">My Daily Reports</h1>
             <Card><CardContent className="p-6 text-red-500">Error loading reports: {error?.message || "Unknown error"}</CardContent></Card>
         </DashboardLayout>
     );
@@ -91,7 +91,7 @@ const MyReports = () => {
   if (!reports || reports.length === 0) {
     return (
         <DashboardLayout>
-            <h1 className="text-3xl font-bold mb-6">My Daily Reports</h1>
+            <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">My Daily Reports</h1>
             <Card><CardContent className="p-6">You have not submitted any reports yet.</CardContent></Card>
         </DashboardLayout>
     );
@@ -99,7 +99,7 @@ const MyReports = () => {
 
   return (
     <DashboardLayout>
-      <h1 className="text-3xl font-bold mb-6">My Daily Reports</h1>
+      <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">My Daily Reports</h1>
       <Card>
         <CardHeader>
           <CardTitle>Reports Submitted by You ({profile?.role})</CardTitle>
@@ -118,6 +118,7 @@ const MyReports = () => {
                 {reports.map((report) => (
                   <TableRow 
                     key={report.id} 
+                    className="hover:bg-accent/10 transition-colors"
                   >
                     <TableCell className="font-medium">
                       {format(new Date(report.report_date), 'PPP')}

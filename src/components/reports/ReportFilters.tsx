@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { ReportFilters } from '@/lib/types';
 import { UserRole } from '@/lib/roles';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/Button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -75,7 +75,7 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({ onFilterChange, initialFi
     const isFiltered = Object.values(filters).some(value => value !== undefined && value !== null && value !== '');
 
     return (
-        <div className="flex flex-wrap items-center gap-4 p-4 border rounded-lg bg-card">
+        <div className="flex flex-wrap items-center gap-4 p-4 border border-border/50 rounded-lg bg-card shadow-lg">
             
             {/* Date Range Filter */}
             <Popover>
@@ -103,7 +103,7 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({ onFilterChange, initialFi
                         )}
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className="w-auto p-0 dark:glass-effect" align="start">
                     <Calendar
                         initialFocus
                         mode="range"
@@ -124,7 +124,7 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({ onFilterChange, initialFi
                     <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
                     <SelectValue placeholder="Filter by Role" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="dark:glass-effect">
                     <SelectItem value="All">All Roles</SelectItem>
                     {ALL_ROLES.map(role => (
                         <SelectItem key={role} value={role}>{role}</SelectItem>

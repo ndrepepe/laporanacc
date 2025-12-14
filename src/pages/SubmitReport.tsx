@@ -1,5 +1,5 @@
 import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
 import { useAuth } from "@/integrations/supabase/auth";
 import { UserRole } from "@/lib/roles";
 import ReportFormAccounting from "@/components/reports/ReportFormAccounting";
@@ -63,7 +63,7 @@ const SubmitReport = () => {
 
   return (
     <DashboardLayout>
-      <h1 className="text-3xl font-bold mb-6">Submit Daily Report</h1>
+      <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">Submit Daily Report</h1>
       <Card>
         <CardHeader>
           <CardTitle>Daily Report Submission ({profile.role})</CardTitle>

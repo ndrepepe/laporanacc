@@ -1,11 +1,11 @@
 import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const AdminDashboard = () => {
   return (
     <DashboardLayout>
-      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+      <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">Admin Dashboard</h1>
       <Tabs defaultValue="users" className="w-full">
         <TabsList>
           <TabsTrigger value="users">User Management</TabsTrigger>
