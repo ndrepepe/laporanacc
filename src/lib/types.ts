@@ -67,3 +67,12 @@ export type DailyReport = BaseReport & (
     | ConsignmentStaffReport
     | SupervisorManagerReport
 );
+
+// New type for report filters
+export interface ReportFilters {
+    startDate?: string; // YYYY-MM-DD
+    endDate?: string; // YYYY-MM-DD
+    role?: UserRole | 'All';
+    employeeName?: string;
+    branchId?: string;
+}

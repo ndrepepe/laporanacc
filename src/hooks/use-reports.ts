@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/integrations/supabase/auth";
-import { DailyReport, Profile } from "@/lib/types";
+import { DailyReport, Profile, ReportFilters } from "@/lib/types";
 import { REPORT_TABLE_MAP, VIEW_PERMISSIONS, ReportType } from "@/lib/report-constants";
 import { UserRole } from "@/lib/roles";
 
@@ -12,7 +12,8 @@ const fetchReportsFromTable = async (
     tableName: string, 
     reportType: ReportType, 
     userId: string, 
-    scope: ReportScope
+    scope: ReportScope,
+    filters: ReportFilters
 ): Promise<DailyReport[]> => {
     
     let query = supabase
@@ -22,6 +23,7 @@ const fetchReportsFromTable = async (
             profile:user_id (id, first_name, last_name, role, avatar_url)
         `);
 
+    // 1. Scope Filtering (RLS handles most of 'subordinates', but we refine here)
     if (scope === 'self') {
         // For 'self' scope, explicitly filter by user_id.
         query = query.eq('user_id', userId);
@@ -32,6 +34,23 @@ const fetchReportsFromTable = async (
     if (scope === 'subordinates') {
         query = query.neq('user_id', userId);
     }
+
+    // 2. Apply Date Filters
+    if (filters.startDate) {
+        query = query.gte('report_date', filters.startDate);
+    }
+    if (filters.endDate) {
+        query = query.lte('report_date', filters.endDate);
+    }
+
+    // 3. Apply Role Filter (Filtering on the joined profile table)
+    if (filters.role && filters.role !== 'All') {
+        // Filter on the joined profile table using the relationship name (user_id)
+        query = query.eq('user_id.role', filters.role);
+    }
+    
+    // Note: Employee Name filtering is handled client-side in the component for simplicity 
+    // due to complex OR logic required for first_name/last_name filtering in PostgREST queries.
 
     const { data, error } = await query.order('report_date', { ascending: false });
 
@@ -48,15 +67,16 @@ const fetchReportsFromTable = async (
     })) as DailyReport[];
 };
 
-export const useDailyReports = (scope: ReportScope = 'self') => {
+export const useDailyReports = (scope: ReportScope = 'self', filters: ReportFilters = {}) => {
     const { profile, user, isLoading: isAuthLoading } = useAuth();
     
     const viewerRole = profile?.role;
     const userId = user?.id;
     const enabled = !!viewerRole && !!userId && !isAuthLoading;
 
+    // Include filters in queryKey to ensure refetching when filters change
     return useQuery<DailyReport[], Error>({
-        queryKey: ['dailyReports', viewerRole, scope],
+        queryKey: ['dailyReports', viewerRole, scope, filters],
         queryFn: async () => {
             if (!viewerRole || !userId) return [];
 
@@ -97,7 +117,7 @@ export const useDailyReports = (scope: ReportScope = 'self') => {
 
             const fetchPromises = allowedReportTypes.map(type => {
                 const tableName = REPORT_TABLE_MAP[type];
-                return fetchReportsFromTable(tableName, type, userId, scope);
+                return fetchReportsFromTable(tableName, type, userId, scope, filters);
             });
 
             const results = await Promise.all(fetchPromises);

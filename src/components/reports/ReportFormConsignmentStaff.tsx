@@ -13,6 +13,7 @@ import { REPORT_TABLE_MAP } from "@/lib/report-constants";
 import { MinusCircle, PlusCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQueryClient } from "@tanstack/react-query";
+import { sendReportSubmissionNotification } from "@/utils/notification-sender";
 
 const LPKEntrySchema = z.object({
     branch_name: z.string().min(1, "Branch name is required."),
@@ -41,7 +42,7 @@ const formSchema = z.object({
 type ConsignmentStaffFormValues = z.infer<typeof formSchema>;
 
 const ReportFormConsignmentStaff = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const queryClient = useQueryClient();
   const form = useForm<ConsignmentStaffFormValues>({
     resolver: zodResolver(formSchema),
@@ -62,8 +63,8 @@ const ReportFormConsignmentStaff = () => {
   });
 
   const onSubmit = async (values: ConsignmentStaffFormValues) => {
-    if (!user) {
-      showError("User not authenticated.");
+    if (!user || !profile?.role) {
+      showError("User not authenticated or role missing.");
       return;
     }
 
@@ -119,6 +120,10 @@ const ReportFormConsignmentStaff = () => {
         issues_encountered: "",
         suggestions: "",
     });
+    
+    // Send notification to managers
+    await sendReportSubmissionNotification(user.id, profile.role, 'consignment_staff');
+
     // Invalidate the dailyReports query to refresh the view
     queryClient.invalidateQueries({ queryKey: ['dailyReports'] });
     // Invalidate LPK entries query if needed, although it's usually fetched via report ID

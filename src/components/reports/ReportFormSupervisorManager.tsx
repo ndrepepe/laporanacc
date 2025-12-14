@@ -9,6 +9,7 @@ import { useAuth } from "@/integrations/supabase/auth";
 import { showSuccess, showError } from "@/utils/toast";
 import { REPORT_TABLE_MAP } from "@/lib/report-constants";
 import { useQueryClient } from "@tanstack/react-query";
+import { sendReportSubmissionNotification } from "@/utils/notification-sender";
 
 const formSchema = z.object({
   tasks_completed: z.string().min(10, "Tasks completed description is required."),
@@ -31,8 +32,8 @@ const ReportFormSupervisorManager = () => {
   });
 
   const onSubmit = async (values: SupervisorManagerFormValues) => {
-    if (!user) {
-      showError("User not authenticated.");
+    if (!user || !profile?.role) {
+      showError("User not authenticated or role missing.");
       return;
     }
 
@@ -53,6 +54,10 @@ const ReportFormSupervisorManager = () => {
     } else {
       showSuccess(`${profile?.role} Report submitted successfully!`);
       form.reset();
+      
+      // Send notification to managers (Senior Manager only)
+      await sendReportSubmissionNotification(user.id, profile.role, 'supervisor_manager');
+
       // Invalidate the dailyReports query to refresh the view
       queryClient.invalidateQueries({ queryKey: ['dailyReports'] });
     }

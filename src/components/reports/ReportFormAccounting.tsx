@@ -11,6 +11,7 @@ import { useAuth } from "@/integrations/supabase/auth";
 import { showSuccess, showError } from "@/utils/toast";
 import { REPORT_TABLE_MAP } from "@/lib/report-constants";
 import { useQueryClient } from "@tanstack/react-query";
+import { sendReportSubmissionNotification } from "@/utils/notification-sender";
 
 const formSchema = z.object({
   new_customers_count: z.coerce.number().min(0, "Must be a non-negative number."),
@@ -24,7 +25,7 @@ const formSchema = z.object({
 type AccountingFormValues = z.infer<typeof formSchema>;
 
 const ReportFormAccounting = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const queryClient = useQueryClient();
   const form = useForm<AccountingFormValues>({
     resolver: zodResolver(formSchema),
@@ -39,8 +40,8 @@ const ReportFormAccounting = () => {
   });
 
   const onSubmit = async (values: AccountingFormValues) => {
-    if (!user) {
-      showError("User not authenticated.");
+    if (!user || !profile?.role) {
+      showError("User not authenticated or role missing.");
       return;
     }
 
@@ -64,6 +65,10 @@ const ReportFormAccounting = () => {
     } else {
       showSuccess("Accounting Report submitted successfully!");
       form.reset();
+      
+      // Send notification to managers
+      await sendReportSubmissionNotification(user.id, profile.role, 'accounting');
+
       // Invalidate the dailyReports query to refresh the view
       queryClient.invalidateQueries({ queryKey: ['dailyReports'] });
     }
