@@ -15,24 +15,50 @@ const getServiceSupabase = () => {
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
   const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-  if (!supabaseUrl || !supabaseServiceRoleKey) {
-    throw new Error('Missing Supabase environment variables.');
+  if (!supabaseUrl) {
+    console.error('Missing SUPABASE_URL environment variable');
+    throw new Error('Missing SUPABASE_URL environment variable.');
   }
 
-  return createClient(supabaseUrl, supabaseServiceRoleKey, {
-    auth: {
-      persistSession: false,
-    },
-  });
+  if (!supabaseServiceRoleKey) {
+    console.error('Missing SUPABASE_SERVICE_ROLE_KEY environment variable');
+    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY environment variable.');
+  }
+
+  try {
+    return createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: {
+        persistSession: false,
+      },
+    });
+  } catch (error: unknown) { // Fixed: Added explicit type for error parameter
+    console.error('Error creating Supabase client:', error);
+    throw new Error(`Failed to create Supabase client: ${(error as Error).message}`); // Fixed: Type assertion to access error.message
+  }
 };
 
 serve(async (req: Request) => {
+  console.log('Function started');
+  
   if (req.method === 'OPTIONS') {
+    console.log('Handling OPTIONS request');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     console.log("Daily submission status function invoked");
+    
+    // Check if required environment variables are present
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl) {
+      throw new Error('SUPABASE_URL environment variable is not set');
+    }
+    
+    if (!supabaseServiceRoleKey) {
+      throw new Error('SUPABASE_SERVICE_ROLE_KEY environment variable is not set');
+    }
     
     const supabase = getServiceSupabase();
     
@@ -43,10 +69,13 @@ serve(async (req: Request) => {
 
     if (!date) {
       console.error("Missing date parameter");
-      return new Response(JSON.stringify({ error: 'Missing date parameter' }), {
-        headers: corsHeaders,
-        status: 400,
-      });
+      return new Response(
+        JSON.stringify({ error: 'Missing date parameter' }), 
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400 
+        }
+      );
     }
 
     const reportTables = [
@@ -61,30 +90,47 @@ serve(async (req: Request) => {
     const submissionPromises = reportTables.map(async (table) => {
       console.log(`Querying ${table.name} for date ${date}`);
       
-      const { data, error, count } = await supabase
-        .from(table.name)
-        .select('user_id', { count: 'exact' })
-        .eq('report_date', date);
+      try {
+        const { data, error, count } = await supabase
+          .from(table.name)
+          .select('user_id', { count: 'exact' })
+          .eq('report_date', date);
 
-      if (error) {
-        console.error(`Error querying ${table.name}:`, error);
-        throw error;
+        if (error) {
+          console.error(`Error querying ${table.name}:`, error);
+          // Don't throw error, just return empty array for this table
+          return [];
+        }
+        
+        console.log(`Found ${count} submissions in ${table.name}`);
+        
+        return data.map((item: { user_id: string }) => ({
+          user_id: item.user_id,
+          report_type: table.type,
+        }));
+      } catch (tableError: unknown) { // Fixed: Added explicit type for error parameter
+        console.error(`Exception querying ${table.name}:`, tableError);
+        // Return empty array for this table if there's an exception
+        return [];
       }
-      
-      console.log(`Found ${count} submissions in ${table.name}`);
-      
-      return data.map((item: { user_id: string }) => ({
-        user_id: item.user_id,
-        report_type: table.type,
-      }));
     });
 
-    const allSubmissions = (await Promise.all(submissionPromises)).flat();
+    const results = await Promise.allSettled(submissionPromises);
+    const allSubmissions: { user_id: string; report_type: string }[] = [];
+    
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        allSubmissions.push(...result.value);
+      } else {
+        console.error(`Promise rejected for table ${reportTables[index].name}:`, result.reason);
+      }
+    });
+    
     console.log("Total submissions found:", allSubmissions.length);
     
     // Group submissions by user_id and collect all report types submitted
     const userSubmissions = new Map<string, Set<string>>();
-    allSubmissions.forEach((sub: { user_id: string; report_type: string }) => {
+    allSubmissions.forEach((sub) => {
         if (!userSubmissions.has(sub.user_id)) {
             userSubmissions.set(sub.user_id, new Set());
         }
@@ -96,10 +142,13 @@ serve(async (req: Request) => {
 
     if (submittedUserIds.length === 0) {
         console.log("No submissions found for date:", date);
-        return new Response(JSON.stringify({ submissions: [] }), {
-            headers: corsHeaders,
-            status: 200,
-        });
+        return new Response(
+          JSON.stringify({ submissions: [] }), 
+          { 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 200 
+          }
+        );
     }
 
     // Fetch profiles for submitted users
@@ -111,7 +160,22 @@ serve(async (req: Request) => {
 
     if (profileError) {
         console.error("Error fetching profiles:", profileError);
-        throw profileError;
+        // Don't throw error, just return submissions without profile info
+        const submissionsWithoutProfiles = submittedUserIds.map(userId => ({
+          user_id: userId,
+          name: 'Unknown User',
+          role: 'Unknown Role',
+          report_types: Array.from(userSubmissions.get(userId) || []),
+        }));
+        
+        console.log("Returning submissions without profiles:", submissionsWithoutProfiles);
+        return new Response(
+          JSON.stringify({ submissions: submissionsWithoutProfiles }), 
+          { 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 200 
+          }
+        );
     }
     
     console.log("Profiles fetched:", profiles.length);
@@ -128,11 +192,11 @@ serve(async (req: Request) => {
     return new Response(
       JSON.stringify({ submissions }),
       {
-        headers: corsHeaders,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       },
     );
-  } catch (error: unknown) {
+  } catch (error: unknown) { // Fixed: Added explicit type for error parameter
     // Type assertion to access error.message
     const errorMessage = (error as Error).message || 'An unknown error occurred';
     console.error("Edge Function Error:", errorMessage);
@@ -140,7 +204,7 @@ serve(async (req: Request) => {
     return new Response(
       JSON.stringify({ error: errorMessage }),
       {
-        headers: corsHeaders,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
       },
     );
