@@ -74,7 +74,7 @@ const SidebarNav = () => {
   }
 
   const NavContent = () => (
-    <div className="flex flex-col h-full p-4">
+    <div className="flex flex-col h-full p-4 text-foreground">
       <div className="mb-8">
         <h2 className="text-2xl font-extrabold text-gradient tracking-widest">
           ANDI OFFSET
@@ -130,7 +130,7 @@ const SidebarNav = () => {
   }
 
   return (
-    <div className="hidden md:flex flex-col w-64 border-r border-border bg-sidebar dark:bg-card h-screen sticky top-0 shadow-2xl dark:shadow-primary/10">
+    <div className="hidden md:flex flex-col w-64 border-r border-border bg-card h-screen sticky top-0 shadow-2xl dark:shadow-primary/10">
       <NavContent />
     </div>
   );
