@@ -10,8 +10,10 @@ import { useDailySubmissionStatus } from '@/hooks/use-daily-submission-status';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { useLanguage } from '@/contexts/LanguageContext'; // Import useLanguage
 
 const DailySubmissionStatus: React.FC = () => {
+    const { t } = useLanguage(); // Use translation hook
     // Default to today's date
     const [selectedDate, setSelectedDate] = useState<Date>(startOfDay(new Date()));
     const dateString = format(selectedDate, 'yyyy-MM-dd');
@@ -49,7 +51,7 @@ const DailySubmissionStatus: React.FC = () => {
         return (
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle>Daily Submission Status</CardTitle>
+                    <CardTitle>{t('daily_submission_status')}</CardTitle>
                     <Button variant={"outline"} disabled>
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {format(selectedDate, "PPP")}
@@ -70,7 +72,7 @@ const DailySubmissionStatus: React.FC = () => {
         return (
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle>Daily Submission Status</CardTitle>
+                    <CardTitle>{t('daily_submission_status')}</CardTitle>
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button variant={"outline"}>
@@ -90,7 +92,7 @@ const DailySubmissionStatus: React.FC = () => {
                 </CardHeader>
                 <CardContent className="p-0">
                     <p className="p-6 text-red-500">
-                        Failed to load submission data: {error?.message || "Unknown error"}
+                        {t('failed_to_load_submission_data')}: {error?.message || t('unknown_error')}
                     </p>
                 </CardContent>
             </Card>
@@ -100,7 +102,7 @@ const DailySubmissionStatus: React.FC = () => {
     return (
         <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Daily Submission Status</CardTitle>
+                <CardTitle>{t('daily_submission_status')}</CardTitle>
                 <Popover>
                     <PopoverTrigger asChild>
                         <Button variant={"outline"}>
@@ -124,9 +126,9 @@ const DailySubmissionStatus: React.FC = () => {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>User</TableHead>
-                                    <TableHead>Role</TableHead>
-                                    <TableHead>Reports Submitted</TableHead>
+                                    <TableHead>{t('user')}</TableHead>
+                                    <TableHead>{t('role')}</TableHead>
+                                    <TableHead>{t('reports_submitted')}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -149,7 +151,7 @@ const DailySubmissionStatus: React.FC = () => {
                     </div>
                 ) : (
                     <p className="p-6 text-muted-foreground text-center">
-                        No reports submitted on {format(selectedDate, 'PPP')}.
+                        {t('no_reports_submitted_on', { date: format(selectedDate, 'PPP') })}
                     </p>
                 )}
             </CardContent>

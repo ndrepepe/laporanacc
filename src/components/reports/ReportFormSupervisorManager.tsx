@@ -11,11 +11,13 @@ import { REPORT_TABLE_MAP } from "@/lib/report-constants";
 import { useQueryClient } from "@tanstack/react-query";
 import { sendReportSubmissionNotification } from "@/utils/notification-sender";
 import { SupervisorManagerFormSchema } from "@/lib/report-schemas";
+import { useLanguage } from "@/contexts/LanguageContext"; // Import useLanguage
 
 type SupervisorManagerFormValues = z.infer<typeof SupervisorManagerFormSchema>;
 
 const ReportFormSupervisorManager = () => {
   const { user, profile } = useAuth();
+  const { t } = useLanguage(); // Use translation hook
   const queryClient = useQueryClient();
   const form = useForm<SupervisorManagerFormValues>({
     resolver: zodResolver(SupervisorManagerFormSchema),
@@ -67,9 +69,9 @@ const ReportFormSupervisorManager = () => {
           name="tasks_completed"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tasks Completed Today</FormLabel>
+              <FormLabel>{t('tasks_completed_today')}</FormLabel>
               <FormControl>
-                <Textarea placeholder="Describe your completed tasks..." {...field} rows={5} />
+                <Textarea placeholder={t('describe_completed_tasks')} {...field} rows={5} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -81,9 +83,9 @@ const ReportFormSupervisorManager = () => {
           name="issues_encountered"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Issues Encountered</FormLabel>
+              <FormLabel>{t('issues_encountered')}</FormLabel>
               <FormControl>
-                <Textarea placeholder="Describe any issues encountered..." {...field} rows={5} />
+                <Textarea placeholder={t('describe_issues_encountered')} {...field} rows={5} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -95,16 +97,16 @@ const ReportFormSupervisorManager = () => {
           name="suggestions"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Suggestions and Recommendations (Optional)</FormLabel>
+              <FormLabel>{t('suggestions_recommendations')}</FormLabel>
               <FormControl>
-                <Textarea placeholder="Enter suggestions..." {...field} rows={3} />
+                <Textarea placeholder={t('enter_suggestions')} {...field} rows={3} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <Button type="submit" variant="gradient">Submit Report</Button>
+        <Button type="submit" variant="gradient">{t('submit_report_button')}</Button>
       </form>
     </Form>
   );

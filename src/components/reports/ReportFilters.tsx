@@ -9,6 +9,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon, Filter, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext'; // Import useLanguage
 
 interface ReportFiltersProps {
     onFilterChange: (filters: ReportFilters) => void;
@@ -26,6 +27,7 @@ const ALL_ROLES: UserRole[] = [
 ];
 
 const ReportFilters: React.FC<ReportFiltersProps> = ({ onFilterChange, initialFilters }) => {
+    const { t } = useLanguage(); // Use translation hook
     const [filters, setFilters] = useState<ReportFilters>(initialFilters);
     const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({
         from: initialFilters.startDate ? new Date(initialFilters.startDate) : undefined,
@@ -99,7 +101,7 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({ onFilterChange, initialFi
                                 format(dateRange.from, "LLL dd, y")
                             )
                         ) : (
-                            <span>Pick a date range</span>
+                            <span>{t('pick_date_range')}</span>
                         )}
                     </Button>
                 </PopoverTrigger>
@@ -122,10 +124,10 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({ onFilterChange, initialFi
             >
                 <SelectTrigger className="w-full md:w-[180px]">
                     <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <SelectValue placeholder="Filter by Role" />
+                    <SelectValue placeholder={t('filter_by_role')} />
                 </SelectTrigger>
                 <SelectContent className="dark:glass-effect">
-                    <SelectItem value="All">All Roles</SelectItem>
+                    <SelectItem value="All">{t('all_roles')}</SelectItem>
                     {ALL_ROLES.map(role => (
                         <SelectItem key={role} value={role}>{role}</SelectItem>
                     ))}
@@ -134,7 +136,7 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({ onFilterChange, initialFi
 
             {/* Employee Name Filter (Client-side filtering) */}
             <Input
-                placeholder="Filter by Employee Name"
+                placeholder={t('filter_by_employee_name')}
                 className="w-full md:w-[200px]"
                 value={filters.employeeName || ''}
                 onChange={handleNameChange}
@@ -143,7 +145,7 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({ onFilterChange, initialFi
             {/* Clear Filters Button */}
             {isFiltered && (
                 <Button variant="ghost" onClick={handleClearFilters} className="text-destructive hover:text-destructive">
-                    <X className="h-4 w-4 mr-2" /> Clear Filters
+                    <X className="h-4 w-4 mr-2" /> {t('clear_filters')}
                 </Button>
             )}
         </div>

@@ -115,6 +115,28 @@ const translations: Record<Language, Record<string, string>> = {
         'reports_viewable_by': 'Reports Viewable by',
         'no_reports_match_filters': 'No reports match the current filters.',
         'no_subordinate_reports_found': 'No subordinate reports found for your viewing permissions.',
+        
+        // Report Filters
+        'pick_date_range': 'Pick a date range',
+        'filter_by_role': 'Filter by Role',
+        'all_roles': 'All Roles',
+        'filter_by_employee_name': 'Filter by Employee Name',
+        'clear_filters': 'Clear Filters',
+
+        // Daily Submission Status
+        'daily_submission_status': 'Daily Submission Status',
+        'reports_submitted': 'Reports Submitted',
+        'failed_to_load_submission_data': 'Failed to load submission data',
+        'no_reports_submitted_on': 'No reports submitted on {date}.',
+
+        // Supervisor/Manager Form
+        'tasks_completed_today': 'Tasks Completed Today',
+        'describe_completed_tasks': 'Describe your completed tasks...',
+        'issues_encountered': 'Issues Encountered',
+        'describe_issues_encountered': 'Describe any issues encountered...',
+        'suggestions_recommendations': 'Suggestions and Recommendations (Optional)',
+        'enter_suggestions': 'Enter suggestions...',
+        'submit_report_button': 'Submit Report',
 
         // Summary Page
         'statistical_summary_title': 'Statistical Summary',
@@ -237,6 +259,28 @@ const translations: Record<Language, Record<string, string>> = {
         'reports_viewable_by': 'Laporan yang Dapat Dilihat oleh',
         'no_reports_match_filters': 'Tidak ada laporan yang cocok dengan filter saat ini.',
         'no_subordinate_reports_found': 'Tidak ada laporan bawahan yang ditemukan untuk izin melihat Anda.',
+
+        // Report Filters
+        'pick_date_range': 'Pilih rentang tanggal',
+        'filter_by_role': 'Filter berdasarkan Peran',
+        'all_roles': 'Semua Peran',
+        'filter_by_employee_name': 'Filter berdasarkan Nama Karyawan',
+        'clear_filters': 'Hapus Filter',
+
+        // Daily Submission Status
+        'daily_submission_status': 'Status Pengiriman Harian',
+        'reports_submitted': 'Laporan Terkirim',
+        'failed_to_load_submission_data': 'Gagal memuat data pengiriman',
+        'no_reports_submitted_on': 'Tidak ada laporan yang dikirimkan pada {date}.',
+
+        // Supervisor/Manager Form
+        'tasks_completed_today': 'Tugas Selesai Hari Ini',
+        'describe_completed_tasks': 'Jelaskan tugas yang telah Anda selesaikan...',
+        'issues_encountered': 'Masalah yang Ditemui',
+        'describe_issues_encountered': 'Jelaskan masalah apa pun yang ditemui...',
+        'suggestions_recommendations': 'Saran dan Rekomendasi (Opsional)',
+        'enter_suggestions': 'Masukkan saran...',
+        'submit_report_button': 'Kirim Laporan',
 
         // Summary Page
         'statistical_summary_title': 'Ringkasan Statistik',
