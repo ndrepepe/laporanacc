@@ -19,10 +19,16 @@ const fetchDailySubmissionStatus = async (date: string): Promise<DailySubmission
         // Ensure the date is in the correct format (YYYY-MM-DD)
         const formattedDate = new Date(date).toISOString().split('T')[0];
         
+        // Create a Headers object with the query parameter
+        const headers = new Headers();
+        headers.append('x-date-param', formattedDate); // Custom header to pass date
+        
+        // Pass the date as a custom header
         const { data, error } = await supabase.functions.invoke('daily-submission-status', {
             method: 'GET',
-            // Pass the date as a query parameter
-            body: { date: formattedDate }
+            headers: {
+                'x-date-param': formattedDate
+            }
         });
 
         // Log response for debugging
