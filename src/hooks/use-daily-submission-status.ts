@@ -16,8 +16,13 @@ const fetchDailySubmissionStatus = async (date: string): Promise<DailySubmission
     }
 
     try {
+        // Ensure the date is in the correct format (YYYY-MM-DD)
+        const formattedDate = new Date(date).toISOString().split('T')[0];
+        
         const { data, error } = await supabase.functions.invoke('daily-submission-status', {
             method: 'GET',
+            // Pass the date as a query parameter
+            body: { date: formattedDate }
         });
 
         // Log response for debugging

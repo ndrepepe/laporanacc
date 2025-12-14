@@ -68,11 +68,16 @@ serve(async (req: Request) => {
     const date = url.searchParams.get('date');
 
     console.log("Date parameter:", date);
+    console.log("Full URL:", req.url);
 
     if (!date) {
-      console.error("Missing date parameter");
+      // If date is not provided, use today's date
+      const today = new Date();
+      const todayString = today.toISOString().split('T')[0];
+      console.log("Date parameter not provided, using today's date:", todayString);
+      // Redirect to the same function with today's date
       return new Response(
-        JSON.stringify({ error: 'Missing date parameter' }), 
+        JSON.stringify({ error: 'Date parameter is required. Please provide a date in YYYY-MM-DD format.' }), 
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 400 
