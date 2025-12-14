@@ -6,7 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useState, useEffect } from "react"; // Import useEffect
+import { useState } from "react";
+import { UserRole } from "@/lib/roles"; // Import UserRole
 
 const baseNavItems = [
   { to: "/", icon: Home, label: "Dashboard" },
