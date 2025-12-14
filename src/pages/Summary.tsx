@@ -6,6 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, DollarSign, Users, FileText } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
+import DailySubmissionStatus from "@/components/summary/DailySubmissionStatus";
 
 const MetricCard: React.FC<{ title: string; value: string | number; icon: React.ReactNode }> = ({ title, value, icon }) => (
     <Card>
@@ -74,6 +75,11 @@ const Summary = () => {
     <DashboardLayout>
       <h1 className="text-3xl font-bold mb-6">Statistical Summary</h1>
       
+      {/* Daily Submission Status Tool */}
+      <div className="mb-8">
+        <DailySubmissionStatus />
+      </div>
+
       {/* Monthly/Period Summary */}
       <h2 className="text-2xl font-semibold mb-4">Period Totals (Last 30 Days)</h2>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
