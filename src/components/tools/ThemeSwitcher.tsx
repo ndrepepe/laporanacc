@@ -1,35 +1,36 @@
 import { useTheme } from "next-themes";
-import { Button } from "@/components/Button";
 import { Moon, Sun } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Switch } from "@/components/ui/switch"; // Import Switch component
+import { Label } from "@/components/ui/label"; // Import Label component
 
 const ThemeSwitcher = () => {
   const { theme, setTheme } = useTheme();
   const { t } = useLanguage();
 
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
+  const isDarkMode = theme === "dark";
+
+  const handleToggle = (checked: boolean) => {
+    setTheme(checked ? "dark" : "light");
   };
 
   return (
-    <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
+    <div className="flex items-center justify-between p-4 border rounded-lg bg-card shadow-md">
       <span className="font-medium">{t('theme_switcher')}</span>
-      <Button 
-        variant="outline" 
-        size="sm" 
-        onClick={toggleTheme}
-        className="w-32"
-      >
-        {theme === "dark" ? (
-          <>
-            <Moon className="h-4 w-4 mr-2" /> {t('dark_mode')}
-          </>
-        ) : (
-          <>
-            <Sun className="h-4 w-4 mr-2" /> {t('light_mode')}
-          </>
-        )}
-      </Button>
+      
+      <div className="flex items-center space-x-2">
+        <Sun className="h-4 w-4 text-yellow-500" />
+        
+        <Label htmlFor="theme-switch" className="sr-only">{t('theme_switcher')}</Label>
+        <Switch
+          id="theme-switch"
+          checked={isDarkMode}
+          onCheckedChange={handleToggle}
+          className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-gray-300"
+        />
+        
+        <Moon className="h-4 w-4 text-blue-500" />
+      </div>
     </div>
   );
 };
