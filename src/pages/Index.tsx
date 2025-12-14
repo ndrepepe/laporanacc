@@ -5,6 +5,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { UserRole } from "@/lib/roles";
 import ApplicationTools from "@/components/tools/ApplicationTools";
 import { useLanguage } from "@/contexts/LanguageContext"; // Import useLanguage
+import StickyHeader from "@/components/StickyHeader"; // Import StickyHeader
 
 const SUMMARY_ROLES: UserRole[] = ['Senior Manager', 'Accounting Manager'];
 const SUBORDINATE_ROLES: UserRole[] = ['Senior Manager', 'Accounting Manager', 'Consignment Supervisor'];
@@ -40,9 +41,11 @@ const Index = () => {
 
   return (
     <DashboardLayout>
-      <h1 className="text-4xl font-extrabold tracking-widest lg:text-5xl text-gradient mb-6">
-        {t('welcome')}, {profile?.first_name || user?.email}!
-      </h1>
+      <StickyHeader>
+        <h1 className="text-4xl font-extrabold tracking-widest lg:text-5xl text-gradient">
+          {t('welcome')}, {profile?.first_name || user?.email}!
+        </h1>
+      </StickyHeader>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
