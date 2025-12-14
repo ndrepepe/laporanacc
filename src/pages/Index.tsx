@@ -1,8 +1,5 @@
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { useAuth } from "@/integrations/supabase/auth";
-import { Button } from "@/components/Button";
-import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
 import DashboardLayout from "@/components/DashboardLayout";
 import { UserRole } from "@/lib/roles";
@@ -12,12 +9,6 @@ const SUBORDINATE_ROLES: UserRole[] = ['Senior Manager', 'Accounting Manager', '
 
 const Index = () => {
   const { profile, user } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate('/login');
-  };
 
   const getGuidanceMessage = (role: UserRole | undefined) => {
     if (!role) {
@@ -64,11 +55,7 @@ const Index = () => {
           </CardContent>
         </Card>
 
-        <div className="mt-8">
-          <Button onClick={handleLogout} variant="outline">
-            Logout
-          </Button>
-        </div>
+        {/* Removed Logout Button */}
       </div>
       <MadeWithDyad />
     </DashboardLayout>
