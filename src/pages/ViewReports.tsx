@@ -16,7 +16,6 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/integrations/supabase/auth";
 import ReportDetailModal from "@/components/reports/ReportDetailModal";
 import { useState } from "react";
-import { logReportView } from "@/utils/activity-logger";
 import { Button } from "@/components/ui/button";
 import { Pencil, Eye } from "lucide-react";
 import ReportEditWrapper from "@/components/reports/ReportEditWrapper";
@@ -43,7 +42,7 @@ const ReportTypeBadge = ({ type }: { type: DailyReport['type'] }) => {
 };
 
 const MyReports = () => {
-  const { profile, user } = useAuth();
+  const { profile } = useAuth(); // Fixed: Removed unused 'user'
   // Use 'self' scope to only fetch reports submitted by the current user
   const { data: reports, isLoading, isError, error, refetch } = useDailyReports('self');
   

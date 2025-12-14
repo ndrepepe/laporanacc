@@ -14,7 +14,7 @@ import { MinusCircle, PlusCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQueryClient } from "@tanstack/react-query";
 import { sendReportSubmissionNotification } from "@/utils/notification-sender";
-import { ConsignmentStaffFormSchema, LPKEntrySchema } from "@/lib/report-schemas";
+import { ConsignmentStaffFormSchema } from "@/lib/report-schemas";
 
 type ConsignmentStaffFormValues = z.infer<typeof ConsignmentStaffFormSchema>;
 

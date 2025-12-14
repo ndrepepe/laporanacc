@@ -1,7 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { UserRole } from "@/lib/roles";
 import { ReportType } from "@/lib/report-constants";
-import { showError } from "./toast";
 
 // Define which roles supervise which staff roles
 const SUPERVISOR_MAP: Record<UserRole, UserRole[]> = {

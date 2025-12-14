@@ -1,6 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
 import { DailyReport } from "@/lib/types";
-import { showError } from "./toast";
 
 /**
  * Logs an activity when a viewer accesses a report submitted by another user,

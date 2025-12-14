@@ -14,7 +14,7 @@ const fetchDailySubmissionStatus = async (date: string): Promise<DailySubmission
     if (!date) return [];
     
     // Project ID: madymngifviixpttjpvp
-    const functionUrl = `https://madymngifviixpttjpvp.supabase.co/functions/v1/daily-submission-status?date=${date}`;
+    // const functionUrl = `https://madymngifviixpttjpvp.supabase.co/functions/v1/daily-submission-status?date=${date}`; // Removed unused variable
 
     const { data, error } = await supabase.functions.invoke('daily-submission-status', {
         method: 'GET',

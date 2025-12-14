@@ -105,7 +105,7 @@ export const useDailyReports = (scope: ReportScope = 'self', filters: ReportFilt
                 
             } else if (scope === 'subordinates') {
                 // For 'subordinates' scope, use the defined VIEW_PERMISSIONS
-                allowedReportTypes = VIEW_PERMISSIONS[viewerRole as UserRole].filter(type => {
+                allowedReportTypes = VIEW_PERMISSIONS[viewerRole as UserRole].filter(_type => { // Fixed: Renamed 'type' to '_type'
                     // Exclude the manager's own report type from the subordinate view
                     return true; 
                 });

@@ -13,7 +13,7 @@ import { REPORT_TABLE_MAP } from "@/lib/report-constants";
 import { MinusCircle, PlusCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQueryClient } from "@tanstack/react-query";
-import { ConsignmentStaffReport, DailyReport, LPKEntry } from "@/lib/types";
+import { ConsignmentStaffReport, DailyReport } from "@/lib/types";
 import { ConsignmentStaffFormSchema } from "@/lib/report-schemas";
 import { useLpkEntries } from '@/hooks/use-lpk-entries';
 import { Skeleton } from '@/components/ui/skeleton';

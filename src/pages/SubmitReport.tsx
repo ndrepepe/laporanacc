@@ -1,7 +1,6 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/integrations/supabase/auth";
-import { ReportType } from "@/lib/report-constants";
 import { UserRole } from "@/lib/roles";
 import ReportFormAccounting from "@/components/reports/ReportFormAccounting";
 import ReportFormCashier from "@/components/reports/ReportFormCashier";

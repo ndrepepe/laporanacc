@@ -25,9 +25,8 @@ export interface SummaryData {
 }
 
 const fetchSummaryData = async (): Promise<SummaryData> => {
-    // Note: The Edge Function URL is hardcoded as per Supabase guidelines.
     // Project ID: madymngifviixpttjpvp
-    const functionUrl = "https://madymngifviixpttjpvp.supabase.co/functions/v1/fetch-summary";
+    // const functionUrl = "https://madymngifviixpttjpvp.supabase.co/functions/v1/fetch-summary"; // Removed unused variable
 
     const { data, error } = await supabase.functions.invoke('fetch-summary', {
         method: 'GET',

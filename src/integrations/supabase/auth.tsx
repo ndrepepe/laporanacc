@@ -1,4 +1,4 @@
-import React, {
+import {
   createContext,
   useContext,
   useEffect,
@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
+      async (_, currentSession) => { // Fixed: Renamed 'event' to '_'
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
 
