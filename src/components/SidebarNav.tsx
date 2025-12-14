@@ -8,13 +8,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
 import { UserRole } from "@/lib/roles"; // Import UserRole
-
-const baseNavItems = [
-  { to: "/", icon: Home, label: "Dashboard" },
-  { to: "/report/submit", icon: FileText, label: "Submit Report" },
-  { to: "/reports/view", icon: Eye, label: "My Reports" },
-  { to: "/notifications", icon: Bell, label: "Notifications" },
-];
+import { useLanguage } from "@/contexts/LanguageContext"; // Import useLanguage
 
 const SUBORDINATE_VIEWER_ROLES: UserRole[] = ['Senior Manager', 'Accounting Manager', 'Consignment Supervisor'];
 const USER_MANAGER_ROLES: UserRole[] = ['Senior Manager', 'Accounting Manager']; // New role group
@@ -23,6 +17,7 @@ const ADMIN_ROLE: UserRole = 'Senior Manager';
 
 const SidebarNav = () => {
   const { profile } = useAuth();
+  const { t } = useLanguage(); // Use translation hook
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   
@@ -33,11 +28,18 @@ const SidebarNav = () => {
     navigate('/login');
   };
 
+  const baseNavItems = [
+    { to: "/", icon: Home, label: t('dashboard') },
+    { to: "/report/submit", icon: FileText, label: t('submit_report') },
+    { to: "/reports/view", icon: Eye, label: t('my_reports') },
+    { to: "/notifications", icon: Bell, label: t('notifications') },
+  ];
+
   let navItems = [...baseNavItems];
   
   // Conditionally add Add User link (after Notifications, index 4)
   if (profile?.role && USER_MANAGER_ROLES.includes(profile.role)) {
-    navItems.splice(4, 0, { to: "/users/add", icon: UserPlus, label: "Add Employee" });
+    navItems.splice(4, 0, { to: "/users/add", icon: UserPlus, label: t('add_employee') });
   }
 
   // Conditionally add View Subordinate Reports link for managers/supervisors
@@ -51,7 +53,7 @@ const SidebarNav = () => {
 
     // Ensure we don't duplicate if the role is in both groups (e.g., Senior Manager)
     if (!navItems.some(item => item.to === "/reports/subordinates")) {
-        navItems.splice(subordinateIndex, 0, { to: "/reports/subordinates", icon: Users, label: "View Subordinates" });
+        navItems.splice(subordinateIndex, 0, { to: "/reports/subordinates", icon: Users, label: t('view_subordinates') });
     }
   }
   
@@ -62,13 +64,13 @@ const SidebarNav = () => {
     const summaryIndex = lastReportIndex !== -1 ? lastReportIndex + 1 : navItems.findIndex(item => item.to === "/users/add") + 1;
     
     if (!navItems.some(item => item.to === "/summary")) {
-        navItems.splice(summaryIndex, 0, { to: "/summary", icon: BarChart, label: "Summary" });
+        navItems.splice(summaryIndex, 0, { to: "/summary", icon: BarChart, label: t('summary') });
     }
   }
 
   // Conditionally add Admin link
   if (profile?.role === ADMIN_ROLE) {
-    navItems.push({ to: "/admin", icon: Settings, label: "Admin Dashboard" });
+    navItems.push({ to: "/admin", icon: Settings, label: t('admin_dashboard') });
   }
 
   const NavContent = () => (
@@ -105,7 +107,7 @@ const SidebarNav = () => {
       <div className="mt-auto pt-4 border-t border-border">
         <Button onClick={handleLogout} variant="ghost" className="w-full justify-start text-destructive hover:text-destructive">
           <LogOut className="h-5 w-5 mr-3" />
-          Logout
+          {t('logout')}
         </Button>
       </div>
     </div>
