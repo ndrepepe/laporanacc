@@ -49,15 +49,21 @@ const Login = () => {
                   },
                 },
               },
+              style: {
+                // Menyembunyikan semua tautan (anchor tags) di dalam komponen Auth
+                anchor: {
+                  display: 'none',
+                },
+              },
             }}
             localization={{
               variables: {
                 sign_in: {
-                  sign_up_link: '', // Menghilangkan teks tautan pendaftaran
-                  no_account_text: '', // Menghilangkan teks 'Don't have an account?'
+                  sign_up_link: '', // Tetap pertahankan localization sebagai fallback
+                  no_account_text: '', 
                 },
               },
-            } as any} // Menggunakan 'as any' untuk mengatasi kesalahan TypeScript
+            } as any} 
             theme="dark" // Default to dark theme for futuristic look
             redirectTo={window.location.origin + '/'}
             view="sign_in" // Restrict view to only sign in, hiding sign up link
