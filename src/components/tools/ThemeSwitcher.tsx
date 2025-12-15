@@ -8,14 +8,16 @@ const ThemeSwitcher = () => {
   const { theme, setTheme } = useTheme();
   const { t } = useLanguage();
 
-  const isDarkMode = theme === "dark";
+  // next-themes returns 'system' initially, so we check the resolved theme
+  const resolvedTheme = theme === 'system' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme;
+  const isDarkMode = resolvedTheme === "dark";
 
   const handleToggle = (checked: boolean) => {
     setTheme(checked ? "dark" : "light");
   };
 
   return (
-    <div className="flex items-center justify-between p-4 border rounded-lg bg-card shadow-md">
+    <div className="flex items-center justify-between p-4 border border-border rounded-lg bg-card shadow-md transition-colors duration-200">
       <span className="font-medium">{t('theme_switcher')}</span>
       
       <div className="flex items-center space-x-2">
@@ -26,7 +28,8 @@ const ThemeSwitcher = () => {
           id="theme-switch"
           checked={isDarkMode}
           onCheckedChange={handleToggle}
-          className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-gray-300"
+          // Ensure switch colors are theme-aware
+          className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-input"
         />
         
         <Moon className="h-4 w-4 text-blue-500" />
