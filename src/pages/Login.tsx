@@ -52,6 +52,7 @@ const Login = () => {
             }}
             theme="dark" // Default to dark theme for futuristic look
             redirectTo={window.location.origin + '/'}
+            view="sign_in" // Restrict view to only sign in, hiding sign up link
           />
         </CardContent>
       </Card>
