@@ -12,11 +12,13 @@ import { REPORT_TABLE_MAP } from "@/lib/report-constants";
 import { useQueryClient } from "@tanstack/react-query";
 import { sendReportSubmissionNotification } from "@/utils/notification-sender";
 import { CashierFormSchema } from "@/lib/report-schemas";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type CashierFormValues = z.infer<typeof CashierFormSchema>;
 
 const ReportFormCashier = () => {
   const { user, profile } = useAuth();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const form = useForm<CashierFormValues>({
     resolver: zodResolver(CashierFormSchema),
@@ -70,7 +72,7 @@ const ReportFormCashier = () => {
           name="payments_count"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Number of Customers Who Made Payment Today</FormLabel>
+              <FormLabel>{t('payments_count_label')}</FormLabel>
               <FormControl>
                 <Input type="number" {...field} onChange={e => field.onChange(e.target.value === "" ? 0 : parseInt(e.target.value))} />
               </FormControl>
@@ -84,7 +86,7 @@ const ReportFormCashier = () => {
           name="total_payments"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Total Amount of Today’s Payments (IDR)</FormLabel>
+              <FormLabel>{t('total_payments_label')}</FormLabel>
               <FormControl>
                 <Input type="number" step="0.01" {...field} onChange={e => field.onChange(e.target.value === "" ? 0 : parseFloat(e.target.value))} />
               </FormControl>
@@ -98,7 +100,7 @@ const ReportFormCashier = () => {
           name="worked_on_lph"
           render={({ field }) => (
             <FormItem className="space-y-3">
-              <FormLabel>Did you work on LPH today?</FormLabel>
+              <FormLabel>{t('worked_on_lph_label')}</FormLabel>
               <FormControl>
                 <RadioGroup
                   onValueChange={field.onChange}
@@ -109,13 +111,13 @@ const ReportFormCashier = () => {
                     <FormControl>
                       <RadioGroupItem value="Yes" />
                     </FormControl>
-                    <FormLabel className="font-normal">Yes</FormLabel>
+                    <FormLabel className="font-normal">{t('yes')}</FormLabel>
                   </FormItem>
                   <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>
                       <RadioGroupItem value="No" />
                     </FormControl>
-                    <FormLabel className="font-normal">No</FormLabel>
+                    <FormLabel className="font-normal">{t('no')}</FormLabel>
                   </FormItem>
                 </RadioGroup>
               </FormControl>
@@ -129,7 +131,7 @@ const ReportFormCashier = () => {
           name="customer_confirmation_done"
           render={({ field }) => (
             <FormItem className="space-y-3">
-              <FormLabel>Customer Confirmation Done?</FormLabel>
+              <FormLabel>{t('customer_confirmation_done_label')}</FormLabel>
               <FormControl>
                 <RadioGroup
                   onValueChange={field.onChange}
@@ -140,13 +142,13 @@ const ReportFormCashier = () => {
                     <FormControl>
                       <RadioGroupItem value="Yes" />
                     </FormControl>
-                    <FormLabel className="font-normal">Yes</FormLabel>
+                    <FormLabel className="font-normal">{t('yes')}</FormLabel>
                   </FormItem>
                   <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>
                       <RadioGroupItem value="No" />
                     </FormControl>
-                    <FormLabel className="font-normal">No</FormLabel>
+                    <FormLabel className="font-normal">{t('no')}</FormLabel>
                   </FormItem>
                 </RadioGroup>
               </FormControl>
@@ -155,7 +157,7 @@ const ReportFormCashier = () => {
           )}
         />
 
-        <Button type="submit" variant="gradient">Submit Cashier Report</Button>
+        <Button type="submit" variant="gradient">{t('submit_cashier_report')}</Button>
       </form>
     </Form>
   );

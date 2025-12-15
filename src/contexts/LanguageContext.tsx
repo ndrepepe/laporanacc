@@ -66,6 +66,12 @@ const translations: Record<Language, Record<string, string>> = {
         'action': 'Action',
         'unknown_error': 'Unknown error',
         'access_denied': 'Access Denied',
+        'yes': 'Yes',
+        'no': 'No',
+        'branch_name': 'Branch Name',
+        'lpk_count': 'LPK Count',
+        'add_lpk_entry': 'Add LPK Entry',
+        'lpk_entries_title': 'LPK Entries (Multiple)',
         
         // Submit Report Page
         'submit_daily_report_title': 'Submit Daily Report',
@@ -138,6 +144,26 @@ const translations: Record<Language, Record<string, string>> = {
         'enter_suggestions': 'Enter suggestions...',
         'submit_report_button': 'Submit Report',
 
+        // Cashier Form
+        'payments_count_label': 'Number of Customers Who Made Payment Today',
+        'total_payments_label': 'Total Amount of Today’s Payments (IDR)',
+        'worked_on_lph_label': 'Did you work on LPH today?',
+        'customer_confirmation_done_label': 'Customer Confirmation Done?',
+        'submit_cashier_report': 'Submit Cashier Report',
+
+        // Consignment Staff Form
+        'received_lpk_label': 'Did you receive LPK from branches today?',
+        'lpk_entered_bsoft_label': 'Number of LPK entered into Bsoft',
+        'submit_consignment_report': 'Submit Consignment Staff Report',
+
+        // Accounting Form
+        'new_customers_count_label': 'Number of New Customers Entered',
+        'new_sales_count_label': 'Number of New Sales Entered',
+        'new_customer_names_label': 'New Customer Names (List them)',
+        'new_sales_names_label': 'New Sales Names (List them)',
+        'customer_confirmation_status_label': 'Customer Confirmation Status',
+        'submit_accounting_report': 'Submit Accounting Report',
+        
         // Summary Page
         'statistical_summary_title': 'Statistical Summary',
         'error_loading_data': 'Error Loading Data',
@@ -210,6 +236,12 @@ const translations: Record<Language, Record<string, string>> = {
         'action': 'Tindakan',
         'unknown_error': 'Kesalahan tidak diketahui',
         'access_denied': 'Akses Ditolak',
+        'yes': 'Ya',
+        'no': 'Tidak',
+        'branch_name': 'Nama Cabang',
+        'lpk_count': 'Jumlah LPK',
+        'add_lpk_entry': 'Tambah Entri LPK',
+        'lpk_entries_title': 'Entri LPK (Beberapa)',
 
         // Submit Report Page
         'submit_daily_report_title': 'Kirim Laporan Harian',
@@ -281,6 +313,26 @@ const translations: Record<Language, Record<string, string>> = {
         'suggestions_recommendations': 'Saran dan Rekomendasi (Opsional)',
         'enter_suggestions': 'Masukkan saran...',
         'submit_report_button': 'Kirim Laporan',
+
+        // Cashier Form
+        'payments_count_label': 'Jumlah Pelanggan yang Melakukan Pembayaran Hari Ini',
+        'total_payments_label': 'Total Jumlah Pembayaran Hari Ini (IDR)',
+        'worked_on_lph_label': 'Apakah Anda mengerjakan LPH hari ini?',
+        'customer_confirmation_done_label': 'Konfirmasi Pelanggan Selesai?',
+        'submit_cashier_report': 'Kirim Laporan Kasir',
+
+        // Consignment Staff Form
+        'received_lpk_label': 'Apakah Anda menerima LPK dari cabang hari ini?',
+        'lpk_entered_bsoft_label': 'Jumlah LPK yang dimasukkan ke Bsoft',
+        'submit_consignment_report': 'Kirim Laporan Staf Konsinyasi',
+
+        // Accounting Form
+        'new_customers_count_label': 'Jumlah Pelanggan Baru yang Dimasukkan',
+        'new_sales_count_label': 'Jumlah Penjualan Baru yang Dimasukkan',
+        'new_customer_names_label': 'Nama Pelanggan Baru (Daftar)',
+        'new_sales_names_label': 'Nama Penjualan Baru (Daftar)',
+        'customer_confirmation_status_label': 'Status Konfirmasi Pelanggan',
+        'submit_accounting_report': 'Kirim Laporan Akuntansi',
 
         // Summary Page
         'statistical_summary_title': 'Ringkasan Statistik',

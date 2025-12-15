@@ -15,11 +15,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
 import { useQueryClient } from "@tanstack/react-query";
 import { sendReportSubmissionNotification } from "@/utils/notification-sender";
 import { ConsignmentStaffFormSchema } from "@/lib/report-schemas";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type ConsignmentStaffFormValues = z.infer<typeof ConsignmentStaffFormSchema>;
 
 const ReportFormConsignmentStaff = () => {
   const { user, profile } = useAuth();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const form = useForm<ConsignmentStaffFormValues>({
     resolver: zodResolver(ConsignmentStaffFormSchema),
@@ -116,7 +118,7 @@ const ReportFormConsignmentStaff = () => {
           name="received_lpk"
           render={({ field }) => (
             <FormItem className="space-y-3">
-              <FormLabel>Did you receive LPK from branches today?</FormLabel>
+              <FormLabel>{t('received_lpk_label')}</FormLabel>
               <FormControl>
                 <RadioGroup
                   onValueChange={field.onChange}
@@ -127,13 +129,13 @@ const ReportFormConsignmentStaff = () => {
                     <FormControl>
                       <RadioGroupItem value="Yes" />
                     </FormControl>
-                    <FormLabel className="font-normal">Yes</FormLabel>
+                    <FormLabel className="font-normal">{t('yes')}</FormLabel>
                   </FormItem>
                   <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>
                       <RadioGroupItem value="No" />
                     </FormControl>
-                    <FormLabel className="font-normal">No</FormLabel>
+                    <FormLabel className="font-normal">{t('no')}</FormLabel>
                   </FormItem>
                 </RadioGroup>
               </FormControl>
@@ -145,7 +147,7 @@ const ReportFormConsignmentStaff = () => {
         {receivedLpk === "Yes" && (
             <Card className="p-4">
                 <CardHeader className="p-0 pb-4">
-                    <CardTitle className="text-lg tracking-wide">LPK Entries (Multiple)</CardTitle>
+                    <CardTitle className="text-lg tracking-wide">{t('lpk_entries_title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0 space-y-4">
                     {fields.map((field, index) => (
@@ -155,7 +157,7 @@ const ReportFormConsignmentStaff = () => {
                                 name={`lpk_entries.${index}.branch_name`}
                                 render={({ field }) => (
                                     <FormItem className="flex-1">
-                                        <FormLabel>Branch Name</FormLabel>
+                                        <FormLabel>{t('branch_name')}</FormLabel>
                                         <FormControl>
                                             <Input placeholder="e.g., Main Branch" {...field} />
                                         </FormControl>
@@ -168,7 +170,7 @@ const ReportFormConsignmentStaff = () => {
                                 name={`lpk_entries.${index}.lpk_count`}
                                 render={({ field }) => (
                                     <FormItem className="w-32">
-                                        <FormLabel>LPK Count</FormLabel>
+                                        <FormLabel>{t('lpk_count')}</FormLabel>
                                         <FormControl>
                                             <Input 
                                                 type="number" 
@@ -198,7 +200,7 @@ const ReportFormConsignmentStaff = () => {
                         className="w-full" 
                         onClick={() => append({ branch_name: "", lpk_count: 1 })}
                     >
-                        <PlusCircle className="h-4 w-4 mr-2" /> Add LPK Entry
+                        <PlusCircle className="h-4 w-4 mr-2" /> {t('add_lpk_entry')}
                     </Button>
                 </CardContent>
             </Card>
@@ -209,7 +211,7 @@ const ReportFormConsignmentStaff = () => {
           name="lpk_entered_bsoft"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Number of LPK entered into Bsoft</FormLabel>
+              <FormLabel>{t('lpk_entered_bsoft_label')}</FormLabel>
               <FormControl>
                 <Input type="number" {...field} onChange={e => field.onChange(e.target.value === "" ? 0 : parseInt(e.target.value))} />
               </FormControl>
@@ -223,9 +225,9 @@ const ReportFormConsignmentStaff = () => {
           name="tasks_completed"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tasks Completed Today</FormLabel>
+              <FormLabel>{t('tasks_completed_today')}</FormLabel>
               <FormControl>
-                <Textarea placeholder="Describe your completed tasks..." {...field} rows={5} />
+                <Textarea placeholder={t('describe_completed_tasks')} {...field} rows={5} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -237,9 +239,9 @@ const ReportFormConsignmentStaff = () => {
           name="issues_encountered"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Issues Encountered</FormLabel>
+              <FormLabel>{t('issues_encountered')}</FormLabel>
               <FormControl>
-                <Textarea placeholder="Describe any issues encountered..." {...field} rows={5} />
+                <Textarea placeholder={t('describe_issues_encountered')} {...field} rows={5} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -251,16 +253,16 @@ const ReportFormConsignmentStaff = () => {
           name="suggestions"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Suggestions and Recommendations (Optional)</FormLabel>
+              <FormLabel>{t('suggestions_recommendations')}</FormLabel>
               <FormControl>
-                <Textarea placeholder="Enter suggestions..." {...field} rows={3} />
+                <Textarea placeholder={t('enter_suggestions')} {...field} rows={3} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <Button type="submit" variant="gradient">Submit Consignment Staff Report</Button>
+        <Button type="submit" variant="gradient">{t('submit_consignment_report')}</Button>
       </form>
     </Form>
   );
