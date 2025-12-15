@@ -42,12 +42,12 @@ const Index = () => {
   return (
     <DashboardLayout>
       <StickyHeader>
-        <h1 className="text-4xl font-extrabold tracking-widest lg:text-5xl text-gradient">
+        <h1 className="text-4xl font-extrabold tracking-widest lg:text-5xl text-gradient my-0">
           {t('welcome')}, {profile?.first_name || user?.email}!
         </h1>
       </StickyHeader>
       
-      <div className="grid grid-cols-1 gap-6 mt-6"> {/* Tambahkan mt-6 di sini */}
+      <div className="grid grid-cols-1 gap-6 mt-6">
         <Card>
           <CardHeader>
             <CardTitle>{t('your_current_role')}</CardTitle>
