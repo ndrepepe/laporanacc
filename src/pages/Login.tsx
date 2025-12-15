@@ -53,10 +53,11 @@ const Login = () => {
             localization={{
               variables: {
                 sign_in: {
-                  sign_up_link: '', // Menggunakan properti yang benar untuk menghilangkan teks tautan pendaftaran
+                  sign_up_link: '', // Menghilangkan teks tautan pendaftaran
+                  no_account_text: '', // Menghilangkan teks 'Don't have an account?'
                 },
               },
-            }}
+            } as any} // Menggunakan 'as any' untuk mengatasi kesalahan TypeScript
             theme="dark" // Default to dark theme for futuristic look
             redirectTo={window.location.origin + '/'}
             view="sign_in" // Restrict view to only sign in, hiding sign up link
