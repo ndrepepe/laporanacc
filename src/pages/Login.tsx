@@ -50,6 +50,13 @@ const Login = () => {
                 },
               },
             }}
+            localization={{
+              variables: {
+                sign_in: {
+                  sign_up_link: '', // Menggunakan properti yang benar untuk menghilangkan teks tautan pendaftaran
+                },
+              },
+            }}
             theme="dark" // Default to dark theme for futuristic look
             redirectTo={window.location.origin + '/'}
             view="sign_in" // Restrict view to only sign in, hiding sign up link
