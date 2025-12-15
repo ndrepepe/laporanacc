@@ -15,7 +15,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       <SidebarNav />
       {/* On mobile, we need extra padding on the left (pl-16) to clear the fixed sidebar trigger button (top-4 left-4) */}
       <main className={cn(
-        isMobile ? "flex-grow p-4 pt-20 pl-16" : "flex-grow p-8",
+        "flex-grow", // Ensure it takes remaining space
+        isMobile ? "p-4 pt-20 pl-16" : "p-8",
         "bg-background" // Ensure main content area respects theme background
       )}>
         {children}

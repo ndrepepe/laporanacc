@@ -47,7 +47,7 @@ const Index = () => {
         </h1>
       </StickyHeader>
       
-      <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 gap-6 mt-6"> {/* Tambahkan mt-6 di sini */}
         <Card>
           <CardHeader>
             <CardTitle>{t('your_current_role')}</CardTitle>
