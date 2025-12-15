@@ -16,6 +16,7 @@ import AdminRoute from './components/AdminRoute';
 import SummaryRoute from './components/SummaryRoute';
 import UserManagementRoute from './components/UserManagementRoute';
 import NotFound from './pages/NotFound';
+import { QueryProvider } from './contexts/QueryContext'; // Import QueryProvider
 
 function App() {
   return (
@@ -23,34 +24,36 @@ function App() {
       <Router>
         <AuthProvider>
           <LanguageProvider>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route element={<ProtectedRoute />}>
-                {/* Protected Routes */}
-                <Route path="/" element={<Index />} />
-                <Route path="/report/submit" element={<SubmitReport />} />
-                <Route path="/reports/view" element={<ViewReports />} />
-                <Route path="/notifications" element={<Notifications />} />
-                
-                {/* Role-based Protected Routes */}
-                <Route element={<SummaryRoute />}>
-                  <Route path="/summary" element={<Summary />} />
+            <QueryProvider>
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route element={<ProtectedRoute />}>
+                  {/* Protected Routes */}
+                  <Route path="/" element={<Index />} />
+                  <Route path="/report/submit" element={<SubmitReport />} />
+                  <Route path="/reports/view" element={<ViewReports />} />
+                  <Route path="/notifications" element={<Notifications />} />
+                  
+                  {/* Role-based Protected Routes */}
+                  <Route element={<SummaryRoute />}>
+                    <Route path="/summary" element={<Summary />} />
+                  </Route>
+                  
+                  <Route element={<UserManagementRoute />}>
+                    <Route path="/users/add" element={<AddUser />} />
+                  </Route>
+                  
+                  <Route path="/reports/subordinates" element={<ViewSubordinateReports />} />
+                  
+                  <Route element={<AdminRoute />}>
+                    <Route path="/admin" element={<AdminDashboard />} />
+                  </Route>
                 </Route>
                 
-                <Route element={<UserManagementRoute />}>
-                  <Route path="/users/add" element={<AddUser />} />
-                </Route>
-                
-                <Route path="/reports/subordinates" element={<ViewSubordinateReports />} />
-                
-                <Route element={<AdminRoute />}>
-                  <Route path="/admin" element={<AdminDashboard />} />
-                </Route>
-              </Route>
-              
-              {/* Catch all - 404 Page */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+                {/* Catch all - 404 Page */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </QueryProvider>
           </LanguageProvider>
         </AuthProvider>
       </Router>
