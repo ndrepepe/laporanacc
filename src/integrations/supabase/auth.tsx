@@ -47,49 +47,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let isMounted = true;
 
-    const handleInitialSession = async () => {
-      try {
-        // Attempt to get the initial session
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (!isMounted) return;
-
-        if (error) {
-          console.error("Error fetching initial session:", error);
-          // CRITICAL FIX: If session fetch fails (e.g., corrupted local storage), 
-          // force sign out to clear the bad state and prompt re-login.
-          await supabase.auth.signOut();
-          setSession(null);
-          setUser(null);
-          setProfile(null);
-          showError("Session error detected. Please log in again.");
-        } else if (session) {
-          setSession(session);
-          setUser(session.user);
-          const userProfile = await fetchUserProfile(session.user.id);
-          if (isMounted) {
-            setProfile(userProfile);
-          }
-        }
-      } catch (e) {
-        console.error("Unexpected error during initial session fetch:", e);
-        // Fallback: force sign out on unexpected exceptions too
-        await supabase.auth.signOut();
-        setSession(null);
-        setUser(null);
-        setProfile(null);
-        showError("A critical error occurred during startup. Please log in.");
-      } finally {
-        // CRITICAL FIX: Ensure isLoading is set to false unconditionally 
-        // to prevent perpetual loading screen in Strict Mode/late resolution scenarios.
-        setIsLoading(false);
-      }
-    };
-
-    handleInitialSession();
-
     const { data: listener } = supabase.auth.onAuthStateChange(
-      async (_, currentSession) => {
+      async (event, currentSession) => {
         if (!isMounted) return;
         
         setSession(currentSession);
@@ -102,6 +61,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
         } else {
           setProfile(null);
+        }
+        
+        // CRITICAL FIX: Resolve loading state only after the initial session event fires.
+        // This is the most reliable way to handle initial load with Supabase listeners.
+        if (event === 'INITIAL_SESSION') {
+            setIsLoading(false);
+        }
+        
+        // Handle sign out event explicitly to ensure profile is cleared immediately
+        if (event === 'SIGNED_OUT') {
+            setProfile(null);
+            setIsLoading(false); 
         }
       }
     );
