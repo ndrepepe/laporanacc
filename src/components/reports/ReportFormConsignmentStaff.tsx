@@ -28,7 +28,7 @@ const ReportFormConsignmentStaff = () => {
     defaultValues: {
       received_lpk: "No",
       lpk_entries: [],
-      lpk_entered_bsoft: 0,
+      lpk_entered_bsoft: undefined, // Changed from 0
       tasks_completed: "",
       issues_encountered: "",
       suggestions: "",
@@ -94,7 +94,7 @@ const ReportFormConsignmentStaff = () => {
     form.reset({
         received_lpk: "No",
         lpk_entries: [],
-        lpk_entered_bsoft: 0,
+        lpk_entered_bsoft: undefined,
         tasks_completed: "",
         issues_encountered: "",
         suggestions: "",
@@ -107,6 +107,16 @@ const ReportFormConsignmentStaff = () => {
     queryClient.invalidateQueries({ queryKey: ['dailyReports'] });
     // Invalidate LPK entries query if needed, although it's usually fetched via report ID
     queryClient.invalidateQueries({ queryKey: ['lpkEntries'] });
+  };
+  
+  // Helper function for integer input change handling
+  const handleIntChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+    const value = e.target.value;
+    if (value === "") {
+        field.onChange(undefined);
+    } else {
+        field.onChange(parseInt(value));
+    }
   };
 
   return (
@@ -176,7 +186,8 @@ const ReportFormConsignmentStaff = () => {
                                                 type="number" 
                                                 placeholder="0" 
                                                 {...field} 
-                                                onChange={e => field.onChange(e.target.value === "" ? 0 : parseInt(e.target.value))}
+                                                value={field.value === undefined ? "" : field.value}
+                                                onChange={e => handleIntChange(e, field)}
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -198,7 +209,7 @@ const ReportFormConsignmentStaff = () => {
                         type="button" 
                         variant="outline" 
                         className="w-full" 
-                        onClick={() => append({ branch_name: "", lpk_count: 1 })}
+                        onClick={() => append({ branch_name: "", lpk_count: undefined })}
                     >
                         <PlusCircle className="h-4 w-4 mr-2" /> {t('add_lpk_entry')}
                     </Button>
@@ -213,7 +224,12 @@ const ReportFormConsignmentStaff = () => {
             <FormItem>
               <FormLabel>{t('lpk_entered_bsoft_label')}</FormLabel>
               <FormControl>
-                <Input type="number" {...field} onChange={e => field.onChange(e.target.value === "" ? 0 : parseInt(e.target.value))} />
+                <Input 
+                    type="number" 
+                    {...field} 
+                    value={field.value === undefined ? "" : field.value}
+                    onChange={e => handleIntChange(e, field)} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

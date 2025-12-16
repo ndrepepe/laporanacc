@@ -13,18 +13,20 @@ import { REPORT_TABLE_MAP } from "@/lib/report-constants";
 import { useQueryClient } from "@tanstack/react-query";
 import { sendReportSubmissionNotification } from "@/utils/notification-sender";
 import { AccountingFormSchema } from "@/lib/report-schemas";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type AccountingFormValues = z.infer<typeof AccountingFormSchema>;
 
 const ReportFormAccounting = () => {
   const { user, profile } = useAuth();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const form = useForm<AccountingFormValues>({
     resolver: zodResolver(AccountingFormSchema),
     defaultValues: {
-      new_customers_count: 0,
+      new_customers_count: undefined,
       new_customers_names: "",
-      new_sales_count: 0,
+      new_sales_count: undefined,
       new_sales_names: "",
       worked_on_lph: "No",
       customer_confirmation_status: "Successful",
@@ -66,6 +68,16 @@ const ReportFormAccounting = () => {
     }
   };
 
+  // Helper function for integer input change handling
+  const handleIntChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+    const value = e.target.value;
+    if (value === "") {
+        field.onChange(undefined);
+    } else {
+        field.onChange(parseInt(value));
+    }
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -76,9 +88,14 @@ const ReportFormAccounting = () => {
             name="new_customers_count"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Number of New Customers Entered</FormLabel>
+                <FormLabel>{t('new_customers_count_label')}</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field} onChange={e => field.onChange(e.target.value === "" ? 0 : parseInt(e.target.value))} />
+                  <Input 
+                    type="number" 
+                    {...field} 
+                    value={field.value === undefined ? "" : field.value}
+                    onChange={e => handleIntChange(e, field)} 
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -89,9 +106,14 @@ const ReportFormAccounting = () => {
             name="new_sales_count"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Number of New Sales Entered</FormLabel>
+                <FormLabel>{t('new_sales_count_label')}</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field} onChange={e => field.onChange(e.target.value === "" ? 0 : parseInt(e.target.value))} />
+                  <Input 
+                    type="number" 
+                    {...field} 
+                    value={field.value === undefined ? "" : field.value}
+                    onChange={e => handleIntChange(e, field)} 
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -104,7 +126,7 @@ const ReportFormAccounting = () => {
           name="new_customers_names"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>New Customer Names (List them)</FormLabel>
+              <FormLabel>{t('new_customer_names_label')}</FormLabel>
               <FormControl>
                 <Textarea placeholder="e.g., John Doe, Jane Smith" {...field} rows={3} />
               </FormControl>
@@ -118,7 +140,7 @@ const ReportFormAccounting = () => {
           name="new_sales_names"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>New Sales Names (List them)</FormLabel>
+              <FormLabel>{t('new_sales_names_label')}</FormLabel>
               <FormControl>
                 <Textarea placeholder="e.g., Sale A, Sale B" {...field} rows={3} />
               </FormControl>
@@ -132,7 +154,7 @@ const ReportFormAccounting = () => {
           name="worked_on_lph"
           render={({ field }) => (
             <FormItem className="space-y-3">
-              <FormLabel>Did you work on LPH today?</FormLabel>
+              <FormLabel>{t('worked_on_lph_label')}</FormLabel>
               <FormControl>
                 <RadioGroup
                   onValueChange={field.onChange}
@@ -143,13 +165,13 @@ const ReportFormAccounting = () => {
                     <FormControl>
                       <RadioGroupItem value="Yes" />
                     </FormControl>
-                    <FormLabel className="font-normal">Yes</FormLabel>
+                    <FormLabel className="font-normal">{t('yes')}</FormLabel>
                   </FormItem>
                   <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>
                       <RadioGroupItem value="No" />
                     </FormControl>
-                    <FormLabel className="font-normal">No</FormLabel>
+                    <FormLabel className="font-normal">{t('no')}</FormLabel>
                   </FormItem>
                 </RadioGroup>
               </FormControl>
@@ -163,7 +185,7 @@ const ReportFormAccounting = () => {
           name="customer_confirmation_status"
           render={({ field }) => (
             <FormItem className="space-y-3">
-              <FormLabel>Customer Confirmation Status</FormLabel>
+              <FormLabel>{t('customer_confirmation_status_label')}</FormLabel>
               <FormControl>
                 <RadioGroup
                   onValueChange={field.onChange}
@@ -189,7 +211,7 @@ const ReportFormAccounting = () => {
           )}
         />
 
-        <Button type="submit" variant="gradient">Submit Accounting Report</Button>
+        <Button type="submit" variant="gradient">{t('submit_accounting_report')}</Button>
       </form>
     </Form>
   );

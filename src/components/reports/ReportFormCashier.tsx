@@ -23,8 +23,8 @@ const ReportFormCashier = () => {
   const form = useForm<CashierFormValues>({
     resolver: zodResolver(CashierFormSchema),
     defaultValues: {
-      payments_count: 0,
-      total_payments: 0,
+      payments_count: undefined, // Changed from 0
+      total_payments: undefined, // Changed from 0
       worked_on_lph: "No",
       customer_confirmation_done: "No",
     },
@@ -62,6 +62,26 @@ const ReportFormCashier = () => {
       queryClient.invalidateQueries({ queryKey: ['dailyReports'] });
     }
   };
+  
+  // Helper function for integer input change handling
+  const handleIntChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+    const value = e.target.value;
+    if (value === "") {
+        field.onChange(undefined);
+    } else {
+        field.onChange(parseInt(value));
+    }
+  };
+
+  // Helper function for float input change handling
+  const handleFloatChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+    const value = e.target.value;
+    if (value === "") {
+        field.onChange(undefined);
+    } else {
+        field.onChange(parseFloat(value));
+    }
+  };
 
   return (
     <Form {...form}>
@@ -74,7 +94,12 @@ const ReportFormCashier = () => {
             <FormItem>
               <FormLabel>{t('payments_count_label')}</FormLabel>
               <FormControl>
-                <Input type="number" {...field} onChange={e => field.onChange(e.target.value === "" ? 0 : parseInt(e.target.value))} />
+                <Input 
+                    type="number" 
+                    {...field} 
+                    value={field.value === undefined ? "" : field.value}
+                    onChange={e => handleIntChange(e, field)} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -88,7 +113,13 @@ const ReportFormCashier = () => {
             <FormItem>
               <FormLabel>{t('total_payments_label')}</FormLabel>
               <FormControl>
-                <Input type="number" step="0.01" {...field} onChange={e => field.onChange(e.target.value === "" ? 0 : parseFloat(e.target.value))} />
+                <Input 
+                    type="number" 
+                    step="0.01" 
+                    {...field} 
+                    value={field.value === undefined ? "" : field.value}
+                    onChange={e => handleFloatChange(e, field)} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
