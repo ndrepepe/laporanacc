@@ -8,10 +8,9 @@ import {
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "./client";
 import { showError } from "@/utils/toast";
-import { Profile } from "@/lib/types"; // Import Profile type
+import { Profile } from "@/lib/types";
 
-// Define the structure for the user profile (matching the DB schema)
-export type UserProfile = Profile; // Use Profile from types.ts
+export type UserProfile = Profile;
 
 interface AuthContextType {
   session: Session | null;
@@ -23,58 +22,73 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const fetchUserProfile = async (userId: string): Promise<UserProfile | null> => {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("id, first_name, last_name, role")
-    .eq("id", userId)
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, first_name, last_name, role")
+      .eq("id", userId)
+      .single();
 
-  if (error && error.code !== 'PGRST116') { // PGRST116 means no rows found (new user)
-    console.error("Error fetching profile:", error);
-    showError("Failed to load user profile.");
+    if (error && error.code !== 'PGRST116') {
+      console.error("Error fetching profile:", error);
+      showError("Failed to load user profile.");
+      return null;
+    }
+    
+    return data as UserProfile | null;
+  } catch (error) {
+    console.error("Unexpected error fetching profile:", error);
+    showError("Unexpected error loading user profile.");
     return null;
   }
-  
-  return data as UserProfile | null;
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true); // Start true
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
 
-    // 1. Fetch initial session immediately and resolve loading state
-    const loadInitialSession = async () => {
-      const { data: { session: initialSession } } = await supabase.auth.getSession();
-      
-      if (isMounted) {
+    const initializeAuth = async () => {
+      try {
+        // Fetch initial session
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        
+        if (!isMounted) return;
+
         setSession(initialSession);
         setUser(initialSession?.user ?? null);
 
+        // Fetch profile if user exists
         if (initialSession?.user) {
           const userProfile = await fetchUserProfile(initialSession.user.id);
           if (isMounted) {
             setProfile(userProfile);
           }
         }
-        
-        // Resolve loading state immediately after fetching initial data
-        setIsLoading(false);
+      } catch (error) {
+        console.error("Error during initial auth setup:", error);
+        if (isMounted) {
+          showError("Authentication system error. Please refresh the page.");
+        }
+      } finally {
+        // CRITICAL: Always set isLoading to false after initialization attempt
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
-    loadInitialSession();
+    initializeAuth();
 
-    // 2. Set up listener for subsequent changes (sign in/out/update)
+    // Set up real-time listener for auth state changes
     const { data: listener } = supabase.auth.onAuthStateChange(
       async (_event, currentSession) => {
         if (!isMounted) return;
         
-        // Update session/user/profile based on real-time events
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
 
@@ -93,7 +107,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       isMounted = false;
       listener.subscription.unsubscribe();
     };
-  }, []); // Empty dependency array ensures this runs only once on mount
+  }, []);
 
   return (
     <AuthContext.Provider value={{ session, user, profile, isLoading }}>
