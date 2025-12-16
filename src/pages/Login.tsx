@@ -4,7 +4,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/integrations/supabase/auth';
 import { useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/Card'; // Use custom Card
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/Card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+
+// Use custom Card
 
 const Login = () => {
   const navigate = useNavigate();
@@ -28,47 +31,49 @@ const Login = () => {
           <CardTitle className="text-3xl text-center tracking-wider text-gradient">AO Daily Reports</CardTitle>
           <CardDescription className="text-center text-sm">Accounting - Cashier - Consignment</CardDescription>
         </CardHeader>
-        <CardContent>
-          <Auth
-            supabaseClient={supabase}
-            providers={[]}
-            appearance={{
-              theme: ThemeSupa,
-              variables: {
-                default: {
-                  colors: {
-                    // Use primary color for brand identity
-                    brand: 'hsl(var(--primary))',
-                    brandAccent: 'hsl(var(--accent))',
-                    defaultButtonBackground: 'hsl(var(--secondary))',
-                    defaultButtonBackgroundHover: 'hsl(var(--secondary)/0.8)',
-                    inputBackground: 'hsl(var(--input))',
-                    inputBorder: 'hsl(var(--border))',
-                    inputBorderHover: 'hsl(var(--primary))',
-                    inputBorderFocus: 'hsl(var(--primary))',
+        <ScrollArea className="h-[500px]">
+          <CardContent>
+            <Auth
+              supabaseClient={supabase}
+              providers={[]}
+              appearance={{
+                theme: ThemeSupa,
+                variables: {
+                  default: {
+                    colors: {
+                      // Use primary color for brand identity
+                      brand: 'hsl(var(--primary))',
+                      brandAccent: 'hsl(var(--accent))',
+                      defaultButtonBackground: 'hsl(var(--secondary))',
+                      defaultButtonBackgroundHover: 'hsl(var(--secondary)/0.8)',
+                      inputBackground: 'hsl(var(--input))',
+                      inputBorder: 'hsl(var(--border))',
+                      inputBorderHover: 'hsl(var(--primary))',
+                      inputBorderFocus: 'hsl(var(--primary))',
+                    },
                   },
                 },
-              },
-              style: {
-                // Menyembunyikan semua tautan (anchor tags) di dalam komponen Auth
-                anchor: {
-                  display: 'none',
+                style: {
+                  // Menyembunyikan semua tautan (anchor tags) di dalam komponen Auth
+                  anchor: {
+                    display: 'none',
+                  },
                 },
-              },
-            }}
-            localization={{
-              variables: {
-                sign_in: {
-                  sign_up_link: '', // Tetap pertahankan localization sebagai fallback
-                  no_account_text: '', 
+              }}
+              localization={{
+                variables: {
+                  sign_in: {
+                    sign_up_link: '', // Tetap pertahankan localization sebagai fallback
+                    no_account_text: '',
+                  },
                 },
-              },
-            } as any} 
-            theme="dark" // Default to dark theme for futuristic look
-            redirectTo={window.location.origin + '/'}
-            view="sign_in" // Restrict view to only sign in, hiding sign up link
-          />
-        </CardContent>
+              } as any}
+              theme="dark" // Default to dark theme for futuristic look
+              redirectTo={window.location.origin + '/'}
+              view="sign_in" // Restrict view to only sign in, hiding sign up link
+            />
+          </CardContent>
+        </ScrollArea>
       </Card>
     </div>
   );

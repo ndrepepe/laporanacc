@@ -8,46 +8,62 @@ import { Button } from "@/components/Button";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const NotificationItem: React.FC<{ notification: Notification; onMarkRead: (id: string) => void }> = ({ notification, onMarkRead }) => {
-    const { t } = useLanguage();
-    const Icon = notification.type === 'report_submission' ? FileText : Eye;
-    const variantClass = notification.is_read ? "bg-muted/50 text-muted-foreground" : "bg-card shadow-md hover:bg-accent/10 transition-colors duration-300";
+  const { t } = useLanguage();
 
-    return (
-        <div 
-            className={cn(
-                "flex items-start p-4 border-b last:border-b-0 transition-colors",
-                variantClass
-            )}
+  const Icon = notification.type === 'report_submission' ? FileText : Eye;
+  const variantClass = notification.is_read ? "bg-muted/50 text-muted-foreground" : "bg-card shadow-md hover:bg-accent/10 transition-colors duration-300";
+
+  return (
+    <div className={cn(
+      "flex items-start p-4 border-b last:border-b-0 transition-colors",
+      variantClass
+    )}>
+      <div className={cn(
+        "p-2 rounded-full mr-4",
+        notification.is_read ? "bg-gray-700 text-gray-300" : "bg-primary text-primary-foreground neon-glow"
+      )}>
+        <Icon className="h-5 w-5" />
+      </div>
+      <div className="flex-grow">
+        <p className={cn(
+          "font-medium",
+          notification.is_read ? "text-muted-foreground" : "text-foreground"
+        )}>
+          {notification.message}
+        </p>
+        <p className="text-xs text-gray-500 mt-1">
+          {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+        </p>
+      </div>
+      {!notification.is_read && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onMarkRead(notification.id)}
+          className="ml-4 flex-shrink-0 text-accent hover:text-accent/80"
         >
-            <div className={cn("p-2 rounded-full mr-4", notification.is_read ? "bg-gray-700 text-gray-300" : "bg-primary text-primary-foreground neon-glow")}>
-                <Icon className="h-5 w-5" />
-            </div>
-            <div className="flex-grow">
-                <p className={cn("font-medium", notification.is_read ? "text-muted-foreground" : "text-foreground")}>
-                    {notification.message}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                    {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
-                </p>
-            </div>
-            {!notification.is_read && (
-                <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => onMarkRead(notification.id)}
-                    className="ml-4 flex-shrink-0 text-accent hover:text-accent/80"
-                >
-                    <CheckCircle className="h-4 w-4 mr-1" /> {t('read')}
-                </Button>
-            )}
-        </div>
-    );
+          <CheckCircle className="h-4 w-4 mr-1" />
+          {t('read')}
+        </Button>
+      )}
+    </div>
+  );
 };
 
 const Notifications = () => {
-  const { data: notifications, isLoading, isError, error, markAllAsRead, markAsReadMutation, unreadCount } = useNotifications();
+  const {
+    data: notifications,
+    isLoading,
+    isError,
+    error,
+    markAllAsRead,
+    markAsReadMutation,
+    unreadCount
+  } = useNotifications();
+
   const { t } = useLanguage();
 
   const handleMarkRead = (id: string) => {
@@ -83,32 +99,34 @@ const Notifications = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold tracking-wider text-gradient">{t('notifications')} ({unreadCount} {t('unread')})</h1>
         {unreadCount > 0 && (
-            <Button 
-                onClick={markAllAsRead} 
-                variant="outline" 
-                size="sm"
-                disabled={markAsReadMutation.isPending}
-            >
-                <MailOpen className="h-4 w-4 mr-2" /> {t('mark_all_read')}
-            </Button>
+          <Button
+            onClick={markAllAsRead}
+            variant="outline"
+            size="sm"
+            disabled={markAsReadMutation.isPending}
+          >
+            <MailOpen className="h-4 w-4 mr-2" />
+            {t('mark_all_read')}
+          </Button>
         )}
       </div>
-      
       <Card>
         <CardHeader>
           <CardTitle>{t('recent_alerts')}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {notifications && notifications.length > 0 ? (
-            <div className="divide-y divide-border">
-              {notifications.map((notification) => (
-                <NotificationItem 
-                    key={notification.id} 
-                    notification={notification} 
+            <ScrollArea className="h-[500px]">
+              <div className="divide-y divide-border">
+                {notifications.map((notification) => (
+                  <NotificationItem
+                    key={notification.id}
+                    notification={notification}
                     onMarkRead={handleMarkRead}
-                />
-              ))}
-            </div>
+                  />
+                ))}
+              </div>
+            </ScrollArea>
           ) : (
             <p className="p-6 text-muted-foreground">{t('no_notifications')}</p>
           )}
