@@ -82,8 +82,8 @@ const ViewSubordinateReports = () => {
     if (!filters.employeeName) return true;
     
     const search = filters.employeeName.toLowerCase();
-    const firstName = report.profile.first_name?.toLowerCase() || '';
-    const lastName = report.profile.last_name?.toLowerCase() || '';
+    const firstName = report.profile?.first_name?.toLowerCase() || '';
+    const lastName = report.profile?.last_name?.toLowerCase() || '';
     const fullName = `${firstName} ${lastName}`.trim();
     
     return fullName.includes(search) || firstName.includes(search) || lastName.includes(search);
@@ -154,10 +154,10 @@ const ViewSubordinateReports = () => {
                         {format(new Date(report.report_date), 'PPP')}
                       </TableCell>
                       <TableCell>
-                        {report.profile.first_name || 'Unknown'} {report.profile.last_name || ''}
+                        {report.profile?.first_name || 'Unknown'} {report.profile?.last_name || ''}
                       </TableCell>
                       <TableCell>
-                        <Badge variant="secondary">{report.profile.role}</Badge>
+                        <Badge variant="secondary">{report.profile?.role}</Badge>
                       </TableCell>
                       <TableCell>
                         <ReportTypeBadge type={report.type} />
