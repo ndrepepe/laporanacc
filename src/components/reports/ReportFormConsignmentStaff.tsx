@@ -20,7 +20,7 @@ const ReportFormConsignmentStaff = () => {
   const { user, profile } = useAuth();
   const { t } = useLanguage();
   const queryClient = useQueryClient();
-  
+
   const form = useForm<ConsignmentStaffFormValues>({
     resolver: zodResolver(ConsignmentStaffFormSchema),
     defaultValues: {
@@ -89,9 +89,9 @@ const ReportFormConsignmentStaff = () => {
             <FormItem>
               <FormLabel>{t('lpk_count')}</FormLabel>
               <FormControl>
-                <Input 
-                  type="number" 
-                  {...field} 
+                <Input
+                  type="number"
+                  {...field}
                   value={field.value === undefined ? "" : field.value}
                   onChange={e => handleIntChange(e, field)}
                 />
@@ -100,7 +100,6 @@ const ReportFormConsignmentStaff = () => {
             </FormItem>
           )}
         />
-        
         <FormField
           control={form.control}
           name="tasks_completed"
@@ -108,17 +107,16 @@ const ReportFormConsignmentStaff = () => {
             <FormItem>
               <FormLabel>{t('tasks_completed_today')}</FormLabel>
               <FormControl>
-                <Textarea 
-                  placeholder={t('describe_completed_tasks')} 
-                  {...field} 
-                  rows={5} 
+                <Textarea
+                  placeholder={t('describe_completed_tasks')}
+                  {...field}
+                  rows={5}
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        
         <FormField
           control={form.control}
           name="issues_encountered"
@@ -126,17 +124,16 @@ const ReportFormConsignmentStaff = () => {
             <FormItem>
               <FormLabel>{t('issues_encountered')}</FormLabel>
               <FormControl>
-                <Textarea 
-                  placeholder={t('describe_issues_encountered')} 
-                  {...field} 
-                  rows={5} 
+                <Textarea
+                  placeholder={t('describe_issues_encountered')}
+                  {...field}
+                  rows={5}
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        
         <FormField
           control={form.control}
           name="suggestions"
@@ -144,17 +141,16 @@ const ReportFormConsignmentStaff = () => {
             <FormItem>
               <FormLabel>{t('suggestions_recommendations')}</FormLabel>
               <FormControl>
-                <Textarea 
-                  placeholder={t('enter_suggestions')} 
-                  {...field} 
-                  rows={3} 
+                <Textarea
+                  placeholder={t('enter_suggestions')}
+                  {...field}
+                  rows={3}
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        
         <Button type="submit" variant="gradient">
           {t('submit_consignment_report')}
         </Button>

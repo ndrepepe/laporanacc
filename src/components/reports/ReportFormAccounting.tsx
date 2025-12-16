@@ -21,6 +21,7 @@ const ReportFormAccounting = () => {
   const { user, profile } = useAuth();
   const { t } = useLanguage();
   const queryClient = useQueryClient();
+
   const form = useForm<AccountingFormValues>({
     resolver: zodResolver(AccountingFormSchema),
     defaultValues: {
@@ -62,7 +63,7 @@ const ReportFormAccounting = () => {
       
       // Send notification to managers
       await sendReportSubmissionNotification(user.id, profile.role, 'accounting');
-
+      
       // Invalidate the dailyReports query to refresh the view
       queryClient.invalidateQueries({ queryKey: ['dailyReports'] });
     }
@@ -72,16 +73,15 @@ const ReportFormAccounting = () => {
   const handleIntChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
     const value = e.target.value;
     if (value === "") {
-        field.onChange(undefined);
+      field.onChange(undefined);
     } else {
-        field.onChange(parseInt(value));
+      field.onChange(parseInt(value));
     }
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
@@ -90,11 +90,11 @@ const ReportFormAccounting = () => {
               <FormItem>
                 <FormLabel>{t('new_customers_count_label')}</FormLabel>
                 <FormControl>
-                  <Input 
-                    type="number" 
-                    {...field} 
+                  <Input
+                    type="number"
+                    {...field}
                     value={field.value === undefined ? "" : field.value}
-                    onChange={e => handleIntChange(e, field)} 
+                    onChange={e => handleIntChange(e, field)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -108,11 +108,11 @@ const ReportFormAccounting = () => {
               <FormItem>
                 <FormLabel>{t('new_sales_count_label')}</FormLabel>
                 <FormControl>
-                  <Input 
-                    type="number" 
-                    {...field} 
+                  <Input
+                    type="number"
+                    {...field}
                     value={field.value === undefined ? "" : field.value}
-                    onChange={e => handleIntChange(e, field)} 
+                    onChange={e => handleIntChange(e, field)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -120,7 +120,6 @@ const ReportFormAccounting = () => {
             )}
           />
         </div>
-
         <FormField
           control={form.control}
           name="new_customers_names"
@@ -128,13 +127,16 @@ const ReportFormAccounting = () => {
             <FormItem>
               <FormLabel>{t('new_customer_names_label')}</FormLabel>
               <FormControl>
-                <Textarea placeholder="e.g., John Doe, Jane Smith" {...field} rows={3} />
+                <Textarea
+                  placeholder="e.g., John Doe, Jane Smith"
+                  {...field}
+                  rows={3}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="new_sales_names"
@@ -142,13 +144,16 @@ const ReportFormAccounting = () => {
             <FormItem>
               <FormLabel>{t('new_sales_names_label')}</FormLabel>
               <FormControl>
-                <Textarea placeholder="e.g., Sale A, Sale B" {...field} rows={3} />
+                <Textarea
+                  placeholder="e.g., Sale A, Sale B"
+                  {...field}
+                  rows={3}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="worked_on_lph"
@@ -179,7 +184,6 @@ const ReportFormAccounting = () => {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="customer_confirmation_status"
@@ -210,7 +214,6 @@ const ReportFormAccounting = () => {
             </FormItem>
           )}
         />
-
         <Button type="submit" variant="gradient">{t('submit_accounting_report')}</Button>
       </form>
     </Form>

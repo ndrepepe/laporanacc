@@ -20,6 +20,7 @@ const ReportFormCashier = () => {
   const { user, profile } = useAuth();
   const { t } = useLanguage();
   const queryClient = useQueryClient();
+
   const form = useForm<CashierFormValues>({
     resolver: zodResolver(CashierFormSchema),
     defaultValues: {
@@ -57,19 +58,19 @@ const ReportFormCashier = () => {
       
       // Send notification to managers
       await sendReportSubmissionNotification(user.id, profile.role, 'cashier');
-
+      
       // Invalidate the dailyReports query to refresh the view
       queryClient.invalidateQueries({ queryKey: ['dailyReports'] });
     }
   };
-  
+
   // Helper function for integer input change handling
   const handleIntChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
     const value = e.target.value;
     if (value === "") {
-        field.onChange(undefined);
+      field.onChange(undefined);
     } else {
-        field.onChange(parseInt(value));
+      field.onChange(parseInt(value));
     }
   };
 
@@ -77,16 +78,15 @@ const ReportFormCashier = () => {
   const handleFloatChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
     const value = e.target.value;
     if (value === "") {
-        field.onChange(undefined);
+      field.onChange(undefined);
     } else {
-        field.onChange(parseFloat(value));
+      field.onChange(parseFloat(value));
     }
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        
         <FormField
           control={form.control}
           name="payments_count"
@@ -94,18 +94,17 @@ const ReportFormCashier = () => {
             <FormItem>
               <FormLabel>{t('payments_count_label')}</FormLabel>
               <FormControl>
-                <Input 
-                    type="number" 
-                    {...field} 
-                    value={field.value === undefined ? "" : field.value}
-                    onChange={e => handleIntChange(e, field)} 
+                <Input
+                  type="number"
+                  {...field}
+                  value={field.value === undefined ? "" : field.value}
+                  onChange={e => handleIntChange(e, field)}
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="total_payments"
@@ -113,19 +112,18 @@ const ReportFormCashier = () => {
             <FormItem>
               <FormLabel>{t('total_payments_label')}</FormLabel>
               <FormControl>
-                <Input 
-                    type="number" 
-                    step="0.01" 
-                    {...field} 
-                    value={field.value === undefined ? "" : field.value}
-                    onChange={e => handleFloatChange(e, field)} 
+                <Input
+                  type="number"
+                  step="0.01"
+                  {...field}
+                  value={field.value === undefined ? "" : field.value}
+                  onChange={e => handleFloatChange(e, field)}
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="worked_on_lph"
@@ -156,7 +154,6 @@ const ReportFormCashier = () => {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="customer_confirmation_done"
@@ -187,7 +184,6 @@ const ReportFormCashier = () => {
             </FormItem>
           )}
         />
-
         <Button type="submit" variant="gradient">{t('submit_cashier_report')}</Button>
       </form>
     </Form>
