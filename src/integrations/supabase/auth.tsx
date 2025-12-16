@@ -45,33 +45,69 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
+    const handleInitialSession = async () => {
+      try {
+        // Attempt to get the initial session
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (!isMounted) return;
+
+        if (error) {
+          console.error("Error fetching initial session:", error);
+          // CRITICAL FIX: If session fetch fails (e.g., corrupted local storage), 
+          // force sign out to clear the bad state and prompt re-login.
+          await supabase.auth.signOut();
+          setSession(null);
+          setUser(null);
+          setProfile(null);
+          showError("Session error detected. Please log in again.");
+        } else if (session) {
+          setSession(session);
+          setUser(session.user);
+          const userProfile = await fetchUserProfile(session.user.id);
+          if (isMounted) {
+            setProfile(userProfile);
+          }
+        }
+      } catch (e) {
+        console.error("Unexpected error during initial session fetch:", e);
+        // Fallback: force sign out on unexpected exceptions too
+        await supabase.auth.signOut();
+        setSession(null);
+        setUser(null);
+        setProfile(null);
+        showError("A critical error occurred during startup. Please log in.");
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    handleInitialSession();
+
     const { data: listener } = supabase.auth.onAuthStateChange(
-      async (_, currentSession) => { // Fixed: Renamed 'event' to '_'
+      async (_, currentSession) => {
+        if (!isMounted) return;
+        
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
 
         if (currentSession?.user) {
           const userProfile = await fetchUserProfile(currentSession.user.id);
-          setProfile(userProfile);
+          if (isMounted) {
+            setProfile(userProfile);
+          }
         } else {
           setProfile(null);
         }
-        
-        setIsLoading(false);
       }
     );
 
-    // Fetch initial session state
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        setSession(session);
-        setUser(session.user);
-        fetchUserProfile(session.user.id).then(setProfile);
-      }
-      setIsLoading(false);
-    });
-
     return () => {
+      isMounted = false;
       listener.subscription.unsubscribe();
     };
   }, []);
