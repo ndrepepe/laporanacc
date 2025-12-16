@@ -80,9 +80,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setProfile(null);
         showError("A critical error occurred during startup. Please log in.");
       } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        // CRITICAL FIX: Ensure isLoading is set to false unconditionally 
+        // to prevent perpetual loading screen in Strict Mode/late resolution scenarios.
+        setIsLoading(false);
       }
     };
 
