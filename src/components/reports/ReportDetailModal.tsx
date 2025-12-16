@@ -51,6 +51,7 @@ const renderConsignmentStaffDetails = (report: DailyReport) => {
   const consignmentReport = report as ConsignmentStaffReport & DailyReport;
   return (
     <div className="space-y-4">
+      <DetailItem label="LPK Count" value={consignmentReport.lpk_count} />
       <div className="space-y-2">
         <h4 className="font-semibold mt-4 pt-4 border-t border-border/50">Tasks Completed</h4>
         <p className="text-sm text-foreground/80 whitespace-pre-wrap p-2 bg-muted/50 rounded-md">{consignmentReport.tasks_completed}</p>

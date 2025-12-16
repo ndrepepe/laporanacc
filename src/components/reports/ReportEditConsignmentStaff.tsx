@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/Button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { showSuccess, showError } from "@/utils/toast";
@@ -25,6 +26,7 @@ const ReportEditConsignmentStaff: React.FC<ReportEditConsignmentStaffProps> = ({
   const queryClient = useQueryClient();
   
   const defaultValues: ConsignmentStaffFormValues = {
+    lpk_count: report.lpk_count,
     tasks_completed: report.tasks_completed,
     issues_encountered: report.issues_encountered,
     suggestions: report.suggestions || "",
@@ -37,6 +39,7 @@ const ReportEditConsignmentStaff: React.FC<ReportEditConsignmentStaffProps> = ({
 
   const onSubmit = async (values: ConsignmentStaffFormValues) => {
     const payload = {
+      lpk_count: values.lpk_count,
       tasks_completed: values.tasks_completed,
       issues_encountered: values.issues_encountered,
       suggestions: values.suggestions || null,
@@ -60,9 +63,38 @@ const ReportEditConsignmentStaff: React.FC<ReportEditConsignmentStaffProps> = ({
     }
   };
 
+  // Helper function for integer input change handling
+  const handleIntChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+    const value = e.target.value;
+    if (value === "") {
+      field.onChange(undefined);
+    } else {
+      field.onChange(parseInt(value));
+    }
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="lpk_count"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('lpk_count')}</FormLabel>
+              <FormControl>
+                <Input 
+                  type="number" 
+                  {...field} 
+                  value={field.value === undefined ? "" : field.value}
+                  onChange={e => handleIntChange(e, field)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
         <FormField
           control={form.control}
           name="tasks_completed"
