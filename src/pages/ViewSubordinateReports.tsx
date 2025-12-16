@@ -154,7 +154,7 @@ const ViewSubordinateReports = () => {
                         {format(new Date(report.report_date), 'PPP')}
                       </TableCell>
                       <TableCell>
-                        {report.profile.first_name} {report.profile.last_name}
+                        {report.profile.first_name || 'Unknown'} {report.profile.last_name || ''}
                       </TableCell>
                       <TableCell>
                         <Badge variant="secondary">{report.profile.role}</Badge>
