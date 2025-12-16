@@ -18,13 +18,13 @@ export const CashierFormSchema = z.object({
 
 export const ConsignmentStaffFormSchema = z.object({
   lpk_count: z.coerce.number().min(0, "Must be a non-negative number."),
-  tasks_completed: z.string().min(10, "Tasks completed description is required."),
-  issues_encountered: z.string().min(10, "Issues encountered description is required."),
+  tasks_completed: z.string().min(1, "Tasks completed description is required."),
+  issues_encountered: z.string().min(1, "Issues encountered description is required."),
   suggestions: z.string().optional(),
 });
 
 export const SupervisorManagerFormSchema = z.object({
-  tasks_completed: z.string().min(10, "Tasks completed description is required."),
-  issues_encountered: z.string().min(10, "Issues encountered description is required."),
+  tasks_completed: z.string().min(1, "Tasks completed description is required."),
+  issues_encountered: z.string().min(1, "Issues encountered description is required."),
   suggestions: z.string().optional(),
 });
