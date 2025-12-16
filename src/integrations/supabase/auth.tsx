@@ -42,17 +42,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true); // Start true
 
   useEffect(() => {
     let isMounted = true;
 
-    // We rely solely on the listener for state changes, including the initial state.
+    // 1. Fetch initial session immediately and resolve loading state
+    const loadInitialSession = async () => {
+      const { data: { session: initialSession } } = await supabase.auth.getSession();
+      
+      if (isMounted) {
+        setSession(initialSession);
+        setUser(initialSession?.user ?? null);
+
+        if (initialSession?.user) {
+          const userProfile = await fetchUserProfile(initialSession.user.id);
+          if (isMounted) {
+            setProfile(userProfile);
+          }
+        }
+        
+        // Resolve loading state immediately after fetching initial data
+        setIsLoading(false);
+      }
+    };
+
+    loadInitialSession();
+
+    // 2. Set up listener for subsequent changes (sign in/out/update)
     const { data: listener } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
+      async (_event, currentSession) => {
         if (!isMounted) return;
         
-        // Update session and user state
+        // Update session/user/profile based on real-time events
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
 
@@ -64,12 +86,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } else {
           setProfile(null);
         }
-        
-        // CRITICAL FIX: Ensure loading state is resolved when the initial session event fires.
-        // This event fires exactly once upon subscription, guaranteeing the end of the loading phase.
-        if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
-            setIsLoading(false);
-        }
       }
     );
 
@@ -77,7 +93,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       isMounted = false;
       listener.subscription.unsubscribe();
     };
-  }, []);
+  }, []); // Empty dependency array ensures this runs only once on mount
 
   return (
     <AuthContext.Provider value={{ session, user, profile, isLoading }}>
