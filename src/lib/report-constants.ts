@@ -16,6 +16,6 @@ export const VIEW_PERMISSIONS: Record<UserRole, ReportType[]> = {
     'Consignment Staff': [],
     
     'Consignment Supervisor': ['consignment_staff', 'supervisor_manager'],
-    'Accounting Manager': ['accounting', 'cashier', 'supervisor_manager'],
+    'Accounting Manager': ['accounting', 'cashier', 'consignment_staff', 'supervisor_manager'],
     'Senior Manager': ['accounting', 'cashier', 'consignment_staff', 'supervisor_manager'],
 };
