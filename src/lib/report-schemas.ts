@@ -2,7 +2,11 @@ import * as z from "zod";
 
 export const LPKEntrySchema = z.object({
     branch_name: z.string().min(1, "Branch name is required."),
-    lpk_count: z.coerce.number().min(1, "LPK count must be at least 1."),
+    // Allow undefined in form state for empty input, but enforce min(1) if a value is provided and coerced.
+    lpk_count: z.union([
+        z.coerce.number().min(1, "LPK count must be at least 1."),
+        z.undefined(),
+    ]),
     // Include ID for editing existing entries
     id: z.string().optional(), 
 });
