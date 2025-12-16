@@ -17,18 +17,20 @@ const Index = () => {
   const { profile, user, isLoading, refreshProfile } = useAuth();
   const { t } = useLanguage();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [hasAttemptedRefresh, setHasAttemptedRefresh] = useState(false);
 
-  // Jika profil tidak dimuat setelah autentikasi selesai, coba refresh
+  // Jika profil tidak dimuat setelah autentikasi selesai, coba refresh secara otomatis
   useEffect(() => {
-    if (!isLoading && !profile && user) {
+    if (!isLoading && !profile && user && !hasAttemptedRefresh) {
       const refresh = async () => {
         setIsRefreshing(true);
         await refreshProfile();
         setIsRefreshing(false);
+        setHasAttemptedRefresh(true);
       };
       refresh();
     }
-  }, [isLoading, profile, user, refreshProfile]);
+  }, [isLoading, profile, user, hasAttemptedRefresh, refreshProfile]);
 
   const getGuidanceMessage = (role: UserRole | undefined) => {
     if (!role) {
