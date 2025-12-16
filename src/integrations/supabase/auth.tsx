@@ -51,6 +51,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     let isMounted = true;
+    // Timeout darurat untuk mencegah loading tak terbatas
+    const timeoutId = setTimeout(() => {
+      if (isMounted) {
+        console.error("Auth initialization timeout - forcing completion");
+        setIsLoading(false);
+      }
+    }, 10000); // 10 detik timeout
 
     const initializeAuth = async () => {
       try {
@@ -77,6 +84,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } finally {
         // CRITICAL: Always set isLoading to false after initialization attempt
         if (isMounted) {
+          clearTimeout(timeoutId);
           setIsLoading(false);
         }
       }
@@ -105,6 +113,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     return () => {
       isMounted = false;
+      clearTimeout(timeoutId);
       listener.subscription.unsubscribe();
     };
   }, []);
