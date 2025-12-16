@@ -47,10 +47,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let isMounted = true;
 
+    // We rely solely on the listener for state changes, including the initial state.
     const { data: listener } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
         if (!isMounted) return;
         
+        // Update session and user state
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
 
@@ -63,16 +65,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setProfile(null);
         }
         
-        // CRITICAL FIX: Resolve loading state only after the initial session event fires.
-        // This is the most reliable way to handle initial load with Supabase listeners.
-        if (event === 'INITIAL_SESSION') {
+        // CRITICAL FIX: Ensure loading state is resolved when the initial session event fires.
+        // This event fires exactly once upon subscription, guaranteeing the end of the loading phase.
+        if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
             setIsLoading(false);
-        }
-        
-        // Handle sign out event explicitly to ensure profile is cleared immediately
-        if (event === 'SIGNED_OUT') {
-            setProfile(null);
-            setIsLoading(false); 
         }
       }
     );
