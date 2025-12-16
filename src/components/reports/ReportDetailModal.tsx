@@ -125,7 +125,7 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({ report, isOpen, o
               <div>
                 <p className="font-medium text-muted-foreground">Submitted By:</p>
                 <p className="text-foreground font-semibold">
-                  {report.profile.first_name} {report.profile.last_name} ({report.profile.role})
+                  {report.profile?.first_name || 'Unknown'} {report.profile?.last_name || ''} ({report.profile?.role || 'Unknown Role'})
                 </p>
               </div>
             </div>
