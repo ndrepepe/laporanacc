@@ -17,7 +17,6 @@ import SummaryRoute from './components/SummaryRoute';
 import UserManagementRoute from './components/UserManagementRoute';
 import NotFound from './pages/NotFound';
 import { QueryProvider } from './contexts/QueryContext'; // Import QueryProvider
-import { Toaster } from 'sonner'; // Import Toaster from sonner
 
 function App() {
   return (
@@ -54,7 +53,6 @@ function App() {
                 {/* Catch all - 404 Page */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
-              <Toaster richColors position="top-right" />
             </QueryProvider>
           </LanguageProvider>
         </AuthProvider>
