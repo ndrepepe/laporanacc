@@ -28,28 +28,67 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const refreshProfile = useCallback(async () => {
-    if (user?.id) {
-      try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("id, first_name, last_name, role")
-          .eq("id", user.id)
-          .single();
+  // Comprehensive function to fetch the profile, or create a basic one if missing.
+  const ensureProfileExists = useCallback(async (currentUser: User): Promise<UserProfile | null> => {
+    try {
+      // 1. Try to fetch existing profile
+      const { data: existingProfile, error: fetchError } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name, role")
+        .eq("id", currentUser.id)
+        .single();
 
-        if (!error && data) {
-          setProfile(data as UserProfile);
-        } else if (error) {
-          console.error("Error refreshing profile:", error);
-          // If profile fetch fails, set profile to null but don't block
-          setProfile(null);
-        }
-      } catch (error) {
-        console.error("Error refreshing profile:", error);
-        setProfile(null);
+      // PGRST116 means 'No rows found'
+      if (fetchError && fetchError.code !== 'PGRST116') { 
+        console.error("Profile fetch error:", fetchError);
+        return null;
       }
+
+      if (existingProfile) {
+        return existingProfile as UserProfile;
+      }
+
+      // 2. If no profile found, attempt to create a basic one using user metadata
+      console.warn(`Profile missing for user ${currentUser.id}. Attempting to create basic profile.`);
+      
+      const metadata = currentUser.user_metadata;
+      
+      const newProfilePayload = {
+        id: currentUser.id,
+        first_name: metadata.first_name || null,
+        last_name: metadata.last_name || null,
+        // Role is handled by the trigger on signup, but if the trigger failed, 
+        // we insert what we have. If the role is missing, it will be null.
+        role: metadata.role || null, 
+      };
+
+      const { data: newProfileData, error: insertError } = await supabase
+        .from("profiles")
+        .insert([newProfilePayload])
+        .select("id, first_name, last_name, role")
+        .single();
+
+      if (insertError) {
+        console.error("Failed to create missing profile:", insertError);
+        // If insertion fails (e.g., due to RLS or constraint), we still return null profile
+        return null;
+      }
+      
+      console.log("Successfully created missing profile.");
+      return newProfileData as UserProfile;
+
+    } catch (error) {
+      console.error("Unexpected error in ensureProfileExists:", error);
+      return null;
     }
-  }, [user?.id]);
+  }, []);
+
+  const refreshProfile = useCallback(async () => {
+    if (user) {
+      const updatedProfile = await ensureProfileExists(user);
+      setProfile(updatedProfile);
+    }
+  }, [user, ensureProfileExists]);
 
   useEffect(() => {
     let isMounted = true;
@@ -80,33 +119,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(currentUser);
 
         // 2. CRITICAL: Set isLoading to false immediately after session check
-        // This resolves ProtectedRoute quickly.
         clearTimeout(timeoutId);
         setIsLoading(false); 
 
-        // 3. Fetch profile if user exists (non-blocking for initial load)
+        // 3. Fetch or create profile if user exists (non-blocking)
         if (currentUser) {
-          // We need to fetch the profile immediately using the user ID from the session,
-          // as the `user` state might not have propagated yet for `refreshProfile`
-          try {
-            const { data, error } = await supabase
-              .from("profiles")
-              .select("id, first_name, last_name, role")
-              .eq("id", currentUser.id)
-              .single();
-
-            if (!isMounted) return;
-
-            if (!error && data) {
-              setProfile(data as UserProfile);
-            } else if (error) {
-              console.error("Profile fetch error:", error);
-              setProfile(null);
-            }
-          } catch (profileError) {
-            console.error("Unexpected error fetching profile on auth change:", profileError);
-            setProfile(null);
-          }
+          const initialProfile = await ensureProfileExists(currentUser);
+          if (!isMounted) return;
+          setProfile(initialProfile);
         } else {
           setProfile(null);
         }
@@ -131,26 +151,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(currentSession?.user ?? null);
 
         if (currentSession?.user) {
-          // Re-fetch profile on auth change
-          try {
-            const { data, error } = await supabase
-              .from("profiles")
-              .select("id, first_name, last_name, role")
-              .eq("id", currentSession.user.id)
-              .single();
-
-            if (!isMounted) return;
-
-            if (!error && data) {
-              setProfile(data as UserProfile);
-            } else if (error) {
-              console.error("Profile fetch error on auth change:", error);
-              setProfile(null);
-            }
-          } catch (profileError) {
-            console.error("Unexpected error fetching profile on auth change:", profileError);
-            setProfile(null);
-          }
+          // Use the new comprehensive function to fetch or create the profile on change
+          const updatedProfile = await ensureProfileExists(currentSession.user);
+          if (!isMounted) return;
+          setProfile(updatedProfile);
         } else {
           setProfile(null);
         }
@@ -162,7 +166,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       clearTimeout(timeoutId);
       listener.subscription.unsubscribe();
     };
-  }, []);
+  }, [ensureProfileExists]);
 
   return (
     <AuthContext.Provider value={{ session, user, profile, isLoading, refreshProfile }}>
