@@ -24,6 +24,10 @@ const SidebarNav = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleLogout = async () => {
+    // Ensure the mobile sheet is closed before navigating away
+    if (isSheetOpen) {
+      setIsSheetOpen(false);
+    }
     await supabase.auth.signOut();
     navigate('/login');
   };
