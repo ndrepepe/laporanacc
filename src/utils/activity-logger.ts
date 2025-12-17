@@ -7,11 +7,13 @@ import { DailyReport } from "@/lib/types";
  * @param viewerId The ID of the user viewing the report (auth.uid()).
  * @param viewedUserId The ID of the user who submitted the report.
  * @param reportType The type of report being viewed.
+ * @param reportId The ID of the specific report being viewed.
  */
 export const logReportView = async (
     viewerId: string,
     viewedUserId: string,
-    reportType: DailyReport['type']
+    reportType: DailyReport['type'],
+    reportId: string
 ) => {
     // Only log and notify if the viewer is not the submitter
     if (viewerId === viewedUserId) {
@@ -23,6 +25,7 @@ export const logReportView = async (
         viewer_id: viewerId,
         viewed_user_id: viewedUserId,
         report_type: reportType,
+        report_id: reportId, // Now tracking specific report ID
     };
 
     const { error: logError } = await supabase

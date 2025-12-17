@@ -3,6 +3,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { useReportViewHistory } from '@/hooks/use-report-view-history';
+import { Clock, User, CheckCircle, Eye } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ReportDetailModalProps {
   report: DailyReport | null;
@@ -87,7 +90,13 @@ const renderSupervisorManagerDetails = (report: DailyReport) => {
 };
 
 const ReportDetailModal: React.FC<ReportDetailModalProps> = ({ report, isOpen, onClose }) => {
+  const { t } = useLanguage();
+  
   if (!report) return null;
+
+  // Fetch view history for the current report
+  const { data: viewHistory, isLoading: isLoadingHistory, isError: isErrorHistory } = useReportViewHistory(report.id);
+  const isViewed = (viewHistory?.length || 0) > 0;
 
   const renderDetails = () => {
     switch (report.type) {
@@ -109,7 +118,7 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({ report, isOpen, o
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col dark:glass-effect">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between text-xl tracking-wide">
-            Report Details
+            {t('view_details')}
             <Badge variant="secondary" className="ml-2 neon-glow">
               {report.type.replace('_', ' ').toUpperCase()}
             </Badge>
@@ -117,19 +126,78 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({ report, isOpen, o
         </DialogHeader>
         <ScrollArea className="flex-grow pr-4">
           <div className="space-y-4 pb-4">
+            {/* Submission Info */}
             <div className="grid grid-cols-2 gap-x-4 text-sm border-b pb-3 border-border/50">
               <div>
-                <p className="font-medium text-muted-foreground">Date Submitted:</p>
+                <p className="font-medium text-muted-foreground">{t('date')}:</p>
                 <p className="text-foreground font-semibold">{format(new Date(report.report_date), 'PPP')}</p>
               </div>
               <div>
-                <p className="font-medium text-muted-foreground">Submitted By:</p>
+                <p className="font-medium text-muted-foreground">{t('submitter')}:</p>
                 <p className="text-foreground font-semibold">
                   {report.profile?.first_name || 'Unknown'} {report.profile?.last_name || ''} ({report.profile?.role || 'Unknown Role'})
                 </p>
               </div>
             </div>
+            
+            {/* Report Specific Details */}
             {renderDetails()}
+            
+            {/* View History Section */}
+            <div className="pt-4 border-t border-border/50">
+              <h3 className="text-lg font-semibold mb-3 flex items-center">
+                <Clock className="h-5 w-5 mr-2 text-primary" />
+                {t('view_history_title')}
+              </h3>
+              
+              {isLoadingHistory && <p className="text-sm text-muted-foreground">Loading view history...</p>}
+              {isErrorHistory && <p className="text-sm text-red-500">Error loading view history.</p>}
+              
+              {!isLoadingHistory && !isErrorHistory && (
+                <>
+                  {/* Viewed Status Indicator */}
+                  <div className="mb-4 p-3 rounded-lg border"
+                       style={{ backgroundColor: isViewed ? 'hsl(var(--primary) / 0.1)' : 'hsl(var(--muted) / 0.5)' }}>
+                    <p className="text-sm font-medium flex items-center">
+                      {isViewed ? (
+                        <>
+                          <CheckCircle className="h-4 w-4 mr-2 text-primary" />
+                          {t('viewed_status')}: <span className="ml-1 font-bold text-primary">{t('viewed')}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Eye className="h-4 w-4 mr-2 text-muted-foreground" />
+                          {t('viewed_status')}: <span className="ml-1 font-bold text-muted-foreground">{t('not_yet_viewed')}</span>
+                        </>
+                      )}
+                    </p>
+                  </div>
+
+                  {/* Viewer List */}
+                  {isViewed && (
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-muted-foreground">{t('viewed_by')}:</p>
+                      {viewHistory?.map((log) => (
+                        <div key={log.id} className="flex items-center justify-between p-2 bg-secondary/50 rounded-md">
+                          <div className="flex items-center">
+                            <User className="h-4 w-4 mr-2 text-accent" />
+                            <span className="text-sm font-medium">
+                              {log.viewer_profile.first_name || 'Unknown'} {log.viewer_profile.last_name || ''}
+                            </span>
+                          </div>
+                          <div className="text-right">
+                            <Badge variant="secondary" className="text-xs mr-2">{log.viewer_profile.role}</Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {t('viewed_on')} {format(new Date(log.viewed_at), 'MMM dd, HH:mm')}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
           </div>
         </ScrollArea>
       </DialogContent>

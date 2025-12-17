@@ -73,7 +73,8 @@ const ViewSubordinateReports = () => {
     
     // Log activity since the viewer is a manager/supervisor viewing another user's report
     if (user && user.id !== report.user_id) {
-        logReportView(user.id, report.user_id, report.type);
+        // Pass report.id to the logger
+        logReportView(user.id, report.user_id, report.type, report.id);
     }
   };
 

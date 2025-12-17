@@ -53,6 +53,7 @@ const translations: Record<Language, Record<string, string>> = {
         'action_check_notifications': 'Check your notifications',
         'action_view_summaries': 'View statistical summaries',
         'action_view_subordinate_reports': 'View subordinate reports',
+        'retry': 'Retry',
 
         // General/Report View
         'date': 'Date',
@@ -72,6 +73,14 @@ const translations: Record<Language, Record<string, string>> = {
         'lpk_count': 'LPK Count',
         'add_lpk_entry': 'Add LPK Entry',
         'lpk_entries_title': 'LPK Entries (Multiple)',
+        
+        // Report View History
+        'viewed_status': 'Viewed Status',
+        'viewed_by': 'Viewed By',
+        'view_history_title': 'Report View History',
+        'not_yet_viewed': 'Not yet viewed by managers.',
+        'viewed_on': 'Viewed on',
+        'viewed': 'Viewed',
         
         // Submit Report Page
         'submit_daily_report_title': 'Submit Daily Report',
@@ -143,6 +152,7 @@ const translations: Record<Language, Record<string, string>> = {
         'suggestions_recommendations': 'Suggestions and Recommendations (Optional)',
         'enter_suggestions': 'Enter suggestions...',
         'submit_report_button': 'Submit Report',
+        'save_changes': 'Save Changes',
 
         // Cashier Form
         'payments_count_label': 'Number of Customers Who Made Payment Today',
@@ -181,7 +191,7 @@ const translations: Record<Language, Record<string, string>> = {
         'new_sales': 'New Sales',
         'payments_count': 'Payments Count',
         'payments_amount': 'Payments Amount',
-        'lpk_entered': 'LPK Entered',
+        'lpk_entered': 'LPK Dimasukkan',
     },
     id: {
         // Tools
@@ -223,6 +233,7 @@ const translations: Record<Language, Record<string, string>> = {
         'action_check_notifications': 'Periksa notifikasi Anda',
         'action_view_summaries': 'Lihat ringkasan statistik',
         'action_view_subordinate_reports': 'Lihat laporan bawahan',
+        'retry': 'Coba Lagi',
 
         // General/Report View
         'date': 'Tanggal',
@@ -242,6 +253,14 @@ const translations: Record<Language, Record<string, string>> = {
         'lpk_count': 'Jumlah LPK',
         'add_lpk_entry': 'Tambah Entri LPK',
         'lpk_entries_title': 'Entri LPK (Beberapa)',
+        
+        // Report View History
+        'viewed_status': 'Status Dilihat',
+        'viewed_by': 'Dilihat Oleh',
+        'view_history_title': 'Riwayat Melihat Laporan',
+        'not_yet_viewed': 'Belum dilihat oleh manajer.',
+        'viewed_on': 'Dilihat pada',
+        'viewed': 'Sudah Dilihat',
 
         // Submit Report Page
         'submit_daily_report_title': 'Kirim Laporan Harian',
@@ -313,6 +332,7 @@ const translations: Record<Language, Record<string, string>> = {
         'suggestions_recommendations': 'Saran dan Rekomendasi (Opsional)',
         'enter_suggestions': 'Masukkan saran...',
         'submit_report_button': 'Kirim Laporan',
+        'save_changes': 'Simpan Perubahan',
 
         // Cashier Form
         'payments_count_label': 'Jumlah Pelanggan yang Melakukan Pembayaran Hari Ini',
