@@ -39,9 +39,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         if (!error && data) {
           setProfile(data as UserProfile);
+        } else if (error) {
+          console.error("Error refreshing profile:", error);
+          // If profile fetch fails, set profile to null but don't block
+          setProfile(null);
         }
       } catch (error) {
         console.error("Error refreshing profile:", error);
+        setProfile(null);
       }
     }
   }, [user?.id]);
@@ -59,7 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const initializeAuth = async () => {
       try {
-        // Fetch initial session
+        // 1. Fetch initial session
         const { data: { session: initialSession }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -69,16 +74,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (!isMounted) return;
 
         const currentSession = initialSession || null;
+        const currentUser = currentSession?.user ?? null;
+        
         setSession(currentSession);
-        setUser(currentSession?.user ?? null);
+        setUser(currentUser);
 
-        // Fetch profile if user exists
-        if (currentSession?.user) {
+        // 2. CRITICAL: Set isLoading to false immediately after session check
+        // This resolves ProtectedRoute quickly.
+        clearTimeout(timeoutId);
+        setIsLoading(false); 
+
+        // 3. Fetch profile if user exists (non-blocking for initial load)
+        if (currentUser) {
+          // We need to fetch the profile immediately using the user ID from the session,
+          // as the `user` state might not have propagated yet for `refreshProfile`
           try {
             const { data, error } = await supabase
               .from("profiles")
               .select("id, first_name, last_name, role")
-              .eq("id", currentSession.user.id)
+              .eq("id", currentUser.id)
               .single();
 
             if (!isMounted) return;
@@ -87,15 +101,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               setProfile(data as UserProfile);
             } else if (error) {
               console.error("Profile fetch error:", error);
+              setProfile(null);
             }
           } catch (profileError) {
-            console.error("Unexpected error fetching profile:", profileError);
+            console.error("Unexpected error fetching profile on auth change:", profileError);
+            setProfile(null);
           }
+        } else {
+          setProfile(null);
         }
       } catch (error) {
         console.error("Error during initial auth setup:", error);
-      } finally {
-        // CRITICAL: Always set isLoading to false after initialization attempt
+        // If a major error occurs, ensure loading stops
         if (isMounted) {
           clearTimeout(timeoutId);
           setIsLoading(false);
@@ -114,6 +131,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(currentSession?.user ?? null);
 
         if (currentSession?.user) {
+          // Re-fetch profile on auth change
           try {
             const { data, error } = await supabase
               .from("profiles")
@@ -127,9 +145,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               setProfile(data as UserProfile);
             } else if (error) {
               console.error("Profile fetch error on auth change:", error);
+              setProfile(null);
             }
           } catch (profileError) {
             console.error("Unexpected error fetching profile on auth change:", profileError);
+            setProfile(null);
           }
         } else {
           setProfile(null);
