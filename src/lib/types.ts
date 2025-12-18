@@ -27,6 +27,9 @@ interface BaseReport {
   created_at: string;
   profile: Profile;
   type: ReportType;
+  // New fields for manager view tracking
+  accounting_manager_viewed_at: string | null;
+  senior_manager_viewed_at: string | null;
 }
 
 // Specific report interfaces

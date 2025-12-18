@@ -23,6 +23,7 @@ import { UserRole } from "@/lib/roles";
 import ReportFilters from "@/components/reports/ReportFilters";
 import { Button } from "@/components/Button"; // Use custom Button
 import { useLanguage } from "@/contexts/LanguageContext";
+import { updateReportViewStatus } from "@/utils/update-report-view-status"; // Import new utility
 
 // Helper function to render report type badge
 const ReportTypeBadge = ({ type }: { type: DailyReport['type'] }) => {
@@ -71,10 +72,12 @@ const ViewSubordinateReports = () => {
   const handleViewDetails = (report: DailyReport) => {
     setSelectedReport(report);
     
-    // Log activity since the viewer is a manager/supervisor viewing another user's report
-    if (user && user.id !== report.user_id) {
-        // Pass report.id to the logger
+    if (user && profile && user.id !== report.user_id) {
+        // 1. Log activity (for history table)
         logReportView(user.id, report.user_id, report.type, report.id);
+        
+        // 2. Update specific manager view status (for quick status display)
+        updateReportViewStatus(profile.role, report.id, report.type);
     }
   };
 

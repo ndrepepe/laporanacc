@@ -3,9 +3,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import { useReportViewHistory } from '@/hooks/use-report-view-history';
-import { Clock, User, CheckCircle, Eye } from 'lucide-react';
+import { useReportViewHistory, ReportViewLog } from '@/hooks/use-report-view-history';
+import { Clock, User, CheckCircle, Eye, ShieldCheck } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { cn } from '@/lib/utils';
 
 interface ReportDetailModalProps {
   report: DailyReport | null;
@@ -89,6 +90,22 @@ const renderSupervisorManagerDetails = (report: DailyReport) => {
   );
 };
 
+const ManagerViewStatus: React.FC<{ timestamp: string | null; role: string }> = ({ timestamp, role }) => {
+    if (!timestamp) return null;
+    
+    const formattedTime = format(new Date(timestamp), 'MMM dd, yyyy HH:mm');
+    
+    return (
+        <div className={cn(
+            "flex items-center p-2 rounded-lg text-xs font-medium",
+            role === 'Senior Manager' ? "bg-purple-500/20 text-purple-600 dark:bg-purple-800/30 dark:text-purple-300" : "bg-blue-500/20 text-blue-600 dark:bg-blue-800/30 dark:text-blue-300"
+        )}>
+            <ShieldCheck className="h-4 w-4 mr-2" />
+            Viewed by {role} on {formattedTime}
+        </div>
+    );
+};
+
 const ReportDetailModal: React.FC<ReportDetailModalProps> = ({ report, isOpen, onClose }) => {
   const { t } = useLanguage();
   
@@ -126,6 +143,18 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({ report, isOpen, o
         </DialogHeader>
         <ScrollArea className="flex-grow pr-4">
           <div className="space-y-4 pb-4">
+            {/* Manager View Status Indicators */}
+            <div className="space-y-2">
+                <ManagerViewStatus 
+                    timestamp={report.accounting_manager_viewed_at} 
+                    role="Accounting Manager" 
+                />
+                <ManagerViewStatus 
+                    timestamp={report.senior_manager_viewed_at} 
+                    role="Senior Manager" 
+                />
+            </div>
+            
             {/* Submission Info */}
             <div className="grid grid-cols-2 gap-x-4 text-sm border-b pb-3 border-border/50">
               <div>
@@ -177,7 +206,7 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({ report, isOpen, o
                   {isViewed && (
                     <div className="space-y-2">
                       <p className="text-sm font-medium text-muted-foreground">{t('viewed_by')}:</p>
-                      {viewHistory?.map((log) => (
+                      {viewHistory?.map((log: ReportViewLog) => (
                         <div key={log.id} className="flex items-center justify-between p-2 bg-secondary/50 rounded-md">
                           <div className="flex items-center">
                             <User className="h-4 w-4 mr-2 text-accent" />
