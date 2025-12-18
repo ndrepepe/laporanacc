@@ -182,11 +182,12 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({ report, isOpen, o
                           <div className="flex items-center">
                             <User className="h-4 w-4 mr-2 text-accent" />
                             <span className="text-sm font-medium">
-                              {log.viewer_profile.first_name || 'Unknown'} {log.viewer_profile.last_name || ''}
+                              {/* Safely access profile properties */}
+                              {log.viewer_profile?.first_name || 'Unknown'} {log.viewer_profile?.last_name || ''}
                             </span>
                           </div>
                           <div className="text-right">
-                            <Badge variant="secondary" className="text-xs mr-2">{log.viewer_profile.role}</Badge>
+                            <Badge variant="secondary" className="text-xs mr-2">{log.viewer_profile?.role || 'Unknown Role'}</Badge>
                             <span className="text-xs text-muted-foreground">
                               {t('viewed_on')} {format(new Date(log.viewed_at), 'MMM dd, HH:mm')}
                             </span>
