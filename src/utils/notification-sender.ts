@@ -16,6 +16,21 @@ const SUPERVISOR_MAP: Record<UserRole, UserRole[]> = {
     'Senior Manager': [], 
 };
 
+// New helper to fetch submitter name
+const fetchSubmitterName = async (senderId: string) => {
+    const { data, error } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('id', senderId)
+        .single();
+    
+    if (error) {
+        console.error("Error fetching submitter profile:", error);
+        return null;
+    }
+    return `${data.first_name || ''} ${data.last_name || ''}`.trim();
+};
+
 /**
  * Sends a notification to relevant supervisors/managers when a report is submitted.
  * @param senderId The ID of the user who submitted the report.
@@ -32,6 +47,9 @@ export const sendReportSubmissionNotification = async (
     if (!targetRoles || targetRoles.length === 0) {
         return; // No supervisors to notify
     }
+    
+    const submitterName = await fetchSubmitterName(senderId);
+    const submitterDisplay = submitterName || senderRole; // Use name if available, otherwise role
 
     // 1. Find all users whose role matches the target roles
     const { data: recipients, error: recipientError } = await supabase
@@ -51,7 +69,8 @@ export const sendReportSubmissionNotification = async (
     }
 
     // 2. Prepare notification payloads
-    const message = `${senderRole} submitted a new ${reportType.replace('_', ' ')} report today.`;
+    // Updated message to include submitter name/role
+    const message = `${submitterDisplay} (${senderRole}) submitted a new ${reportType.replace('_', ' ')} report today.`;
     
     const notificationPayloads = recipients.map(recipient => ({
         recipient_id: recipient.id,
@@ -62,11 +81,16 @@ export const sendReportSubmissionNotification = async (
     }));
 
     // 3. Insert notifications
-    const { error: insertError } = await supabase
-        .from('notifications')
-        .insert(notificationPayloads);
+    // Using try-catch for safe database write
+    try {
+        const { error: insertError } = await supabase
+            .from('notifications')
+            .insert(notificationPayloads);
 
-    if (insertError) {
-        console.error("Error inserting notifications:", insertError);
+        if (insertError) {
+            throw insertError;
+        }
+    } catch (insertError) {
+        console.error("Error inserting submission notifications:", insertError);
     }
 };

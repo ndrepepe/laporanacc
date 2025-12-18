@@ -28,11 +28,15 @@ export const logReportView = async (
         report_id: reportId, // Now tracking specific report ID
     };
 
-    const { error: logError } = await supabase
-        .from('activity_logs')
-        .insert([logPayload]);
+    try {
+        const { error: logError } = await supabase
+            .from('activity_logs')
+            .insert([logPayload]);
 
-    if (logError) {
+        if (logError) {
+            throw logError;
+        }
+    } catch (logError) {
         console.error("Failed to log report view activity:", logError);
         // Continue even if logging fails
     }
@@ -61,11 +65,16 @@ export const logReportView = async (
         is_read: false,
     };
 
-    const { error: notificationError } = await supabase
-        .from('notifications')
-        .insert([notificationPayload]);
+    // Wrapping notification insertion in try-catch for safety
+    try {
+        const { error: notificationError } = await supabase
+            .from('notifications')
+            .insert([notificationPayload]);
 
-    if (notificationError) {
+        if (notificationError) {
+            throw notificationError;
+        }
+    } catch (notificationError) {
         console.error("Failed to send report view notification:", notificationError);
     }
 };
