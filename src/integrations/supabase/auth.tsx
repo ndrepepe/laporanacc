@@ -31,13 +31,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Comprehensive function to fetch the profile, or create a basic one if missing.
   const ensureProfileExists = useCallback(async (currentUser: User): Promise<UserProfile | null> => {
     try {
-      // 1. Try to fetch existing profile
-      // Adding .maybeSingle() to handle PGRST116 (No rows found) gracefully without relying on error code check
+      // 1. Try to fetch existing profile, forcing a fresh read by using single()
       const { data: existingProfile, error: fetchError } = await supabase
         .from("profiles")
         .select("id, first_name, last_name, role")
         .eq("id", currentUser.id)
-        .maybeSingle(); // Use maybeSingle to return null if no row found
+        .maybeSingle();
 
       if (fetchError && fetchError.code) { 
         console.error("Profile fetch error:", fetchError);
@@ -57,8 +56,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         id: currentUser.id,
         first_name: metadata.first_name || null,
         last_name: metadata.last_name || null,
-        // Role is handled by the trigger on signup, but if the trigger failed, 
-        // we insert what we have. If the role is missing, it will be null.
         role: metadata.role || null, 
       };
 
@@ -70,7 +67,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (insertError) {
         console.error("Failed to create missing profile:", insertError);
-        // If insertion fails (e.g., due to RLS or constraint), we still return null profile
         return null;
       }
       
@@ -84,32 +80,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const refreshProfile = useCallback(async () => {
-    if (user) {
-      // Force a fresh fetch of the profile data
-      const updatedProfile = await ensureProfileExists(user);
+    // 1. Force refresh user session data (in case metadata changed)
+    const { data: { user: refreshedUser } } = await supabase.auth.getUser();
+    
+    if (refreshedUser) {
+      setUser(refreshedUser);
+      // 2. Fetch fresh profile data
+      const updatedProfile = await ensureProfileExists(refreshedUser);
       setProfile(updatedProfile);
     } else {
-      // If user is null, try to re-fetch session first
-      const { data: { user: refreshedUser } } = await supabase.auth.getUser();
-      if (refreshedUser) {
-        setUser(refreshedUser);
-        const updatedProfile = await ensureProfileExists(refreshedUser);
-        setProfile(updatedProfile);
-      }
+      // If user is no longer authenticated, clear state
+      setUser(null);
+      setProfile(null);
     }
-  }, [user, ensureProfileExists]);
+  }, [ensureProfileExists]);
 
   useEffect(() => {
     let isMounted = true;
     
-    // Timeout darurat untuk mencegah loading tak terbatas
-    const timeoutId = setTimeout(() => {
-      if (isMounted) {
-        console.error("Auth initialization timeout - forcing completion");
-        setIsLoading(false);
-      }
-    }, 10000); // 10 detik timeout
-
     const initializeAuth = async () => {
       try {
         // 1. Fetch initial session
@@ -127,8 +115,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(currentSession);
         setUser(currentUser);
 
-        // 2. CRITICAL: Set isLoading to false immediately after session check
-        clearTimeout(timeoutId);
+        // 2. Set isLoading to false immediately after session check
         setIsLoading(false); 
 
         // 3. Fetch or create profile if user exists (non-blocking)
@@ -141,9 +128,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
       } catch (error) {
         console.error("Error during initial auth setup:", error);
-        // If a major error occurs, ensure loading stops
         if (isMounted) {
-          clearTimeout(timeoutId);
           setIsLoading(false);
         }
       }
@@ -172,7 +157,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     return () => {
       isMounted = false;
-      clearTimeout(timeoutId);
       listener.subscription.unsubscribe();
     };
   }, [ensureProfileExists]);
