@@ -32,14 +32,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const ensureProfileExists = useCallback(async (currentUser: User): Promise<UserProfile | null> => {
     try {
       // 1. Try to fetch existing profile
+      // Adding .maybeSingle() to handle PGRST116 (No rows found) gracefully without relying on error code check
       const { data: existingProfile, error: fetchError } = await supabase
         .from("profiles")
         .select("id, first_name, last_name, role")
         .eq("id", currentUser.id)
-        .single();
+        .maybeSingle(); // Use maybeSingle to return null if no row found
 
-      // PGRST116 means 'No rows found'
-      if (fetchError && fetchError.code !== 'PGRST116') { 
+      if (fetchError && fetchError.code) { 
         console.error("Profile fetch error:", fetchError);
         return null;
       }
@@ -85,8 +85,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const refreshProfile = useCallback(async () => {
     if (user) {
+      // Force a fresh fetch of the profile data
       const updatedProfile = await ensureProfileExists(user);
       setProfile(updatedProfile);
+    } else {
+      // If user is null, try to re-fetch session first
+      const { data: { user: refreshedUser } } = await supabase.auth.getUser();
+      if (refreshedUser) {
+        setUser(refreshedUser);
+        const updatedProfile = await ensureProfileExists(refreshedUser);
+        setProfile(updatedProfile);
+      }
     }
   }, [user, ensureProfileExists]);
 
