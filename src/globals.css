@@ -14,12 +14,12 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    /* Primary: Blue/Indigo */
-    --primary: 220 80% 50%; /* Soft Blue */
+    /* Primary: Energetic Blue/Indigo (240 80% 50% for deeper indigo) */
+    --primary: 240 80% 50%; 
     --primary-foreground: 210 40% 98%;
 
-    /* Accent: Neon Cyan */
-    --accent: 180 100% 50%; /* Pure Cyan */
+    /* Accent: Electric Cyan (190 90% 50% for electric blue/cyan) */
+    --accent: 190 90% 50%; 
     --accent-foreground: 222.2 47.4% 11.2%;
 
     --secondary: 210 40% 96.1%;
@@ -33,23 +33,23 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 220 80% 50%; /* Primary color ring */
+    --ring: 240 80% 50%; /* Primary color ring */
 
-    --radius: 0.75rem; /* Slightly larger radius */
+    --radius: 0.75rem; /* Slightly larger radius (12px) */
 
     /* Sidebar (Light) */
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 222.2 84% 4.9%;
-    --sidebar-primary: 220 80% 50%;
+    --sidebar-primary: 240 80% 50%;
     --sidebar-primary-foreground: 210 40% 98%;
     --sidebar-accent: 210 40% 96.1%;
     --sidebar-accent-foreground: 222.2 47.4% 11.2%;
     --sidebar-border: 214.3 31.8% 91.4%;
-    --sidebar-ring: 220 80% 50%;
+    --sidebar-ring: 240 80% 50%;
   }
 
   .dark {
-    /* Dark Mode (Deep Charcoal) */
+    /* Dark Mode (Deep Charcoal/Slate 900) */
     --background: 220 10% 10%; /* Dark background */
     --foreground: 210 20% 95%; /* Light text */
 
@@ -110,9 +110,9 @@
   }
 }
 
-/* Custom utility for neon glow effect */
+/* Custom utility for neon glow effect (soft shadow) */
 .neon-glow {
-  box-shadow: 0 0 5px hsl(var(--accent) / 0.5), 0 0 10px hsl(var(--accent) / 0.3);
+  box-shadow: 0 0 8px hsl(var(--accent) / 0.3), 0 0 15px hsl(var(--accent) / 0.15);
 }
 
 /* Custom utility for subtle glass effect */

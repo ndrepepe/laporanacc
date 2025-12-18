@@ -10,7 +10,7 @@ const StickyHeader: React.FC<StickyHeaderProps> = ({ children, className }) => {
     return (
         <header 
             className={cn(
-                "sticky top-0 z-30 pt-4 pb-4 bg-background border-b border-border/50", // Menggunakan bg-background penuh dan menghapus backdrop-blur
+                "sticky top-0 z-30 pt-4 pb-4 bg-background/80 backdrop-blur-sm border-b border-border/50", // Added backdrop-blur
                 className
             )}
         >
