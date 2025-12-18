@@ -19,9 +19,9 @@ const Index = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [hasAttemptedRefresh, setHasAttemptedRefresh] = useState(false);
 
-  // Jika profil tidak dimuat setelah autentikasi selesai, coba refresh secara otomatis
+  // If profile is loaded but role is missing, try to refresh once automatically
   useEffect(() => {
-    if (!isLoading && !profile && user && !hasAttemptedRefresh) {
+    if (!isLoading && profile && !profile.role && !hasAttemptedRefresh) {
       const refresh = async () => {
         setIsRefreshing(true);
         await refreshProfile();
@@ -30,7 +30,7 @@ const Index = () => {
       };
       refresh();
     }
-  }, [isLoading, profile, user, hasAttemptedRefresh, refreshProfile]);
+  }, [isLoading, profile, hasAttemptedRefresh, refreshProfile]);
 
   const getGuidanceMessage = (role: UserRole | undefined) => {
     if (!role) {
@@ -42,7 +42,6 @@ const Index = () => {
     } else if (SUBORDINATE_ROLES.includes(role)) {
       actions.push(t('action_view_subordinate_reports'));
     }
-
     if (actions.length === 1) {
       return `${t('guidance_prefix')} ${actions[0]}.`;
     } else if (actions.length === 2) {
@@ -53,7 +52,7 @@ const Index = () => {
     }
   };
 
-  // Tampilkan pesan loading jika masih dalam proses autentikasi
+  // Show loading message if still in the process of authentication
   if (isLoading) {
     return (
       <DashboardLayout>
@@ -75,23 +74,17 @@ const Index = () => {
             {t('welcome')}, {profile?.first_name || user?.email}!
           </h1>
           {(!profile || !profile.role) && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={async () => {
-                setIsRefreshing(true);
-                await refreshProfile();
-                setIsRefreshing(false);
-              }}
-              disabled={isRefreshing}
-            >
+            <Button variant="outline" size="sm" onClick={async () => {
+              setIsRefreshing(true);
+              await refreshProfile();
+              setIsRefreshing(false);
+            }} disabled={isRefreshing}>
               <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
               Refresh Profile
             </Button>
           )}
         </div>
       </StickyHeader>
-      
       <div className="grid grid-cols-1 gap-6 mt-6">
         <Card>
           <CardHeader>
@@ -107,16 +100,11 @@ const Index = () => {
                 <p className="text-3xl font-bold text-muted-foreground tracking-wider">
                   {t('role_not_assigned')}
                 </p>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={async () => {
-                    setIsRefreshing(true);
-                    await refreshProfile();
-                    setIsRefreshing(false);
-                  }}
-                  disabled={isRefreshing}
-                >
+                <Button variant="outline" size="sm" onClick={async () => {
+                  setIsRefreshing(true);
+                  await refreshProfile();
+                  setIsRefreshing(false);
+                }} disabled={isRefreshing}>
                   <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
                   {t('retry')}
                 </Button>
