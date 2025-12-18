@@ -47,6 +47,13 @@ const renderCashierDetails = (report: DailyReport) => {
       <DetailItem label="Total Payments (IDR)" value={cashierReport.total_payments.toLocaleString('id-ID')} />
       <DetailItem label="Worked on LPH" value={cashierReport.worked_on_lph} />
       <DetailItem label="Customer Confirmation Done" value={cashierReport.customer_confirmation_done} />
+      
+      {cashierReport.incentive_report_progress && (
+        <>
+          <h4 className="font-semibold mt-4 pt-4 border-t border-border/50">Incentive Report Progress</h4>
+          <p className="text-sm text-foreground/80 whitespace-pre-wrap p-2 bg-muted/50 rounded-md">{cashierReport.incentive_report_progress}</p>
+        </>
+      )}
     </div>
   );
 };

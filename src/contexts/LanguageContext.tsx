@@ -160,6 +160,11 @@ const translations: Record<Language, Record<string, string>> = {
         'worked_on_lph_label': 'Did you work on LPH today?',
         'customer_confirmation_done_label': 'Customer Confirmation Done?',
         'submit_cashier_report': 'Submit Cashier Report',
+        
+        // Kasir-Insentif Specific
+        'incentive_report_progress_label': 'Incentive Report Progress Report',
+        'describe_incentive_progress': 'Describe your progress on the incentive report...',
+        'incentive_report_progress_required': 'Incentive Report Progress is required for your role.',
 
         // Consignment Staff Form
         'received_lpk_label': 'Did you receive LPK from branches today?',
@@ -340,6 +345,11 @@ const translations: Record<Language, Record<string, string>> = {
         'worked_on_lph_label': 'Apakah Anda mengerjakan LPH hari ini?',
         'customer_confirmation_done_label': 'Konfirmasi Pelanggan Selesai?',
         'submit_cashier_report': 'Kirim Laporan Kasir',
+        
+        // Kasir-Insentif Specific
+        'incentive_report_progress_label': 'Laporan Perkembangan Pembuatan Laporan Insentif',
+        'describe_incentive_progress': 'Jelaskan perkembangan Anda dalam membuat laporan insentif...',
+        'incentive_report_progress_required': 'Laporan Perkembangan Laporan Insentif wajib diisi untuk peran Anda.',
 
         // Consignment Staff Form
         'received_lpk_label': 'Apakah Anda menerima LPK dari cabang hari ini?',

@@ -4,4 +4,5 @@ export type UserRole =
     | 'Consignment Staff'
     | 'Consignment Supervisor'
     | 'Accounting Manager'
-    | 'Senior Manager';
+    | 'Senior Manager'
+    | 'Kasir-Insentif';

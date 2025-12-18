@@ -13,6 +13,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { sendReportSubmissionNotification } from "@/utils/notification-sender";
 import { CashierFormSchema } from "@/lib/report-schemas";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Textarea } from "@/components/ui/textarea"; // Import Textarea
 
 type CashierFormValues = z.infer<typeof CashierFormSchema>;
 
@@ -20,14 +21,17 @@ const ReportFormCashier = () => {
   const { user, profile } = useAuth();
   const { t } = useLanguage();
   const queryClient = useQueryClient();
+  
+  const isKasirInsentif = profile?.role === 'Kasir-Insentif';
 
   const form = useForm<CashierFormValues>({
     resolver: zodResolver(CashierFormSchema),
     defaultValues: {
-      payments_count: undefined, // Changed from 0
-      total_payments: undefined, // Changed from 0
+      payments_count: undefined,
+      total_payments: undefined,
       worked_on_lph: "No",
       customer_confirmation_done: "No",
+      incentive_report_progress: "", // Initialize new field
     },
   });
 
@@ -36,6 +40,16 @@ const ReportFormCashier = () => {
       showError("User not authenticated or role missing.");
       return;
     }
+    
+    // Validation check for Kasir-Insentif specific field
+    if (isKasirInsentif && !values.incentive_report_progress?.trim()) {
+        form.setError('incentive_report_progress', {
+            type: 'manual',
+            message: t('incentive_report_progress_required'),
+        });
+        showError(t('incentive_report_progress_required'));
+        return;
+    }
 
     const payload = {
       user_id: user.id,
@@ -43,6 +57,7 @@ const ReportFormCashier = () => {
       total_payments: values.total_payments,
       worked_on_lph: values.worked_on_lph === "Yes",
       customer_confirmation_done: values.customer_confirmation_done === "Yes",
+      incentive_report_progress: isKasirInsentif ? values.incentive_report_progress || null : null,
     };
 
     const { error } = await supabase
@@ -54,7 +69,13 @@ const ReportFormCashier = () => {
       showError("Failed to submit report. You may have already submitted a report for today.");
     } else {
       showSuccess("Cashier Report submitted successfully!");
-      form.reset();
+      form.reset({
+        payments_count: undefined,
+        total_payments: undefined,
+        worked_on_lph: "No",
+        customer_confirmation_done: "No",
+        incentive_report_progress: "",
+      });
       
       // Send notification to managers
       await sendReportSubmissionNotification(user.id, profile.role, 'cashier');
@@ -184,6 +205,28 @@ const ReportFormCashier = () => {
             </FormItem>
           )}
         />
+        
+        {/* Conditional Field for Kasir-Insentif */}
+        {isKasirInsentif && (
+            <FormField
+              control={form.control}
+              name="incentive_report_progress"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-primary font-bold">{t('incentive_report_progress_label')}</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder={t('describe_incentive_progress')}
+                      {...field}
+                      rows={5}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+        )}
+
         <Button type="submit" variant="gradient">{t('submit_cashier_report')}</Button>
       </form>
     </Form>

@@ -14,6 +14,7 @@ export const VIEW_PERMISSIONS: Record<UserRole, ReportType[]> = {
     'Accounting Staff': [],
     'Cashier': [],
     'Consignment Staff': [],
+    'Kasir-Insentif': [], // FIX: Added missing role
     
     'Consignment Supervisor': ['consignment_staff', 'supervisor_manager'],
     'Accounting Manager': ['accounting', 'cashier', 'consignment_staff', 'supervisor_manager'],

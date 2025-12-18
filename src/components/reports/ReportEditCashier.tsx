@@ -12,6 +12,8 @@ import { REPORT_TABLE_MAP } from "@/lib/report-constants";
 import { useQueryClient } from "@tanstack/react-query";
 import { CashierReport, DailyReport } from "@/lib/types";
 import { CashierFormSchema } from "@/lib/report-schemas";
+import { Textarea } from "@/components/ui/textarea";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type CashierFormValues = z.infer<typeof CashierFormSchema>;
 
@@ -21,13 +23,18 @@ interface ReportEditCashierProps {
 }
 
 const ReportEditCashier: React.FC<ReportEditCashierProps> = ({ report, onSuccess }) => {
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   
+  // Determine if the report being edited belongs to a Kasir-Insentif user
+  const isKasirInsentifReport = report.profile?.role === 'Kasir-Insentif';
+
   const defaultValues: CashierFormValues = {
     payments_count: report.payments_count,
     total_payments: report.total_payments,
     worked_on_lph: report.worked_on_lph ? "Yes" : "No",
     customer_confirmation_done: report.customer_confirmation_done ? "Yes" : "No",
+    incentive_report_progress: report.incentive_report_progress || "", // Initialize new field
   };
 
   const form = useForm<CashierFormValues>({
@@ -36,11 +43,23 @@ const ReportEditCashier: React.FC<ReportEditCashierProps> = ({ report, onSuccess
   });
 
   const onSubmit = async (values: CashierFormValues) => {
+    
+    // Validation check for Kasir-Insentif specific field during edit
+    if (isKasirInsentifReport && !values.incentive_report_progress?.trim()) {
+        form.setError('incentive_report_progress', {
+            type: 'manual',
+            message: t('incentive_report_progress_required'),
+        });
+        showError(t('incentive_report_progress_required'));
+        return;
+    }
+    
     const payload = {
       payments_count: values.payments_count,
       total_payments: values.total_payments,
       worked_on_lph: values.worked_on_lph === "Yes",
       customer_confirmation_done: values.customer_confirmation_done === "Yes",
+      incentive_report_progress: isKasirInsentifReport ? values.incentive_report_progress || null : null,
     };
 
     const { error } = await supabase
@@ -154,6 +173,27 @@ const ReportEditCashier: React.FC<ReportEditCashierProps> = ({ report, onSuccess
             </FormItem>
           )}
         />
+        
+        {/* Conditional Field for Kasir-Insentif */}
+        {isKasirInsentifReport && (
+            <FormField
+              control={form.control}
+              name="incentive_report_progress"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-primary font-bold">{t('incentive_report_progress_label')}</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder={t('describe_incentive_progress')}
+                      {...field}
+                      rows={5}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+        )}
 
         <Button type="submit" variant="gradient">Save Changes</Button>
       </form>

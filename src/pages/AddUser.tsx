@@ -20,6 +20,7 @@ const ALL_ROLES: UserRole[] = [
   'Consignment Supervisor',
   'Accounting Manager',
   'Senior Manager',
+  'Kasir-Insentif', // Added new role
 ];
 
 const AddUserSchema = z.object({

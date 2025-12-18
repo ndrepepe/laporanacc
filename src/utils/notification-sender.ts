@@ -7,6 +7,7 @@ const SUPERVISOR_MAP: Record<UserRole, UserRole[]> = {
     'Accounting Staff': ['Accounting Manager', 'Senior Manager'],
     'Cashier': ['Accounting Manager', 'Senior Manager'],
     'Consignment Staff': ['Consignment Supervisor', 'Senior Manager'],
+    'Kasir-Insentif': ['Accounting Manager', 'Senior Manager'], // FIX: Added missing role
     
     // Managers/Supervisors report up to Senior Manager
     'Consignment Supervisor': ['Senior Manager'],

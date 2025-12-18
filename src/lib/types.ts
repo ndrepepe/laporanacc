@@ -47,6 +47,7 @@ export interface CashierReport {
   total_payments: number;
   worked_on_lph: boolean; // Added for Error 5
   customer_confirmation_done: boolean;
+  incentive_report_progress: string | null; // NEW FIELD
 }
 
 export interface ConsignmentStaffReport {
