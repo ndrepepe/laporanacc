@@ -142,10 +142,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setProfile(null);
         }
       } catch (error: any) {
-        console.error("Error during initial auth setup:", error);
-        showError(`Initialization error: ${error.message}`);
+        // This block catches unexpected errors, often caused by corrupted local storage/cookies.
+        console.error("Error during initial auth setup (likely corrupted cache):", error);
+        showError(`Initialization error: ${error.message}. Attempting to clear local session.`);
+        
+        // Self-healing: Force sign out to clear corrupted local storage state
+        await supabase.auth.signOut(); 
+        
         if (isMounted) {
+          // Ensure we stop loading and allow ProtectedRoute to redirect to /login
           setIsLoading(false);
+          setSession(null);
+          setUser(null);
+          setProfile(null);
         }
       }
     };
