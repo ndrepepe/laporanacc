@@ -9,3 +9,12 @@ export const NOTIFICATION_RECIPIENTS: Record<UserRole, UserRole[]> = {
   'Accounting Manager': ['Senior Manager'],
   'Senior Manager': [],
 };
+
+export const sendReportSubmissionNotification = async (
+  userId: string,
+  userRole: UserRole,
+  reportType: string
+) => {
+  // Implementasi notifikasi akan ditambahkan di sini
+  console.log(`Sending notification for ${reportType} report from user ${userId} with role ${userRole}`);
+};

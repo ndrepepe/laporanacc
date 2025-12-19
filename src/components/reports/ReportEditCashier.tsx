@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +11,6 @@ import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/integrations/supabase/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { UserRole } from "@/lib/roles";
 
 interface ReportData {
   id: string;
@@ -30,19 +28,18 @@ interface ProfileData {
   id: string;
   first_name: string;
   last_name: string;
-  role: UserRole;
+  role: string;
 }
 
 const ReportEditCashier = () => {
   const { t } = useLanguage();
-  const { profile } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [report, setReport] = useState<ReportData | null>(null);
   const [allProfiles, setAllProfiles] = useState<ProfileData[]>([]);
 
-  const isKasirInsentifReport = report?.profile?.role === 'Cashier-Insentif';
+  const isKasirInsentifReport = report?.incentive_report_progress !== undefined;
 
   useEffect(() => {
     const fetchReport = async () => {
@@ -50,10 +47,7 @@ const ReportEditCashier = () => {
       try {
         const { data, error } = await supabase
           .from("reports_cashier")
-          .select(`
-            *,
-            profile:profiles!inner(*)
-          `)
+          .select("*")
           .eq("id", window.location.pathname.split("/").pop())
           .single();
 
