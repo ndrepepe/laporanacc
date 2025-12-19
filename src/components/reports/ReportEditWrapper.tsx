@@ -71,7 +71,7 @@ const ReportEditWrapper: React.FC<ReportEditWrapperProps> = ({ reportId, reportT
       case 'accounting':
         return <ReportEditAccounting report={report as any} onSuccess={onSuccess} />;
       case 'cashier':
-        return <ReportEditCashier report={report as any} onSuccess={onSuccess} />;
+        return <ReportEditCashier />;
       case 'consignment_staff':
         return <ReportEditConsignmentStaff report={report as any} onSuccess={onSuccess} />;
       case 'supervisor_manager':
