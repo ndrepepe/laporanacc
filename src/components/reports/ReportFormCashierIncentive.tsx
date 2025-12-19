@@ -1,27 +1,22 @@
 "use client";
 
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/integrations/supabase/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { UserRole } from "@/lib/roles";
 
-const ReportFormCashier = () => {
+const ReportFormCashierIncentive = () => {
   const { t } = useLanguage();
   const { profile } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-
-  const isKasirInsentif = profile?.role === 'Cashier-Insentif';
 
   const [formData, setFormData] = useState({
     report_date: new Date().toISOString().split('T')[0],
@@ -29,7 +24,7 @@ const ReportFormCashier = () => {
     total_payments: "",
     worked_on_lph: false,
     customer_confirmation_done: false,
-    incentive_report_progress: isKasirInsentif ? "" : undefined
+    incentive_report_progress: ""
   });
 
   const handleInputChange = (field: string, value: string | boolean) => {
@@ -50,22 +45,17 @@ const ReportFormCashier = () => {
         throw new Error("User profile not found");
       }
 
-      const reportData = {
-        user_id: profile.id,
-        report_date: formData.report_date,
-        payments_count: parseInt(formData.payments_count) || 0,
-        total_payments: parseFloat(formData.total_payments) || 0,
-        worked_on_lph: formData.worked_on_lph,
-        customer_confirmation_done: formData.customer_confirmation_done,
-      };
-
-      if (isKasirInsentif && formData.incentive_report_progress) {
-        (reportData as any).incentive_report_progress = formData.incentive_report_progress;
-      }
-
       const { error: submitError } = await supabase
         .from("reports_cashier")
-        .insert(reportData);
+        .insert({
+          user_id: profile.id,
+          report_date: formData.report_date,
+          payments_count: parseInt(formData.payments_count) || 0,
+          total_payments: parseFloat(formData.total_payments) || 0,
+          worked_on_lph: formData.worked_on_lph,
+          customer_confirmation_done: formData.customer_confirmation_done,
+          incentive_report_progress: formData.incentive_report_progress
+        });
 
       if (submitError) {
         throw submitError;
@@ -150,18 +140,16 @@ const ReportFormCashier = () => {
           />
         </div>
 
-        {isKasirInsentif && (
-          <div className="space-y-2">
-            <Label htmlFor="incentive_report_progress">{t('incentive_report_progress')}</Label>
-            <Textarea
-              id="incentive_report_progress"
-              value={formData.incentive_report_progress || ""}
-              onChange={(e) => handleInputChange("incentive_report_progress", e.target.value)}
-              placeholder={t('incentive_report_progress_placeholder')}
-              rows={3}
-            />
-          </div>
-        )}
+        <div className="space-y-2">
+          <Label htmlFor="incentive_report_progress">{t('incentive_report_progress')}</Label>
+          <Textarea
+            id="incentive_report_progress"
+            value={formData.incentive_report_progress}
+            onChange={(e) => handleInputChange("incentive_report_progress", e.target.value)}
+            placeholder={t('incentive_report_progress_placeholder')}
+            rows={3}
+          />
+        </div>
       </div>
 
       <div className="space-y-4">
@@ -206,4 +194,4 @@ const ReportFormCashier = () => {
   );
 };
 
-export default ReportFormCashier;
+export default ReportFormCashierIncentive;

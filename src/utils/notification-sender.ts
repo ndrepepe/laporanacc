@@ -1,97 +1,11 @@
-import { supabase } from "@/integrations/supabase/client";
-import { UserRole } from "@/lib/roles";
-import { ReportType } from "@/lib/report-constants";
+import { UserRole } from '../lib/roles';
 
-// Define which roles supervise which staff roles
-const SUPERVISOR_MAP: Record<UserRole, UserRole[]> = {
-    'Accounting Staff': ['Accounting Manager', 'Senior Manager'],
-    'Cashier': ['Accounting Manager', 'Senior Manager'],
-    'Consignment Staff': ['Consignment Supervisor', 'Senior Manager'],
-    'Kasir-Insentif': ['Accounting Manager', 'Senior Manager'], // FIX: Added missing role
-    
-    // Managers/Supervisors report up to Senior Manager
-    'Consignment Supervisor': ['Senior Manager'],
-    'Accounting Manager': ['Senior Manager'],
-    
-    // Senior Manager reports to no one in this system context
-    'Senior Manager': [], 
-};
-
-// New helper to fetch submitter name
-const fetchSubmitterName = async (senderId: string) => {
-    const { data, error } = await supabase
-        .from('profiles')
-        .select('first_name, last_name')
-        .eq('id', senderId)
-        .single();
-    
-    if (error) {
-        console.error("Error fetching submitter profile:", error);
-        return null;
-    }
-    return `${data.first_name || ''} ${data.last_name || ''}`.trim();
-};
-
-/**
- * Sends a notification to relevant supervisors/managers when a report is submitted.
- * @param senderId The ID of the user who submitted the report.
- * @param senderRole The role of the user who submitted the report.
- * @param reportType The type of report submitted.
- */
-export const sendReportSubmissionNotification = async (
-    senderId: string,
-    senderRole: UserRole,
-    reportType: ReportType
-) => {
-    const targetRoles = SUPERVISOR_MAP[senderRole];
-
-    if (!targetRoles || targetRoles.length === 0) {
-        return; // No supervisors to notify
-    }
-    
-    const submitterName = await fetchSubmitterName(senderId);
-    const submitterDisplay = submitterName || senderRole; // Use name if available, otherwise role
-
-    // 1. Find all users whose role matches the target roles
-    const { data: recipients, error: recipientError } = await supabase
-        .from('profiles')
-        .select('id')
-        .in('role', targetRoles);
-
-    if (recipientError) {
-        console.error("Error finding notification recipients:", recipientError);
-        // We don't show an error toast for notification failure, as it shouldn't block the user.
-        return;
-    }
-
-    if (!recipients || recipients.length === 0) {
-        console.warn(`No users found for roles: ${targetRoles.join(', ')}`);
-        return;
-    }
-
-    // 2. Prepare notification payloads
-    // Updated message to include submitter name/role
-    const message = `${submitterDisplay} (${senderRole}) submitted a new ${reportType.replace('_', ' ')} report today.`;
-    
-    const notificationPayloads = recipients.map(recipient => ({
-        recipient_id: recipient.id,
-        sender_id: senderId,
-        type: 'report_submission',
-        message: message,
-        is_read: false,
-    }));
-
-    // 3. Insert notifications
-    // Using try-catch for safe database write
-    try {
-        const { error: insertError } = await supabase
-            .from('notifications')
-            .insert(notificationPayloads);
-
-        if (insertError) {
-            throw insertError;
-        }
-    } catch (insertError) {
-        console.error("Error inserting submission notifications:", insertError);
-    }
+export const NOTIFICATION_RECIPIENTS: Record<UserRole, UserRole[]> = {
+  'Accounting Staff': ['Accounting Manager', 'Senior Manager'],
+  'Cashier': ['Accounting Manager', 'Senior Manager'],
+  'Cashier-Insentif': ['Accounting Manager', 'Senior Manager'],
+  'Consignment Staff': ['Consignment Supervisor', 'Senior Manager'],
+  'Consignment Supervisor': ['Accounting Manager', 'Senior Manager'],
+  'Accounting Manager': ['Senior Manager'],
+  'Senior Manager': [],
 };
