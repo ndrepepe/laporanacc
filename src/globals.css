@@ -1,3 +1,4 @@
+/* UI Update Dec 2025 - Force consistent sidebar width and modern styling */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,36 +8,26 @@
     /* Light Mode (Soft Neutral) */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
-
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
-
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-
     /* Primary: Energetic Blue/Indigo (240 80% 50% for deeper indigo) */
-    --primary: 240 80% 50%; 
+    --primary: 240 80% 50%;
     --primary-foreground: 210 40% 98%;
-
     /* Accent: Electric Cyan (190 90% 50% for electric blue/cyan) */
-    --accent: 190 90% 50%; 
+    --accent: 190 90% 50%;
     --accent-foreground: 222.2 47.4% 11.2%;
-
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
-
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 240 80% 50%; /* Primary color ring */
-
     --radius: 0.75rem; /* Slightly larger radius (12px) */
-
     /* Sidebar (Light) */
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 222.2 84% 4.9%;
@@ -52,34 +43,24 @@
     /* Dark Mode (Deep Charcoal/Slate 900) */
     --background: 220 10% 10%; /* Dark background */
     --foreground: 210 20% 95%; /* Light text */
-
     --card: 220 10% 15%; /* Slightly lighter card */
     --card-foreground: 210 20% 95%;
-
     --popover: 220 10% 15%;
     --popover-foreground: 210 20% 95%;
-
     /* Primary: Deep Indigo/Violet */
     --primary: 250 80% 60%; /* Violet/Purple */
-    --primary-foreground: 210 20% 95%;
-
-    /* Accent: Electric Blue/Cyan */
+    --primary-foreground: 210 20% 95%; /* Accent: Electric Blue/Cyan */
     --accent: 190 80% 50%; /* Electric Cyan */
     --accent-foreground: 220 10% 10%;
-
     --secondary: 220 10% 20%;
     --secondary-foreground: 210 20% 95%;
-
     --muted: 220 10% 20%;
     --muted-foreground: 215 10% 60%;
-
     --destructive: 0 80% 50%;
     --destructive-foreground: 210 20% 95%;
-
     --border: 220 10% 25%;
     --input: 220 10% 20%;
     --ring: 250 80% 60%; /* Primary color ring */
-
     /* Sidebar (Dark) */
     --sidebar-background: 220 10% 10%;
     --sidebar-foreground: 210 20% 95%;
@@ -96,12 +77,10 @@
   * {
     @apply border-border;
   }
-
   body {
     /* Use a modern font stack */
     @apply bg-background text-foreground font-sans;
   }
-  
   /* Custom class for gradient text */
   .text-gradient {
     background-image: linear-gradient(to right, hsl(var(--primary)) 30%, hsl(var(--accent)) 70%);
@@ -120,4 +99,28 @@
   background-color: hsl(var(--card) / 0.5);
   backdrop-filter: blur(10px);
   border: 1px solid hsl(var(--border) / 0.5);
+}
+
+/* Force consistent sidebar width - FIXED WIDTH 256px */
+.md\:flex.flex-col.w-64.border-r.border-border.bg-card.h-screen.sticky.top-0.shadow-2xl.dark\:shadow-primary\/10 {
+  width: 256px !important;
+  min-width: 256px !important;
+  max-width: 256px !important;
+}
+
+/* Alternative selector for sidebar if the above doesn't catch it */
+div[class*="sidebar"] {
+  width: 256px !important;
+  min-width: 256px !important;
+  max-width: 256px !important;
+}
+
+/* Force modern styling with rounded corners */
+.rounded-xl {
+  border-radius: 16px !important;
+}
+
+/* Ensure cards have modern styling */
+.bg-card {
+  border-radius: 16px !important;
 }
