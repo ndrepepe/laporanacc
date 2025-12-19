@@ -9,7 +9,7 @@ import {
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "./client";
 import { Profile } from "@/lib/types";
-import { showError } from "@/utils/toast"; // Import toast utility
+import { showError } from "@/utils/toast";
 
 export type UserProfile = Profile;
 
@@ -28,8 +28,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Comprehensive function to fetch the profile, or create a basic one if missing.
+  // Comprehensive function to fetch profile, or create a basic one if missing.
   const ensureProfileExists = useCallback(async (currentUser: User): Promise<UserProfile | null> => {
     try {
       // 1. Try to fetch existing profile with explicit single() to force fresh read
@@ -87,59 +88,99 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const refreshProfile = useCallback(async () => {
-    // 1. Force refresh user session data (in case metadata changed)
-    const { data: { user: refreshedUser }, error: userError } = await supabase.auth.getUser();
-    
-    if (userError) {
-      console.error("Error refreshing user session:", userError);
-      showError(`Session refresh failed: ${userError.message}`);
-      return; // Don't proceed if we can't get the user
-    }
+    try {
+      // 1. Force refresh user session data (in case metadata changed)
+      const { data: { user: refreshedUser }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        console.error("Error refreshing user session:", userError);
+        showError(`Session refresh failed: ${userError.message}`);
+        return; // Don't proceed if we can't get user
+      }
 
-    if (refreshedUser) {
-      setUser(refreshedUser);
-      // 2. Fetch fresh profile data
-      const updatedProfile = await ensureProfileExists(refreshedUser);
-      setProfile(updatedProfile);
-    } else {
-      // If user is no longer authenticated, clear state
-      setUser(null);
-      setProfile(null);
+      if (refreshedUser) {
+        setUser(refreshedUser);
+        // 2. Fetch fresh profile data
+        const updatedProfile = await ensureProfileExists(refreshedUser);
+        setProfile(updatedProfile);
+      } else {
+        // If user is no longer authenticated, clear state
+        setUser(null);
+        setProfile(null);
+      }
+    } catch (error: any) {
+      console.error("Error in refreshProfile:", error);
+      showError(`Profile refresh failed: ${error.message}`);
     }
   }, [ensureProfileExists]);
 
   useEffect(() => {
     let isMounted = true;
+    let timeoutId: NodeJS.Timeout;
     
     const initializeAuth = async () => {
       try {
-        // 1. Fetch initial session
-        const { data: { session: initialSession }, error: sessionError } = await supabase.auth.getSession();
+        // Add timeout to prevent infinite loading
+        timeoutId = setTimeout(() => {
+          if (isMounted && !isInitialized) {
+            console.warn("Auth initialization timeout - forcing completion");
+            setIsLoading(false);
+            setIsInitialized(true);
+          }
+        }, 10000); // 10 second timeout
+
+        // 1. Fetch initial session with retry logic
+        let retryCount = 0;
+        const maxRetries = 3;
         
-        if (sessionError) {
-          console.error("Session fetch error:", sessionError);
-          showError(`Authentication error: ${sessionError.message}`);
-        }
+        while (retryCount < maxRetries) {
+          try {
+            const { data: { session: initialSession }, error: sessionError } = await supabase.auth.getSession();
+            
+            if (sessionError) {
+              console.error("Session fetch error:", sessionError);
+              if (retryCount === maxRetries - 1) {
+                showError(`Authentication error: ${sessionError.message}`);
+              }
+            } else {
+              // Retry after a short delay
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              retryCount++;
+              continue;
+            }
 
-        if (!isMounted) return;
+            if (!isMounted) return;
 
-        const currentSession = initialSession || null;
-        const currentUser = currentSession?.user ?? null;
-        
-        setSession(currentSession);
-        setUser(currentUser);
+            const currentSession = initialSession || null;
+            const currentUser = currentSession?.user ?? null;
+            
+            setSession(currentSession);
+            setUser(currentUser);
 
-        // 2. CRITICAL: Set isLoading to false immediately after session check
-        // This allows the app to render and ProtectedRoute to decide navigation
-        setIsLoading(false); 
+            // 2. CRITICAL: Set isLoading to false immediately after session check
+            // This allows app to render and ProtectedRoute to decide navigation
+            setIsLoading(false);
+            setIsInitialized(true);
 
-        // 3. Fetch or create profile if user exists (non-blocking)
-        if (currentUser) {
-          const initialProfile = await ensureProfileExists(currentUser);
-          if (!isMounted) return;
-          setProfile(initialProfile);
-        } else {
-          setProfile(null);
+            // 3. Fetch or create profile if user exists (non-blocking)
+            if (currentUser) {
+              const initialProfile = await ensureProfileExists(currentUser);
+              if (!isMounted) return;
+              setProfile(initialProfile);
+            } else {
+              setProfile(null);
+            }
+            
+            // Clear timeout since we succeeded
+            clearTimeout(timeoutId);
+            break;
+          } catch (retryError: any) {
+            console.error(`Retry ${retryCount + 1} failed:`, retryError);
+            retryCount++;
+            if (retryCount < maxRetries) {
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+          }
         }
       } catch (error: any) {
         // This block catches unexpected errors, often caused by corrupted local storage/cookies.
@@ -152,9 +193,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (isMounted) {
           // Ensure we stop loading and allow ProtectedRoute to redirect to /login
           setIsLoading(false);
+          setIsInitialized(true);
           setSession(null);
           setUser(null);
           setProfile(null);
+          clearTimeout(timeoutId);
         }
       }
     };
@@ -166,11 +209,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       async (_event, currentSession) => {
         if (!isMounted) return;
         
+        console.log("Auth state changed:", _event);
+        
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
 
         if (currentSession?.user) {
-          // Use the new comprehensive function to fetch or create the profile on change
+          // Use new comprehensive function to fetch or create profile on change
           const updatedProfile = await ensureProfileExists(currentSession.user);
           if (!isMounted) return;
           setProfile(updatedProfile);
@@ -182,6 +227,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     return () => {
       isMounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
       listener.subscription.unsubscribe();
     };
   }, [ensureProfileExists]);
