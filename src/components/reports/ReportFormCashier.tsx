@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
