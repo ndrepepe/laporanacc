@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  ReactNode,
-  useCallback,
-} from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "./client";
 import { Profile } from "@/lib/types";
@@ -44,11 +37,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (fetchError) {
         console.error("Profile fetch error:", fetchError);
-        
         // Handle specific error codes
         if (fetchError.code === 'PGRST116') {
           console.warn(`Profile not found for user ${currentUser.id}. Attempting to create.`);
-          
           // Try to create profile from metadata
           const metadata = currentUser.user_metadata || {};
           const newProfilePayload = {
@@ -57,9 +48,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             last_name: metadata.last_name || null,
             role: metadata.role || null,
           };
-
+          
           console.log("Creating new profile with payload:", newProfilePayload);
-
           const { data: newProfileData, error: insertError } = await supabase
             .from("profiles")
             .insert([newProfilePayload])
@@ -82,7 +72,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         console.log("Found existing profile:", existingProfile);
         return existingProfile as UserProfile;
       }
-
+      
       return null;
     } catch (err: any) {
       console.error("Error in fetchProfile:", err);
@@ -102,7 +92,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setError(`Session refresh failed: ${userError.message}`);
         return;
       }
-
+      
       if (refreshedUser) {
         setUser(refreshedUser);
         const updatedProfile = await fetchProfile(refreshedUser);
@@ -120,7 +110,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let isMounted = true;
     let timeoutId: NodeJS.Timeout;
-    
+
     const initializeAuth = async () => {
       try {
         console.log("Initializing auth...");
@@ -142,19 +132,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           console.error("Session fetch error:", sessionError);
           setError(`Authentication error: ${sessionError.message}`);
         }
-
+        
         const currentSession = initialSession || null;
         const currentUser = currentSession?.user ?? null;
         
         console.log("Session loaded:", { hasSession: !!currentSession, hasUser: !!currentUser });
-        
         setSession(currentSession);
         setUser(currentUser);
-
+        
         // Set loading to false immediately after session check
         setIsLoading(false);
         setIsInitialized(true);
-
+        
         // Fetch profile if user exists
         if (currentUser) {
           try {
@@ -175,12 +164,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         clearTimeout(timeoutId);
       } catch (error: any) {
         console.error("Error during initial auth setup:", error);
-        
         if (isMounted) {
           setError(`Initialization error: ${error.message}`);
           setIsLoading(false);
           setIsInitialized(true);
-          
           // Try to clear corrupted data
           try {
             await supabase.auth.signOut();
@@ -189,7 +176,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             console.error("Failed to sign out:", signOutError);
           }
         }
-        
         clearTimeout(timeoutId);
       }
     };
@@ -202,10 +188,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (!isMounted) return;
         
         console.log("Auth state changed:", _event);
-        
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
-
+        
         if (currentSession?.user) {
           try {
             const updatedProfile = await fetchProfile(currentSession.user);
