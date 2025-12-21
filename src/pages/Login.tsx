@@ -7,15 +7,12 @@ import { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/Card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-// Use custom Card
-
 const Login = () => {
   const navigate = useNavigate();
   const { session, isLoading } = useAuth();
 
   useEffect(() => {
     if (!isLoading && session) {
-      // Redirect authenticated users to the main dashboard
       navigate('/');
     }
   }, [session, isLoading, navigate]);
@@ -27,11 +24,11 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md dark:neon-glow">
-        <CardHeader>
-          <CardTitle className="text-3xl text-center tracking-wider text-gradient">AO Daily Reports</CardTitle>
-          <CardDescription className="text-center text-sm">Accounting - Cashier - Consignment</CardDescription>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-2xl sm:text-3xl text-center tracking-wider text-gradient">AO Daily Reports</CardTitle>
+          <CardDescription className="text-center text-xs sm:text-sm">Accounting - Cashier - Consignment</CardDescription>
         </CardHeader>
-        <ScrollArea className="h-[500px]">
+        <ScrollArea className="max-h-[80vh]">
           <CardContent>
             <Auth
               supabaseClient={supabase}
@@ -41,7 +38,6 @@ const Login = () => {
                 variables: {
                   default: {
                     colors: {
-                      // Use primary color for brand identity
                       brand: 'hsl(var(--primary))',
                       brandAccent: 'hsl(var(--accent))',
                       defaultButtonBackground: 'hsl(var(--secondary))',
@@ -54,7 +50,6 @@ const Login = () => {
                   },
                 },
                 style: {
-                  // Menyembunyikan semua tautan (anchor tags) di dalam komponen Auth
                   anchor: {
                     display: 'none',
                   },
@@ -63,14 +58,14 @@ const Login = () => {
               localization={{
                 variables: {
                   sign_in: {
-                    sign_up_link: '', // Tetap pertahankan localization sebagai fallback
+                    sign_up_link: '',
                     no_account_text: '',
                   },
                 },
               } as any}
-              theme="dark" // Default to dark theme for futuristic look
+              theme="dark"
               redirectTo={window.location.origin + '/'}
-              view="sign_in" // Restrict view to only sign in, hiding sign up link
+              view="sign_in"
             />
           </CardContent>
         </ScrollArea>
