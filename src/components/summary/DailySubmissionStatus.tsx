@@ -57,7 +57,7 @@ const DailySubmissionStatus: React.FC = () => {
           <CardTitle>{t('daily_submission_status')}</CardTitle>
           <Button variant={"outline"} disabled>
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {format(selectedDate, "PPP")}
+            {format(selectedDate, "MMM dd, yyyy")}
           </Button>
         </CardHeader>
         <CardContent className="p-0">
@@ -80,7 +80,7 @@ const DailySubmissionStatus: React.FC = () => {
             <PopoverTrigger asChild>
               <Button variant={"outline"}>
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {format(selectedDate, "PPP")}
+                {format(selectedDate, "MMM dd, yyyy")}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0 dark:glass-effect" align="end">
@@ -103,9 +103,9 @@ const DailySubmissionStatus: React.FC = () => {
         <CardTitle>{t('daily_submission_status')}</CardTitle>
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant={"outline"}>
+            <Button variant={"outline"} className="w-auto">
               <CalendarIcon className="mr-2 h-4 w-4" />
-              {format(selectedDate, "PPP")}
+              {format(selectedDate, "MMM dd, yyyy")}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0 dark:glass-effect" align="end">
