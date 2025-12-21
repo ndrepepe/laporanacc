@@ -10,7 +10,8 @@ import { Button } from "@/components/Button";
 import { RefreshCw, AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { showError } from "@/utils/toast";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 const SUMMARY_ROLES: UserRole[] = ['Senior Manager', 'Accounting Manager'];
 const SUBORDINATE_ROLES: UserRole[] = ['Senior Manager', 'Accounting Manager', 'Consignment Supervisor'];
@@ -18,11 +19,11 @@ const SUBORDINATE_ROLES: UserRole[] = ['Senior Manager', 'Accounting Manager', '
 const Index = () => {
   const { profile, user, isLoading, refreshProfile, error } = useAuth();
   const { t } = useLanguage();
+  const isMobile = useIsMobile();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [hasAttemptedRefresh, setHasAttemptedRefresh] = useState(false);
-  const [localError, setLocalError] = useState<string | null>(null);
+  const localError = null; // Removed unused setter
 
-  // If profile is loaded but role is missing, try to refresh once automatically
   useEffect(() => {
     if (!isLoading && profile && !profile.role && !hasAttemptedRefresh) {
       const refresh = async () => {
@@ -40,112 +41,78 @@ const Index = () => {
   }, [isLoading, profile, hasAttemptedRefresh, refreshProfile]);
 
   const getGuidanceMessage = (role: UserRole | undefined) => {
-    if (!role) {
-      return t('guidance_prefix') + " " + t('dashboard') + ".";
-    }
-    let actions = [t('action_submit_report'), t('action_view_reports'), t('action_check_notifications')];
-    if (SUMMARY_ROLES.includes(role)) {
-      actions.push(t('action_view_summaries'));
-    } else if (SUBORDINATE_ROLES.includes(role)) {
-      actions.push(t('action_view_subordinate_reports'));
-    }
-    if (actions.length === 1) {
-      return `${t('guidance_prefix')} ${actions[0]}.`;
-    } else if (actions.length === 2) {
-      return `${t('guidance_prefix')} ${actions[0]} ${t('and_conjunction')} ${actions[1]}.`;
-    } else {
-      const lastAction = actions.pop();
-      return `${t('guidance_prefix')} ${actions.join(', ')}, ${t('and_conjunction')} ${lastAction}.`;
-    }
+    if (!role) return t('guidance_prefix') + " " + t('dashboard') + ".";
+    let actions = [t('action_submit_report'), t('action_view_reports')];
+    if (SUMMARY_ROLES.includes(role)) actions.push(t('action_view_summaries'));
+    if (SUBORDINATE_ROLES.includes(role)) actions.push(t('action_view_subordinate_reports'));
+    
+    return `${t('guidance_prefix')} ${actions.join(', ')}.`;
   };
 
-  // Show loading message if still in the process of authentication
   if (isLoading) {
     return (
       <DashboardLayout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-4">Loading your profile...</p>
-          </div>
+        <div className="flex items-center justify-center h-[60vh]">
+          <RefreshCw className="h-8 w-8 animate-spin text-primary" />
         </div>
       </DashboardLayout>
     );
   }
 
-  const handleRefreshClick = async () => {
-    setIsRefreshing(true);
-    setLocalError(null);
-    try {
-      await refreshProfile();
-    } catch (err: any) {
-      console.error("Refresh failed:", err);
-      const errorMessage = err.message || "Failed to refresh profile";
-      setLocalError(errorMessage);
-      showError(errorMessage);
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
-
   return (
     <DashboardLayout>
       <StickyHeader>
-        <div className="flex justify-between items-center">
-          <h1 className="text-4xl font-extrabold tracking-widest lg:text-5xl text-gradient my-0">
-            {t('welcome')}, {profile?.first_name || user?.email}!
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h1 className={cn(
+            "font-extrabold tracking-tight text-gradient",
+            isMobile ? "text-2xl" : "text-4xl"
+          )}>
+            {t('welcome')}, {profile?.first_name || user?.email?.split('@')[0]}!
           </h1>
           {(!profile || !profile.role) && (
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={handleRefreshClick}
+              onClick={() => refreshProfile()}
               disabled={isRefreshing}
+              className="w-full sm:w-auto"
             >
-              <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={cn("h-4 w-4 mr-2", isRefreshing && "animate-spin")} />
               Refresh Profile
             </Button>
           )}
         </div>
       </StickyHeader>
-      <div className="grid grid-cols-1 gap-6 mt-6">
-        {/* Show error if any */}
+      
+      <div className="space-y-6">
         {(error || localError) && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>{error || localError}</AlertDescription>
           </Alert>
         )}
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('your_current_role')}</CardTitle>
+        
+        <Card className="overflow-hidden">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+              {t('your_current_role')}
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            {profile?.role ? (
-              <p className="text-3xl font-bold text-primary tracking-wider">
-                {profile.role}
+            <div className="flex flex-col gap-2">
+              <p className={cn(
+                "font-bold text-primary tracking-tight",
+                isMobile ? "text-xl" : "text-3xl"
+              )}>
+                {profile?.role || t('role_not_assigned')}
               </p>
-            ) : (
-              <div className="flex items-center justify-between">
-                <p className="text-3xl font-bold text-muted-foreground tracking-wider">
-                  {t('role_not_assigned')}
-                </p>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleRefreshClick}
-                  disabled={isRefreshing}
-                >
-                  <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-                  {t('retry')}
-                </Button>
-              </div>
-            )}
-            <p className="text-sm text-muted-foreground mt-4">
-              {getGuidanceMessage(profile?.role)}
-            </p>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {getGuidanceMessage(profile?.role)}
+              </p>
+            </div>
           </CardContent>
         </Card>
+        
         <ApplicationTools />
       </div>
       <MadeWithDyad />

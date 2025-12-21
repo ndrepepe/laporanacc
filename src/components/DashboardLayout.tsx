@@ -1,7 +1,7 @@
 import React from 'react';
 import SidebarNav from './SidebarNav';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { cn } from '@/lib/utils'; // Import cn
+import { cn } from '@/lib/utils';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -11,15 +11,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const isMobile = useIsMobile();
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-background overflow-x-hidden">
       <SidebarNav />
-      {/* On mobile, we need extra padding on the left (pl-16) to clear the fixed sidebar trigger button (top-4 left-4) */}
       <main className={cn(
-        "flex-grow", // Ensure it takes remaining space
-        isMobile ? "p-4 pt-20 pl-16" : "p-8",
-        "bg-background" // Ensure main content area respects theme background
+        "flex-grow w-full transition-all duration-300",
+        isMobile ? "px-4 pt-20 pb-8" : "p-8",
+        "bg-background"
       )}>
-        {children}
+        <div className="max-w-7xl mx-auto">
+          {children}
+        </div>
       </main>
     </div>
   );

@@ -24,10 +24,7 @@ const SidebarNav = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleLogout = async () => {
-    // Ensure the mobile sheet is closed before navigating away
-    if (isSheetOpen) {
-      setIsSheetOpen(false);
-    }
+    if (isSheetOpen) setIsSheetOpen(false);
     await supabase.auth.signOut();
     navigate('/login');
   };
@@ -47,82 +44,44 @@ const SidebarNav = () => {
 
   let navItems = [...baseNavItems];
 
-  // Conditionally add Add User link
   if (profile?.role && USER_MANAGER_ROLES.includes(profile.role)) {
-    navItems.splice(4, 0, {
-      to: "/users/add",
-      icon: UserPlus,
-      label: t('add_employee')
-    });
+    navItems.push({ to: "/users/add", icon: UserPlus, label: t('add_employee') });
   }
 
-  // Conditionally add View Subordinate Reports link
   if (profile?.role && SUBORDINATE_VIEWER_ROLES.includes(profile.role)) {
-    const insertionIndex = navItems.findIndex(item => item.to === "/notifications") + 1;
-    const addUserIndex = navItems.findIndex(item => item.to === "/users/add");
-    const subordinateIndex = addUserIndex !== -1 ? addUserIndex + 1 : insertionIndex;
-    
-    if (!navItems.some(item => item.to === "/reports/subordinates")) {
-      navItems.splice(subordinateIndex, 0, {
-        to: "/reports/subordinates",
-        icon: Users,
-        label: t('view_subordinates')
-      });
-    }
+    navItems.push({ to: "/reports/subordinates", icon: Users, label: t('view_subordinates') });
   }
 
-  // Conditionally add Summary link
   if (profile?.role && SUMMARY_VIEWER_ROLES.includes(profile.role)) {
-    const lastReportIndex = navItems.findIndex(item => item.to === "/reports/subordinates");
-    const summaryIndex = lastReportIndex !== -1 ? lastReportIndex + 1 : navItems.findIndex(item => item.to === "/users/add") + 1;
-    if (!navItems.some(item => item.to === "/summary")) {
-      navItems.splice(summaryIndex, 0, {
-        to: "/summary",
-        icon: BarChart,
-        label: t('summary')
-      });
-    }
+    navItems.push({ to: "/summary", icon: BarChart, label: t('summary') });
   }
 
-  // Conditionally add Admin link
   if (profile?.role === ADMIN_ROLE) {
-    navItems.push({
-      to: "/admin",
-      icon: Settings,
-      label: t('admin_dashboard')
-    });
+    navItems.push({ to: "/admin", icon: Settings, label: t('admin_dashboard') });
   }
 
   const NavContent = () => (
-    <div className="flex flex-col h-full p-4 text-foreground">
-      <div className="mb-8">
-        <h2 className="text-2xl font-extrabold text-gradient tracking-widest">
+    <div className="flex flex-col h-full p-4 bg-card">
+      <div className="mb-8 px-2">
+        <h2 className="text-xl font-extrabold text-gradient tracking-widest">
           ANDI OFFSET
         </h2>
         <div className="flex items-center justify-between mt-1">
-          {profile?.role ? (
-            <p className="text-xs text-muted-foreground">
-              {profile.role}
-            </p>
-          ) : (
-            <p className="text-xs text-muted-foreground">
-              {t('role_not_assigned')}
-            </p>
-          )}
-          {(!profile || !profile.role) && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleRefreshProfile}
-              disabled={isRefreshing}
-              className="h-6 px-2 text-xs"
-            >
-              <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </Button>
-          )}
+          <p className="text-[10px] uppercase tracking-tighter text-muted-foreground truncate max-w-[150px]">
+            {profile?.role || t('role_not_assigned')}
+          </p>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleRefreshProfile}
+            disabled={isRefreshing}
+            className="h-6 w-6 p-0"
+          >
+            <RefreshCw className={cn("h-3 w-3", isRefreshing && "animate-spin")} />
+          </Button>
         </div>
       </div>
-      <nav className="flex-grow space-y-1">
+      <nav className="flex-grow space-y-1 overflow-y-auto">
         {navItems.map((item) => (
           <NavLink
             key={item.to}
@@ -130,15 +89,14 @@ const SidebarNav = () => {
             onClick={() => isMobile && setIsSheetOpen(false)}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 transition-all duration-300",
-                "hover:bg-accent/20 hover:text-accent-foreground",
+                "flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all duration-200 text-sm",
                 isActive
-                  ? "bg-primary/20 text-primary font-semibold border border-primary/50 neon-glow"
-                  : "text-muted-foreground"
+                  ? "bg-primary/10 text-primary font-bold border border-primary/20"
+                  : "text-muted-foreground hover:bg-accent/10"
               )
             }
           >
-            <item.icon className="h-5 w-5" />
+            <item.icon className="h-4 w-4" />
             {item.label}
           </NavLink>
         ))}
@@ -147,9 +105,9 @@ const SidebarNav = () => {
         <Button
           onClick={handleLogout}
           variant="ghost"
-          className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 transition-colors duration-200"
+          className="w-full justify-start text-destructive hover:bg-destructive/10 h-10"
         >
-          <LogOut className="h-5 w-5 mr-3" />
+          <LogOut className="h-4 w-4 mr-3" />
           {t('logout')}
         </Button>
       </div>
@@ -158,21 +116,28 @@ const SidebarNav = () => {
 
   if (isMobile) {
     return (
-      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetTrigger asChild>
-          <Button variant="outline" size="icon" className="fixed top-4 left-4 z-50">
-            <Home className="h-5 w-5" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-[250px] p-0 bg-sidebar dark:bg-background">
-          <NavContent />
-        </SheetContent>
-      </Sheet>
+      <div className="fixed top-0 left-0 right-0 h-16 bg-background/80 backdrop-blur-md border-b z-40 flex items-center px-4">
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" className="mr-2">
+              <div className="flex flex-col gap-1">
+                <span className="w-5 h-0.5 bg-foreground"></span>
+                <span className="w-5 h-0.5 bg-foreground"></span>
+                <span className="w-5 h-0.5 bg-foreground"></span>
+              </div>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-[280px] p-0 border-r-0">
+            <NavContent />
+          </SheetContent>
+        </Sheet>
+        <h1 className="text-lg font-bold text-gradient tracking-tight">ANDI OFFSET</h1>
+      </div>
     );
   }
 
   return (
-    <div className="hidden md:flex flex-col w-64 border-r border-border bg-card h-screen sticky top-0 shadow-2xl dark:shadow-primary/10">
+    <div className="hidden md:flex flex-col w-64 border-r border-border bg-card h-screen sticky top-0 shadow-sm">
       <NavContent />
     </div>
   );
