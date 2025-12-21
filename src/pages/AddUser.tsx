@@ -10,6 +10,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, CheckCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
+import DashboardLayout from "@/components/DashboardLayout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
@@ -72,123 +74,130 @@ const AddUser = () => {
     }
   };
 
-  if (success) {
-    return (
-      <Alert>
-        <CheckCircle className="h-4 w-4" />
-        <AlertTitle>{t('success')}</AlertTitle>
-        <AlertDescription>
-          {t('user_created_successfully')}
-        </AlertDescription>
-      </Alert>
-    );
-  }
-
   return (
-    <div className="max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-6">{t('add_employee')}</h1>
-      
-      {error && (
-        <Alert variant="destructive" className="mb-6">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>{t('error')}</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
+    <DashboardLayout>
+      <div className="max-w-2xl mx-auto">
+        <h1 className="text-3xl font-bold mb-6 tracking-wider text-gradient">{t('add_new_employee_title')}</h1>
+        
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>{t('error')}</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="first_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('first_name')}</FormLabel>
-                  <FormControl>
-                    <Input placeholder={t('first_name')} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        {success && (
+          <Alert className="mb-6 bg-green-500/10 border-green-500/50 text-green-600">
+            <CheckCircle className="h-4 w-4" />
+            <AlertTitle>{t('success')}</AlertTitle>
+            <AlertDescription>
+              {t('user_created_successfully')}
+            </AlertDescription>
+          </Alert>
+        )}
 
-            <FormField
-              control={form.control}
-              name="last_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('last_name')}</FormLabel>
-                  <FormControl>
-                    <Input placeholder={t('last_name')} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('create_user_account')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="first_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('first_name')}</FormLabel>
+                        <FormControl>
+                          <Input placeholder={t('first_name')} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('email')}</FormLabel>
-                <FormControl>
-                  <Input type="email" placeholder={t('email')} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                  <FormField
+                    control={form.control}
+                    name="last_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('last_name')}</FormLabel>
+                        <FormControl>
+                          <Input placeholder={t('last_name')} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('password')}</FormLabel>
-                <FormControl>
-                  <Input type="password" placeholder={t('password')} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('email')}</FormLabel>
+                      <FormControl>
+                        <Input type="email" placeholder={t('email')} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-          <FormField
-            control={form.control}
-            name="role"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('role')}</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('select_role')} />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="Accounting Staff">{t('accounting_staff')}</SelectItem>
-                    <SelectItem value="Cashier">{t('cashier')}</SelectItem>
-                    <SelectItem value="Cashier-Insentif">{t('cashier_insentif')}</SelectItem>
-                    <SelectItem value="Consignment Staff">{t('consignment_staff')}</SelectItem>
-                    <SelectItem value="Consignment Supervisor">{t('consignment_supervisor')}</SelectItem>
-                    <SelectItem value="Accounting Manager">{t('accounting_manager')}</SelectItem>
-                    <SelectItem value="Senior Manager">{t('senior_manager')}</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('temporary_password')}</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="••••••••" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-          <Button type="submit" disabled={isLoading} className="w-full">
-            {isLoading ? t('creating') : t('create_user')}
-          </Button>
-        </form>
-      </Form>
-    </div>
+                <FormField
+                  control={form.control}
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('role')}</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={t('select_employee_role')} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Accounting Staff">Accounting Staff</SelectItem>
+                          <SelectItem value="Cashier">Cashier</SelectItem>
+                          <SelectItem value="Cashier-Insentif">Cashier-Insentif</SelectItem>
+                          <SelectItem value="Consignment Staff">Consignment Staff</SelectItem>
+                          <SelectItem value="Consignment Supervisor">Consignment Supervisor</SelectItem>
+                          <SelectItem value="Accounting Manager">Accounting Manager</SelectItem>
+                          <SelectItem value="Senior Manager">Senior Manager</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button type="submit" disabled={isLoading} variant="gradient" className="w-full">
+                  {isLoading ? t('creating') : t('add_user_button')}
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
+    </DashboardLayout>
   );
 };
 
