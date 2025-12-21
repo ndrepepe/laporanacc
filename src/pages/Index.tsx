@@ -10,6 +10,7 @@ import { Button } from "@/components/Button";
 import { RefreshCw, AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { showError } from "@/utils/toast";
 
 const SUMMARY_ROLES: UserRole[] = ['Senior Manager', 'Accounting Manager'];
 const SUBORDINATE_ROLES: UserRole[] = ['Senior Manager', 'Accounting Manager', 'Consignment Supervisor'];
@@ -19,13 +20,18 @@ const Index = () => {
   const { t } = useLanguage();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [hasAttemptedRefresh, setHasAttemptedRefresh] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
 
   // If profile is loaded but role is missing, try to refresh once automatically
   useEffect(() => {
     if (!isLoading && profile && !profile.role && !hasAttemptedRefresh) {
       const refresh = async () => {
         setIsRefreshing(true);
-        await refreshProfile();
+        try {
+          await refreshProfile();
+        } catch (err) {
+          console.error("Auto-refresh failed:", err);
+        }
         setIsRefreshing(false);
         setHasAttemptedRefresh(true);
       };
@@ -67,6 +73,21 @@ const Index = () => {
     );
   }
 
+  const handleRefreshClick = async () => {
+    setIsRefreshing(true);
+    setLocalError(null);
+    try {
+      await refreshProfile();
+    } catch (err: any) {
+      console.error("Refresh failed:", err);
+      const errorMessage = err.message || "Failed to refresh profile";
+      setLocalError(errorMessage);
+      showError(errorMessage);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   return (
     <DashboardLayout>
       <StickyHeader>
@@ -75,27 +96,26 @@ const Index = () => {
             {t('welcome')}, {profile?.first_name || user?.email}!
           </h1>
           {(!profile || !profile.role) && (
-            <Button variant="outline" size="sm" onClick={async () => {
-              setIsRefreshing(true);
-              await refreshProfile();
-              setIsRefreshing(false);
-            }} disabled={isRefreshing}>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleRefreshClick}
+              disabled={isRefreshing}
+            >
               <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
               Refresh Profile
             </Button>
           )}
         </div>
       </StickyHeader>
-      
       <div className="grid grid-cols-1 gap-6 mt-6">
         {/* Show error if any */}
-        {error && (
+        {(error || localError) && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>{error || localError}</AlertDescription>
           </Alert>
         )}
-        
         <Card>
           <CardHeader>
             <CardTitle>{t('your_current_role')}</CardTitle>
@@ -110,11 +130,12 @@ const Index = () => {
                 <p className="text-3xl font-bold text-muted-foreground tracking-wider">
                   {t('role_not_assigned')}
                 </p>
-                <Button variant="outline" size="sm" onClick={async () => {
-                  setIsRefreshing(true);
-                  await refreshProfile();
-                  setIsRefreshing(false);
-                }} disabled={isRefreshing}>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleRefreshClick}
+                  disabled={isRefreshing}
+                >
                   <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
                   {t('retry')}
                 </Button>
