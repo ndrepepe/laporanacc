@@ -7,14 +7,15 @@ import ApplicationTools from "@/components/tools/ApplicationTools";
 import { useLanguage } from "@/contexts/LanguageContext";
 import StickyHeader from "@/components/StickyHeader";
 import { Button } from "@/components/Button";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const SUMMARY_ROLES: UserRole[] = ['Senior Manager', 'Accounting Manager'];
 const SUBORDINATE_ROLES: UserRole[] = ['Senior Manager', 'Accounting Manager', 'Consignment Supervisor'];
 
 const Index = () => {
-  const { profile, user, isLoading, refreshProfile } = useAuth();
+  const { profile, user, isLoading, refreshProfile, error } = useAuth();
   const { t } = useLanguage();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [hasAttemptedRefresh, setHasAttemptedRefresh] = useState(false);
@@ -85,7 +86,16 @@ const Index = () => {
           )}
         </div>
       </StickyHeader>
+      
       <div className="grid grid-cols-1 gap-6 mt-6">
+        {/* Show error if any */}
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+        
         <Card>
           <CardHeader>
             <CardTitle>{t('your_current_role')}</CardTitle>

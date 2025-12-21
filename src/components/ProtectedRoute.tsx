@@ -4,7 +4,7 @@ import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const ProtectedRoute = () => {
-  const { session, isLoading } = useAuth();
+  const { session, isLoading, error } = useAuth();
   const [hasTimedOut, setHasTimedOut] = useState(false);
   const [showTimeoutMessage, setShowTimeoutMessage] = useState(false);
 
@@ -21,7 +21,7 @@ const ProtectedRoute = () => {
           window.location.href = '/login';
         }, 3000);
       }
-    }, 15000); // 15 second timeout
+    }, 20000); // 20 second timeout
 
     return () => clearTimeout(timeoutId);
   }, [isLoading]);
@@ -84,6 +84,14 @@ const ProtectedRoute = () => {
           <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg max-w-md">
             <p className="text-sm text-yellow-600 dark:text-yellow-400">
               This is taking longer than expected. If this continues, the page will redirect automatically.
+            </p>
+          </div>
+        )}
+        
+        {error && (
+          <div className="mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg max-w-md">
+            <p className="text-sm text-red-600 dark:text-red-400">
+              Error: {error}
             </p>
           </div>
         )}
