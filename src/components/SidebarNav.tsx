@@ -137,7 +137,7 @@ const SidebarNav = () => {
   }
 
   return (
-    <div className="hidden md:flex flex-col w-64 border-r border-border bg-card h-screen sticky top-0 shadow-sm">
+    <div className="hidden md:flex flex-col w-64 border-r border-border bg-card h-screen fixed top-0 left-0 shadow-sm z-40">
       <NavContent />
     </div>
   );

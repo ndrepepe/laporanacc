@@ -15,7 +15,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       <SidebarNav />
       <main className={cn(
         "flex-grow w-full transition-all duration-300",
-        isMobile ? "px-4 pt-20 pb-8" : "p-8",
+        isMobile ? "px-4 pt-20 pb-8" : "p-8 ml-64", // Added ml-64 for desktop offset
         "bg-background"
       )}>
         <div className="max-w-7xl mx-auto">
