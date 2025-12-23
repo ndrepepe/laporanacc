@@ -41,6 +41,7 @@ const Index = () => {
     return `${t('guidance_prefix')} ${actions.join(', ')}.`;
   };
 
+  // Tampilkan loading state saat profil masih dimuat
   if (isLoading) {
     return (
       <DashboardLayout>

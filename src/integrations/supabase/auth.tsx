@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode, useCallback, useRef } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "./client";
 import { Profile } from "@/lib/types";
@@ -22,7 +22,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const isInitialLoad = useRef(true);
 
   const fetchProfile = useCallback(async (currentUser: User): Promise<UserProfile | null> => {
     try {
@@ -30,23 +29,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .from("profiles")
         .select("*")
         .eq("id", currentUser.id)
-        .maybeSingle();
+        .single();
 
       if (fetchError) {
         console.error("Error fetching profile from DB:", fetchError);
-        return null;
-      }
-      
-      // Jika profil tidak ditemukan di DB, coba gunakan metadata dari user (sebagai fallback sementara)
-      if (!data && currentUser.user_metadata) {
+        // Jika error, coba gunakan metadata dari user sebagai fallback
+        if (currentUser.user_metadata) {
           return {
-              id: currentUser.id,
-              first_name: currentUser.user_metadata.first_name || null,
-              last_name: currentUser.user_metadata.last_name || null,
-              role: currentUser.user_metadata.role || null,
-              avatar_url: null,
-              updated_at: null
+            id: currentUser.id,
+            first_name: currentUser.user_metadata.first_name || null,
+            last_name: currentUser.user_metadata.last_name || null,
+            role: currentUser.user_metadata.role || null,
+            avatar_url: null,
+            updated_at: null
           } as UserProfile;
+        }
+        return null;
       }
 
       return data as UserProfile;
@@ -74,14 +72,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const initializeAuth = async () => {
       try {
-        const { data: { session: initSession } } = await supabase.auth.getSession();
+        // Dapatkan sesi yang ada (persisted)
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
         
         if (!mounted) return;
 
-        if (initSession) {
-          setSession(initSession);
-          setUser(initSession.user);
-          const p = await fetchProfile(initSession.user);
+        if (currentSession) {
+          setSession(currentSession);
+          setUser(currentSession.user);
+          
+          // Selalu fetch profil dari backend
+          const p = await fetchProfile(currentSession.user);
           if (mounted) setProfile(p);
         }
       } catch (err: any) {
@@ -89,13 +90,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } finally {
         if (mounted) {
           setIsLoading(false);
-          isInitialLoad.current = false;
         }
       }
     };
 
     initializeAuth();
 
+    // Listener untuk perubahan auth state
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       if (!mounted) return;
       
@@ -110,8 +111,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setProfile(null);
       }
 
-      if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-          setIsLoading(false);
+      // Hanya set loading false untuk event SIGN_IN/SIGN_OUT
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+        setIsLoading(false);
       }
     });
 

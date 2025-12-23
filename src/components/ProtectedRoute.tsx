@@ -5,7 +5,8 @@ import { Loader2 } from 'lucide-react';
 const ProtectedRoute = () => {
   const { session, isLoading } = useAuth();
 
-  // ATURAN: Tunggu sampai pemuatan sesi dan profil selesai
+  // Tampilkan loading state saat memeriksa autentikasi
+  // JANGAN redirect ke login saat loading
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background text-foreground">
@@ -15,17 +16,18 @@ const ProtectedRoute = () => {
             <span className="text-xs font-bold text-primary/80">AO</span>
           </div>
         </div>
-        <p className="mt-6 text-lg font-medium tracking-wider">Verifikasi Akses...</p>
+        <p className="mt-6 text-lg font-medium tracking-wider">Memverifikasi Akses...</p>
         <p className="text-sm text-muted-foreground mt-1">Mohon tunggu sebentar</p>
       </div>
     );
   }
 
-  // ATURAN: Hanya arahkan ke login jika loading sudah selesai dan tidak ada sesi
+  // Hanya redirect jika TIDAK ada session (benar-benar tidak terautentikasi)
   if (!session) {
     return <Navigate to="/login" replace />;
   }
 
+  // Jika ada session, izinkan akses (role akan dimuat di halaman yang relevan)
   return <Outlet />;
 };
 
