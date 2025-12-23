@@ -25,13 +25,13 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      {/* Kartu dengan latar belakang 10% lebih gelap (menggunakan black/40 overlay atau warna spesifik yang lebih gelap) */}
-      <Card className="w-full max-w-md dark:neon-glow overflow-hidden border-border/40 bg-black/40 backdrop-blur-sm">
+      <Card className="w-full max-w-md dark:neon-glow overflow-hidden border-border/40 bg-black/60 backdrop-blur-md">
         <CardHeader className="pb-2">
           <CardTitle className="text-2xl sm:text-3xl text-center tracking-widest text-gradient font-black">
             AO DAILY REPORTS
           </CardTitle>
-          <CardDescription className="text-center text-xs sm:text-sm font-semibold text-muted-foreground mt-2 border-t pt-2 border-border/30">
+          {/* Meningkatkan kontras deskripsi dengan text-foreground/90 */}
+          <CardDescription className="text-center text-xs sm:text-sm font-bold text-foreground/90 mt-2 border-t pt-2 border-border/30">
             ACCOUNTING • CASHIER • CONSIGNMENT
           </CardDescription>
         </CardHeader>
@@ -50,10 +50,14 @@ const Login = () => {
                       brandAccent: 'hsl(var(--accent))',
                       defaultButtonBackground: 'hsl(var(--secondary))',
                       defaultButtonBackgroundHover: 'hsl(var(--secondary)/0.8)',
-                      inputBackground: 'rgba(0,0,0,0.3)', // Input juga dibuat lebih gelap
-                      inputBorder: 'hsl(var(--border))',
+                      inputBackground: 'rgba(255,255,255,0.05)', 
+                      inputBorder: 'hsl(var(--border)/0.5)',
                       inputBorderHover: 'hsl(var(--primary))',
                       inputBorderFocus: 'hsl(var(--primary))',
+                      // Menambahkan warna teks label dan input agar lebih kontras
+                      inputText: '#ffffff',
+                      inputLabelText: '#f8fafc', 
+                      inputPlaceholder: '#94a3b8',
                     },
                   },
                 },
@@ -68,7 +72,13 @@ const Login = () => {
                   },
                   input: {
                     borderRadius: 'var(--radius)',
+                    color: 'white',
                   },
+                  label: {
+                    color: '#f1f5f9', // Warna putih tulang yang sangat jelas
+                    fontWeight: '600',
+                    marginBottom: '4px',
+                  }
                 },
               }}
               localization={{
