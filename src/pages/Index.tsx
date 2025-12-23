@@ -8,7 +8,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import StickyHeader from "@/components/StickyHeader";
 import { Button } from "@/components/Button";
 import { RefreshCw, AlertCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -21,24 +21,16 @@ const Index = () => {
   const { t } = useLanguage();
   const isMobile = useIsMobile();
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [hasAttemptedRefresh, setHasAttemptedRefresh] = useState(false);
-  const localError = null; // Removed unused setter
 
-  useEffect(() => {
-    if (!isLoading && profile && !profile.role && !hasAttemptedRefresh) {
-      const refresh = async () => {
-        setIsRefreshing(true);
-        try {
-          await refreshProfile();
-        } catch (err) {
-          console.error("Auto-refresh failed:", err);
-        }
-        setIsRefreshing(false);
-        setHasAttemptedRefresh(true);
-      };
-      refresh();
+  const handleManualRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshProfile();
+    } catch (err) {
+      console.error("Manual refresh failed:", err);
     }
-  }, [isLoading, profile, hasAttemptedRefresh, refreshProfile]);
+    setIsRefreshing(false);
+  };
 
   const getGuidanceMessage = (role: UserRole | undefined) => {
     if (!role) return t('guidance_prefix') + " " + t('dashboard') + ".";
@@ -69,26 +61,24 @@ const Index = () => {
           )}>
             {t('welcome')}, {profile?.first_name || user?.email?.split('@')[0]}!
           </h1>
-          {(!profile || !profile.role) && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => refreshProfile()}
-              disabled={isRefreshing}
-              className="w-full sm:w-auto"
-            >
-              <RefreshCw className={cn("h-4 w-4 mr-2", isRefreshing && "animate-spin")} />
-              Refresh Profile
-            </Button>
-          )}
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleManualRefresh}
+            disabled={isRefreshing}
+            className="w-full sm:w-auto"
+          >
+            <RefreshCw className={cn("h-4 w-4 mr-2", isRefreshing && "animate-spin")} />
+            {t('retry')}
+          </Button>
         </div>
       </StickyHeader>
       
       <div className="space-y-6">
-        {(error || localError) && (
+        {error && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error || localError}</AlertDescription>
+            <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
         

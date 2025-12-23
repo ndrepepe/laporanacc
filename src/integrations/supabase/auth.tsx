@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback, useRef } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "./client";
 import { Profile } from "@/lib/types";
@@ -22,6 +22,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const isInitialLoad = useRef(true);
 
   const fetchProfile = useCallback(async (currentUser: User): Promise<UserProfile | null> => {
     try {
@@ -32,12 +33,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .maybeSingle();
 
       if (fetchError) throw fetchError;
-      
-      if (!data) {
-        console.warn("Profile missing for user:", currentUser.id);
-        return null;
-      }
-
       return data as UserProfile;
     } catch (err: any) {
       console.error("Error fetching profile:", err);
@@ -46,7 +41,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const refreshProfile = useCallback(async () => {
-    setIsLoading(true);
     try {
       const { data: { user: currentUser } } = await supabase.auth.getUser();
       if (currentUser) {
@@ -56,39 +50,45 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     } catch (err: any) {
       setError(err.message);
-    } finally {
-      setIsLoading(false);
     }
   }, [fetchProfile]);
 
   useEffect(() => {
     let mounted = true;
 
-    const init = async () => {
+    const initializeAuth = async () => {
       try {
+        // 1. Dapatkan sesi yang tersimpan (Persistence)
         const { data: { session: initSession } } = await supabase.auth.getSession();
+        
         if (!mounted) return;
 
-        setSession(initSession);
-        const currentUser = initSession?.user ?? null;
-        setUser(currentUser);
-
-        if (currentUser) {
-          const p = await fetchProfile(currentUser);
+        if (initSession) {
+          setSession(initSession);
+          setUser(initSession.user);
+          // 2. Muat profil secara sinkron sebelum menghentikan loading
+          const p = await fetchProfile(initSession.user);
           if (mounted) setProfile(p);
         }
       } catch (err: any) {
         if (mounted) setError(err.message);
       } finally {
-        if (mounted) setIsLoading(false);
+        if (mounted) {
+          setIsLoading(false);
+          isInitialLoad.current = false;
+        }
       }
     };
 
-    init();
+    initializeAuth();
 
+    // 3. Pantau perubahan status auth (login/logout/refresh)
     const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, currentSession) => {
       if (!mounted) return;
       
+      // Jangan jalankan logika di sini jika sedang initial load untuk mencegah double fetching
+      if (isInitialLoad.current) return;
+
       setSession(currentSession);
       const currentUser = currentSession?.user ?? null;
       setUser(currentUser);
