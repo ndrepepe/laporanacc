@@ -5,14 +5,13 @@ import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/integrations/supabase/auth';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/Card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 const Login = () => {
   const navigate = useNavigate();
   const { session, isLoading } = useAuth();
-  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     if (!isLoading && session) {
@@ -24,29 +23,10 @@ const Login = () => {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
 
-  const logoUrl = "https://madymngifviixpttjpvp.supabase.co/storage/v1/object/public/public-assets/pasted-image-2025-12-23T15-19-06-152Z.png";
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md dark:neon-glow overflow-hidden border-border/40">
         <CardHeader className="pb-2">
-          {/* Container Logo */}
-          <div className="flex justify-center mb-6 bg-white p-4 rounded-2xl shadow-inner border border-slate-100 min-h-[100px] items-center">
-            {!imageError ? (
-              <img 
-                src={logoUrl} 
-                alt="Penerbit Andi Logo" 
-                className="h-20 w-auto object-contain"
-                onError={() => setImageError(true)}
-              />
-            ) : (
-              <div className="flex flex-col items-center justify-center text-slate-400">
-                <span className="text-4xl font-black tracking-tighter text-slate-800">ANDI</span>
-                <span className="text-[10px] font-bold uppercase tracking-[0.3em] -mt-1">Penerbit</span>
-              </div>
-            )}
-          </div>
-          
           <CardTitle className="text-2xl sm:text-3xl text-center tracking-widest text-gradient font-black">
             AO DAILY REPORTS
           </CardTitle>
