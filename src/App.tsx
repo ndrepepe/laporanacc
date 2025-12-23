@@ -20,6 +20,7 @@ import NotFound from './pages/NotFound';
 import { QueryProvider } from './contexts/QueryContext';
 import { Toaster } from "sonner";
 import { Loader2 } from 'lucide-react';
+import ScrollingTitle from './components/ScrollingTitle';
 
 // Loading fallback component
 const PageLoader = () => (
@@ -34,6 +35,7 @@ const PageLoader = () => (
 function App() {
   return (
     <ThemeProvider defaultTheme="light" attribute="class">
+      <ScrollingTitle />
       <Router>
         <AuthProvider>
           <LanguageProvider>
