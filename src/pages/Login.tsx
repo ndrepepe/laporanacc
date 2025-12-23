@@ -1,3 +1,5 @@
+"use client";
+
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,13 +25,27 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md dark:neon-glow">
+      <Card className="w-full max-w-md dark:neon-glow overflow-hidden border-border/40">
         <CardHeader className="pb-2">
-          <CardTitle className="text-2xl sm:text-3xl text-center tracking-wider text-gradient">AO Daily Reports</CardTitle>
-          <CardDescription className="text-center text-xs sm:text-sm">Accounting - Cashier - Consignment</CardDescription>
+          {/* Logo Penerbit Andi */}
+          <div className="flex justify-center mb-6 bg-white p-4 rounded-2xl shadow-inner border border-slate-100">
+            <img 
+              src="https://madymngifviixpttjpvp.supabase.co/storage/v1/object/public/public-assets/pasted-image-2025-12-23T15-19-06-152Z.png" 
+              alt="Penerbit Andi Logo" 
+              className="h-20 w-auto object-contain"
+            />
+          </div>
+          
+          <CardTitle className="text-2xl sm:text-3xl text-center tracking-widest text-gradient font-black">
+            AO DAILY REPORTS
+          </CardTitle>
+          <CardDescription className="text-center text-xs sm:text-sm font-semibold text-muted-foreground mt-2 border-t pt-2 border-border/30">
+            ACCOUNTING • CASHIER • CONSIGNMENT
+          </CardDescription>
         </CardHeader>
+        
         <ScrollArea className="max-h-[80vh]">
-          <CardContent>
+          <CardContent className="pt-6">
             <Auth
               supabaseClient={supabase}
               providers={[]}
@@ -52,6 +68,14 @@ const Login = () => {
                 style: {
                   anchor: {
                     display: 'none',
+                  },
+                  button: {
+                    borderRadius: 'var(--radius)',
+                    fontWeight: '700',
+                    letterSpacing: '0.05em',
+                  },
+                  input: {
+                    borderRadius: 'var(--radius)',
                   },
                 },
               }}
