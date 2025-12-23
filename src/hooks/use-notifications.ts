@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/integrations/supabase/auth";
-import { showError, showSuccess } from "@/utils/toast";
+import { showError } from "@/utils/toast";
 
 export interface Notification {
     id: string;
@@ -16,9 +16,10 @@ export interface Notification {
 const fetchNotifications = async (userId: string): Promise<Notification[]> => {
     const { data, error } = await supabase
         .from('notifications')
-        .select('*')
+        .select('id, type, message, is_read, created_at, sender_id')
         .eq('recipient_id', userId)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(50); // Limit to latest 50 for speed
 
     if (error) {
         console.error("Error fetching notifications:", error);
@@ -37,7 +38,7 @@ export const useNotifications = () => {
         queryKey: ['notifications', userId],
         queryFn: () => fetchNotifications(userId!),
         enabled: !!userId && !isAuthLoading,
-        staleTime: 1000 * 60, // 1 minute
+        staleTime: 1000 * 60 * 2, // 2 minutes
     });
 
     const markAsReadMutation = useMutation({
@@ -47,16 +48,13 @@ export const useNotifications = () => {
                 .update({ is_read: true })
                 .in('id', notificationIds);
 
-            if (error) {
-                throw new Error(error.message);
-            }
+            if (error) throw new Error(error.message);
         },
         onSuccess: () => {
-            // Invalidate the query to refetch updated notifications
             queryClient.invalidateQueries({ queryKey: ['notifications', userId] });
         },
         onError: (error) => {
-            showError(`Failed to mark notifications as read: ${error.message}`);
+            showError(`Failed to mark read: ${error.message}`);
         }
     });
 
@@ -65,8 +63,6 @@ export const useNotifications = () => {
             const unreadIds = query.data.filter(n => !n.is_read).map(n => n.id);
             if (unreadIds.length > 0) {
                 markAsReadMutation.mutate(unreadIds);
-            } else {
-                showSuccess("All notifications are already read.");
             }
         }
     };

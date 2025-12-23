@@ -7,7 +7,7 @@ import { UserRole } from "@/lib/roles";
 
 type ReportScope = 'self' | 'subordinates';
 
-// Helper function to fetch reports from a single table
+// Helper function to fetch reports from a single table with optimized column selection
 const fetchReportsFromTable = async (
     tableName: string, 
     reportType: ReportType, 
@@ -16,26 +16,34 @@ const fetchReportsFromTable = async (
     filters: ReportFilters
 ): Promise<DailyReport[]> => {
     
+    // Define specific columns based on report type to reduce payload size
+    let columns = 'id, user_id, report_date, created_at, accounting_manager_viewed_at, senior_manager_viewed_at';
+    
+    if (reportType === 'accounting') {
+        columns += ', new_customers_count, new_customers_names, new_sales_count, new_sales_names, worked_on_lph, customer_confirmation_status';
+    } else if (reportType === 'cashier') {
+        columns += ', payments_count, total_payments, worked_on_lph, customer_confirmation_done, incentive_report_progress';
+    } else if (reportType === 'consignment_staff') {
+        columns += ', lpk_entered_bsoft, tasks_completed, issues_encountered, suggestions';
+    } else if (reportType === 'supervisor_manager') {
+        columns += ', tasks_completed, issues_encountered, suggestions';
+    }
+
     let query = supabase
         .from(tableName)
         .select(`
-            *,
+            ${columns},
             profile:user_id (id, first_name, last_name, role, avatar_url)
         `);
 
-    // 1. Scope Filtering (RLS handles most of 'subordinates', but we refine here)
     if (scope === 'self') {
-        // For 'self' scope, explicitly filter by user_id.
         query = query.eq('user_id', userId);
     }
     
-    // For 'subordinates' scope, we rely on RLS to filter reports based on the viewer's role,
-    // but we explicitly exclude the viewer's own reports to separate the views.
     if (scope === 'subordinates') {
         query = query.neq('user_id', userId);
     }
 
-    // 2. Apply Date Filters
     if (filters.startDate) {
         query = query.gte('report_date', filters.startDate);
     }
@@ -43,27 +51,22 @@ const fetchReportsFromTable = async (
         query = query.lte('report_date', filters.endDate);
     }
 
-    // 3. Apply Role Filter (Filtering on the joined profile table)
     if (filters.role && filters.role !== 'All') {
-        // Filter on the joined profile table using the relationship name (user_id)
         query = query.eq('user_id.role', filters.role);
     }
     
-    // Note: Employee Name filtering is handled client-side in the component for simplicity 
-    // due to complex OR logic required for first_name/last_name filtering in PostgREST queries.
-
-    const { data, error } = await query.order('report_date', { ascending: false });
+    const { data, error } = await query.order('report_date', { ascending: false }).limit(100);
 
     if (error) {
-        console.error(`Error fetching reports from ${tableName} (Scope: ${scope}):`, error);
-        throw new Error(`Failed to fetch reports from ${tableName}: ${error.message}`);
+        console.error(`Error fetching reports from ${tableName}:`, error);
+        throw new Error(`Failed to fetch reports: ${error.message}`);
     }
 
-    // Map the raw data to the DailyReport type, ensuring the profile structure is correct
-    return data.map(item => ({
+    // Cast to any to avoid ParserError in complex template literal types
+    return (data as any[]).map(item => ({
         ...item,
         type: reportType,
-        profile: item.profile as Profile, // Cast the joined profile data
+        profile: item.profile as Profile,
     })) as DailyReport[];
 };
 
@@ -74,7 +77,6 @@ export const useDailyReports = (scope: ReportScope = 'self', filters: ReportFilt
     const userId = user?.id;
     const enabled = !!viewerRole && !!userId && !isAuthLoading;
 
-    // Include filters in queryKey to ensure refetching when filters change
     return useQuery<DailyReport[], Error>({
         queryKey: ['dailyReports', viewerRole, scope, filters],
         queryFn: async () => {
@@ -83,58 +85,38 @@ export const useDailyReports = (scope: ReportScope = 'self', filters: ReportFilt
             let allowedReportTypes: ReportType[] = [];
 
             if (scope === 'self') {
-                // For 'self' scope, only fetch reports corresponding to the user's own role type
                 switch (viewerRole as UserRole) {
-                    case 'Accounting Staff':
-                        allowedReportTypes = ['accounting'];
-                        break;
+                    case 'Accounting Staff': allowedReportTypes = ['accounting']; break;
                     case 'Cashier':
-                        allowedReportTypes = ['cashier'];
-                        break;
-                    case 'Consignment Staff':
-                        allowedReportTypes = ['consignment_staff'];
-                        break;
+                    case 'Cashier-Insentif': allowedReportTypes = ['cashier']; break;
+                    case 'Consignment Staff': allowedReportTypes = ['consignment_staff']; break;
                     case 'Consignment Supervisor':
                     case 'Accounting Manager':
-                    case 'Senior Manager':
-                        allowedReportTypes = ['supervisor_manager'];
-                        break;
-                    default:
-                        allowedReportTypes = [];
+                    case 'Senior Manager': allowedReportTypes = ['supervisor_manager']; break;
+                    default: allowedReportTypes = [];
                 }
-                
             } else if (scope === 'subordinates') {
-                // For 'subordinates' scope, use the defined VIEW_PERMISSIONS
-                allowedReportTypes = VIEW_PERMISSIONS[viewerRole as UserRole].filter(_type => { // Fixed: Renamed 'type' to '_type'
-                    // Exclude the manager's own report type from the subordinate view
-                    return true; 
-                });
+                allowedReportTypes = VIEW_PERMISSIONS[viewerRole as UserRole] || [];
             }
 
-            if (allowedReportTypes.length === 0) {
-                return [];
-            }
+            if (allowedReportTypes.length === 0) return [];
 
-            const fetchPromises = allowedReportTypes.map(type => {
-                const tableName = REPORT_TABLE_MAP[type];
-                return fetchReportsFromTable(tableName, type, userId, scope, filters);
-            });
-
-            const results = await Promise.all(fetchPromises);
+            const results = await Promise.all(
+                allowedReportTypes.map(type => 
+                    fetchReportsFromTable(REPORT_TABLE_MAP[type], type, userId, scope, filters)
+                )
+            );
             
-            const allReports = results.flat();
-
-            // Sort all reports by report date descending
-            allReports.sort((a, b) => new Date(b.report_date).getTime() - new Date(a.report_date).getTime());
-
-            return allReports;
+            return results.flat().sort((a, b) => 
+                new Date(b.report_date).getTime() - new Date(a.report_date).getTime()
+            );
         },
         enabled: enabled,
-        staleTime: 1000 * 60 * 5, // 5 minutes
+        staleTime: 1000 * 60 * 10, // Increased to 10 minutes
+        gcTime: 1000 * 60 * 30, // Keep in cache for 30 minutes
     });
 };
 
-// New function to fetch a single report by ID and type
 export const fetchSingleReport = async (reportId: string, reportType: ReportType): Promise<DailyReport | null> => {
     const tableName = REPORT_TABLE_MAP[reportType];
     
@@ -147,12 +129,7 @@ export const fetchSingleReport = async (reportId: string, reportType: ReportType
         .eq('id', reportId)
         .single();
 
-    if (error) {
-        console.error(`Error fetching single report from ${tableName}:`, error);
-        throw new Error(`Failed to fetch report: ${error.message}`);
-    }
-
-    if (!data) return null;
+    if (error) throw new Error(`Failed to fetch report: ${error.message}`);
 
     return {
         ...data,
@@ -161,14 +138,11 @@ export const fetchSingleReport = async (reportId: string, reportType: ReportType
     } as DailyReport;
 };
 
-// New hook to use the single report fetcher
 export const useSingleReport = (reportId: string | null, reportType: ReportType | null) => {
-    const enabled = !!reportId && !!reportType;
-    
     return useQuery<DailyReport | null, Error>({
         queryKey: ['singleReport', reportId, reportType],
         queryFn: () => fetchSingleReport(reportId!, reportType!),
-        enabled: enabled,
-        staleTime: 0, // Always refetch when opened
+        enabled: !!reportId && !!reportType,
+        staleTime: 1000 * 60 * 5,
     });
 };
