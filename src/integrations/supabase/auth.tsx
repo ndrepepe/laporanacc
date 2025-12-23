@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode, useCallback, useRef } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "./client";
 import { Profile } from "@/lib/types";
@@ -20,9 +20,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  // Status loading awal disetel ke true
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const isInitialLoad = useRef(true);
 
   const fetchProfile = useCallback(async (currentUser: User): Promise<UserProfile | null> => {
     try {
@@ -34,22 +34,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (fetchError) {
         console.error("Error fetching profile from DB:", fetchError);
-        return null;
+        // Jika gagal fetch dari DB, gunakan metadata sebagai fallback
+        return {
+            id: currentUser.id,
+            first_name: currentUser.user_metadata.first_name || null,
+            last_name: currentUser.user_metadata.last_name || null,
+            role: currentUser.user_metadata.role || null,
+            avatar_url: null,
+            updated_at: null
+        } as UserProfile;
       }
       
-      // Jika profil tidak ditemukan di DB, coba gunakan metadata dari user (sebagai fallback sementara)
-      if (!data && currentUser.user_metadata) {
-          return {
-              id: currentUser.id,
-              first_name: currentUser.user_metadata.first_name || null,
-              last_name: currentUser.user_metadata.last_name || null,
-              role: currentUser.user_metadata.role || null,
-              avatar_url: null,
-              updated_at: null
-          } as UserProfile;
+      // Jika data ditemukan, kembalikan data
+      if (data) {
+        return data as UserProfile;
       }
+      
+      // Jika data tidak ditemukan, gunakan metadata
+      return {
+          id: currentUser.id,
+          first_name: currentUser.user_metadata.first_name || null,
+          last_name: currentUser.user_metadata.last_name || null,
+          role: currentUser.user_metadata.role || null,
+          avatar_url: null,
+          updated_at: null
+      } as UserProfile;
 
-      return data as UserProfile;
     } catch (err: any) {
       console.error("Exception in fetchProfile:", err);
       return null;
@@ -74,6 +84,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const initializeAuth = async () => {
       try {
+        // 1. Ambil sesi awal
         const { data: { session: initSession } } = await supabase.auth.getSession();
         
         if (!mounted) return;
@@ -81,21 +92,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (initSession) {
           setSession(initSession);
           setUser(initSession.user);
+          
+          // 2. Ambil profil dan peran
           const p = await fetchProfile(initSession.user);
           if (mounted) setProfile(p);
         }
       } catch (err: any) {
         if (mounted) setError(err.message);
       } finally {
+        // 3. Selesai loading HANYA setelah sesi dan profil dicoba dimuat
         if (mounted) {
           setIsLoading(false);
-          isInitialLoad.current = false;
         }
       }
     };
 
     initializeAuth();
 
+    // Listener untuk perubahan status Auth
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       if (!mounted) return;
       
@@ -104,13 +118,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(currentUser);
 
       if (currentUser) {
+        // Ambil profil saat SIGNED_IN atau USER_UPDATED
         const p = await fetchProfile(currentUser);
         if (mounted) setProfile(p);
       } else {
+        // Hapus profil saat SIGNED_OUT
         setProfile(null);
       }
 
-      if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+      // Pastikan isLoading disetel ke false setelah event penting
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
           setIsLoading(false);
       }
     });
