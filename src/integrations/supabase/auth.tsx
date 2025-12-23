@@ -32,10 +32,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .eq("id", currentUser.id)
         .maybeSingle();
 
-      if (fetchError) throw fetchError;
+      if (fetchError) {
+        console.error("Error fetching profile from DB:", fetchError);
+        return null;
+      }
+      
+      // Jika profil tidak ditemukan di DB, coba gunakan metadata dari user (sebagai fallback sementara)
+      if (!data && currentUser.user_metadata) {
+          return {
+              id: currentUser.id,
+              first_name: currentUser.user_metadata.first_name || null,
+              last_name: currentUser.user_metadata.last_name || null,
+              role: currentUser.user_metadata.role || null,
+              avatar_url: null,
+              updated_at: null
+          } as UserProfile;
+      }
+
       return data as UserProfile;
     } catch (err: any) {
-      console.error("Error fetching profile:", err);
+      console.error("Exception in fetchProfile:", err);
       return null;
     }
   }, []);
@@ -58,7 +74,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const initializeAuth = async () => {
       try {
-        // 1. Dapatkan sesi yang tersimpan (Persistence)
         const { data: { session: initSession } } = await supabase.auth.getSession();
         
         if (!mounted) return;
@@ -66,7 +81,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (initSession) {
           setSession(initSession);
           setUser(initSession.user);
-          // 2. Muat profil secara sinkron sebelum menghentikan loading
           const p = await fetchProfile(initSession.user);
           if (mounted) setProfile(p);
         }
@@ -82,13 +96,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     initializeAuth();
 
-    // 3. Pantau perubahan status auth (login/logout/refresh)
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, currentSession) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       if (!mounted) return;
       
-      // Jangan jalankan logika di sini jika sedang initial load untuk mencegah double fetching
-      if (isInitialLoad.current) return;
-
       setSession(currentSession);
       const currentUser = currentSession?.user ?? null;
       setUser(currentUser);
@@ -98,6 +108,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (mounted) setProfile(p);
       } else {
         setProfile(null);
+      }
+
+      if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+          setIsLoading(false);
       }
     });
 
