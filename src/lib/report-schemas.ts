@@ -14,11 +14,11 @@ export const CashierFormSchema = z.object({
   total_payments: z.coerce.number().min(0.01, "Total payments must be greater than zero."),
   worked_on_lph: z.enum(["Yes", "No"], { required_error: "LPH status is required." }),
   customer_confirmation_done: z.enum(["Yes", "No"], { required_error: "Confirmation status is required." }),
-  incentive_report_progress: z.string().optional(), // NEW FIELD: Optional for standard Cashier, conditionally required in UI for Kasir-Insentif
+  incentive_report_progress: z.string().optional(),
 });
 
 export const ConsignmentStaffFormSchema = z.object({
-  lpk_count: z.coerce.number().min(0, "Must be a non-negative number."),
+  lpk_entered_bsoft: z.coerce.number().min(0, "Must be a non-negative number."), // FIXED
   tasks_completed: z.string().min(1, "Tasks completed description is required."),
   issues_encountered: z.string().min(1, "Issues encountered description is required."),
   suggestions: z.string().optional(),

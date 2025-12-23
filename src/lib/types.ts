@@ -51,7 +51,7 @@ export interface CashierReport {
 }
 
 export interface ConsignmentStaffReport {
-  lpk_count: number;
+  lpk_entered_bsoft: number; // FIXED: Matches DB column
   tasks_completed: string;
   issues_encountered: string;
   suggestions: string | null;

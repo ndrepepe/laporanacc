@@ -24,7 +24,7 @@ const ReportFormConsignmentStaff = () => {
   const form = useForm<ConsignmentStaffFormValues>({
     resolver: zodResolver(ConsignmentStaffFormSchema),
     defaultValues: {
-      lpk_count: undefined,
+      lpk_entered_bsoft: undefined,
       tasks_completed: "",
       issues_encountered: "",
       suggestions: "",
@@ -39,7 +39,7 @@ const ReportFormConsignmentStaff = () => {
 
     const payload = {
       user_id: user.id,
-      lpk_count: values.lpk_count,
+      lpk_entered_bsoft: values.lpk_entered_bsoft,
       tasks_completed: values.tasks_completed,
       issues_encountered: values.issues_encountered,
       suggestions: values.suggestions || null,
@@ -54,29 +54,16 @@ const ReportFormConsignmentStaff = () => {
       showError("Failed to submit report. You may have already submitted a report for today.");
     } else {
       showSuccess("Consignment Staff Report submitted successfully!");
-      form.reset({
-        lpk_count: undefined,
-        tasks_completed: "",
-        issues_encountered: "",
-        suggestions: "",
-      });
+      form.reset();
       
-      // Send notification to managers
       await sendReportSubmissionNotification(user.id, profile.role, 'consignment_staff');
-      
-      // Invalidate the dailyReports query to refresh the view
       queryClient.invalidateQueries({ queryKey: ['dailyReports'] });
     }
   };
 
-  // Helper function for integer input change handling
   const handleIntChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
     const value = e.target.value;
-    if (value === "") {
-      field.onChange(undefined);
-    } else {
-      field.onChange(parseInt(value));
-    }
+    field.onChange(value === "" ? undefined : parseInt(value));
   };
 
   return (
@@ -84,10 +71,10 @@ const ReportFormConsignmentStaff = () => {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
-          name="lpk_count"
+          name="lpk_entered_bsoft"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('lpk_count')}</FormLabel>
+              <FormLabel>{t('lpk_entered_bsoft_label')}</FormLabel>
               <FormControl>
                 <Input
                   type="number"
@@ -107,11 +94,7 @@ const ReportFormConsignmentStaff = () => {
             <FormItem>
               <FormLabel>{t('tasks_completed_today')}</FormLabel>
               <FormControl>
-                <Textarea
-                  placeholder={t('describe_completed_tasks')}
-                  {...field}
-                  rows={5}
-                />
+                <Textarea placeholder={t('describe_completed_tasks')} {...field} rows={5} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -124,11 +107,7 @@ const ReportFormConsignmentStaff = () => {
             <FormItem>
               <FormLabel>{t('issues_encountered')}</FormLabel>
               <FormControl>
-                <Textarea
-                  placeholder={t('describe_issues_encountered')}
-                  {...field}
-                  rows={5}
-                />
+                <Textarea placeholder={t('describe_issues_encountered')} {...field} rows={5} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -141,11 +120,7 @@ const ReportFormConsignmentStaff = () => {
             <FormItem>
               <FormLabel>{t('suggestions_recommendations')}</FormLabel>
               <FormControl>
-                <Textarea
-                  placeholder={t('enter_suggestions')}
-                  {...field}
-                  rows={3}
-                />
+                <Textarea placeholder={t('enter_suggestions')} {...field} rows={3} />
               </FormControl>
               <FormMessage />
             </FormItem>

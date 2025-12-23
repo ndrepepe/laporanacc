@@ -26,7 +26,7 @@ const ReportEditConsignmentStaff: React.FC<ReportEditConsignmentStaffProps> = ({
   const queryClient = useQueryClient();
   
   const defaultValues: ConsignmentStaffFormValues = {
-    lpk_count: report.lpk_count,
+    lpk_entered_bsoft: report.lpk_entered_bsoft,
     tasks_completed: report.tasks_completed,
     issues_encountered: report.issues_encountered,
     suggestions: report.suggestions || "",
@@ -39,7 +39,7 @@ const ReportEditConsignmentStaff: React.FC<ReportEditConsignmentStaffProps> = ({
 
   const onSubmit = async (values: ConsignmentStaffFormValues) => {
     const payload = {
-      lpk_count: values.lpk_count,
+      lpk_entered_bsoft: values.lpk_entered_bsoft,
       tasks_completed: values.tasks_completed,
       issues_encountered: values.issues_encountered,
       suggestions: values.suggestions || null,
@@ -55,22 +55,15 @@ const ReportEditConsignmentStaff: React.FC<ReportEditConsignmentStaffProps> = ({
       showError("Failed to update report.");
     } else {
       showSuccess("Consignment Staff Report updated successfully!");
-      
-      // Invalidate queries to refresh the list and the single report view
       queryClient.invalidateQueries({ queryKey: ['dailyReports'] });
       queryClient.invalidateQueries({ queryKey: ['singleReport', report.id] });
       onSuccess();
     }
   };
 
-  // Helper function for integer input change handling
   const handleIntChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
     const value = e.target.value;
-    if (value === "") {
-      field.onChange(undefined);
-    } else {
-      field.onChange(parseInt(value));
-    }
+    field.onChange(value === "" ? 0 : parseInt(value));
   };
 
   return (
@@ -78,15 +71,14 @@ const ReportEditConsignmentStaff: React.FC<ReportEditConsignmentStaffProps> = ({
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
-          name="lpk_count"
+          name="lpk_entered_bsoft"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('lpk_count')}</FormLabel>
+              <FormLabel>{t('lpk_entered_bsoft_label')}</FormLabel>
               <FormControl>
                 <Input 
                   type="number" 
                   {...field} 
-                  value={field.value === undefined ? "" : field.value}
                   onChange={e => handleIntChange(e, field)}
                 />
               </FormControl>
@@ -94,7 +86,6 @@ const ReportEditConsignmentStaff: React.FC<ReportEditConsignmentStaffProps> = ({
             </FormItem>
           )}
         />
-        
         <FormField
           control={form.control}
           name="tasks_completed"
@@ -102,17 +93,12 @@ const ReportEditConsignmentStaff: React.FC<ReportEditConsignmentStaffProps> = ({
             <FormItem>
               <FormLabel>{t('tasks_completed_today')}</FormLabel>
               <FormControl>
-                <Textarea 
-                  placeholder={t('describe_completed_tasks')} 
-                  {...field} 
-                  rows={5} 
-                />
+                <Textarea placeholder={t('describe_completed_tasks')} {...field} rows={5} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        
         <FormField
           control={form.control}
           name="issues_encountered"
@@ -120,17 +106,12 @@ const ReportEditConsignmentStaff: React.FC<ReportEditConsignmentStaffProps> = ({
             <FormItem>
               <FormLabel>{t('issues_encountered')}</FormLabel>
               <FormControl>
-                <Textarea 
-                  placeholder={t('describe_issues_encountered')} 
-                  {...field} 
-                  rows={5} 
-                />
+                <Textarea placeholder={t('describe_issues_encountered')} {...field} rows={5} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        
         <FormField
           control={form.control}
           name="suggestions"
@@ -138,17 +119,12 @@ const ReportEditConsignmentStaff: React.FC<ReportEditConsignmentStaffProps> = ({
             <FormItem>
               <FormLabel>{t('suggestions_recommendations')}</FormLabel>
               <FormControl>
-                <Textarea 
-                  placeholder={t('enter_suggestions')} 
-                  {...field} 
-                  rows={3} 
-                />
+                <Textarea placeholder={t('enter_suggestions')} {...field} rows={3} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        
         <Button type="submit" variant="gradient">
           {t('save_changes')}
         </Button>

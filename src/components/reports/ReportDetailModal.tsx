@@ -62,7 +62,7 @@ const renderConsignmentStaffDetails = (report: DailyReport) => {
   const consignmentReport = report as ConsignmentStaffReport & DailyReport;
   return (
     <div className="space-y-4">
-      <DetailItem label="LPK Count" value={consignmentReport.lpk_count} />
+      <DetailItem label="LPK Entered Bsoft" value={consignmentReport.lpk_entered_bsoft} />
       <div className="space-y-2">
         <h4 className="font-semibold mt-4 pt-4 border-t border-border/50">Tasks Completed</h4>
         <p className="text-sm text-foreground/80 whitespace-pre-wrap p-2 bg-muted/50 rounded-md">{consignmentReport.tasks_completed}</p>
@@ -99,9 +99,7 @@ const renderSupervisorManagerDetails = (report: DailyReport) => {
 
 const ManagerViewStatus: React.FC<{ timestamp: string | null; role: string }> = ({ timestamp, role }) => {
     if (!timestamp) return null;
-    
     const formattedTime = format(new Date(timestamp), 'MMM dd, yyyy HH:mm');
-    
     return (
         <div className={cn(
             "flex items-center p-2 rounded-lg text-xs font-medium",
@@ -115,25 +113,18 @@ const ManagerViewStatus: React.FC<{ timestamp: string | null; role: string }> = 
 
 const ReportDetailModal: React.FC<ReportDetailModalProps> = ({ report, isOpen, onClose }) => {
   const { t } = useLanguage();
-  
   if (!report) return null;
 
-  // Fetch view history for the current report
   const { data: viewHistory, isLoading: isLoadingHistory, isError: isErrorHistory } = useReportViewHistory(report.id);
   const isViewed = (viewHistory?.length || 0) > 0;
 
   const renderDetails = () => {
     switch (report.type) {
-      case 'accounting':
-        return renderAccountingDetails(report);
-      case 'cashier':
-        return renderCashierDetails(report);
-      case 'consignment_staff':
-        return renderConsignmentStaffDetails(report);
-      case 'supervisor_manager':
-        return renderSupervisorManagerDetails(report);
-      default:
-        return <p>Unknown report type.</p>;
+      case 'accounting': return renderAccountingDetails(report);
+      case 'cashier': return renderCashierDetails(report);
+      case 'consignment_staff': return renderConsignmentStaffDetails(report);
+      case 'supervisor_manager': return renderSupervisorManagerDetails(report);
+      default: return <p>Unknown report type.</p>;
     }
   };
 
@@ -150,19 +141,10 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({ report, isOpen, o
         </DialogHeader>
         <ScrollArea className="flex-grow pr-4">
           <div className="space-y-4 pb-4">
-            {/* Manager View Status Indicators */}
             <div className="space-y-2">
-                <ManagerViewStatus 
-                    timestamp={report.accounting_manager_viewed_at} 
-                    role="Accounting Manager" 
-                />
-                <ManagerViewStatus 
-                    timestamp={report.senior_manager_viewed_at} 
-                    role="Senior Manager" 
-                />
+                <ManagerViewStatus timestamp={report.accounting_manager_viewed_at} role="Accounting Manager" />
+                <ManagerViewStatus timestamp={report.senior_manager_viewed_at} role="Senior Manager" />
             </div>
-            
-            {/* Submission Info */}
             <div className="grid grid-cols-2 gap-x-4 text-sm border-b pb-3 border-border/50">
               <div>
                 <p className="font-medium text-muted-foreground">{t('date')}:</p>
@@ -175,41 +157,25 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({ report, isOpen, o
                 </p>
               </div>
             </div>
-            
-            {/* Report Specific Details */}
             {renderDetails()}
-            
-            {/* View History Section */}
             <div className="pt-4 border-t border-border/50">
               <h3 className="text-lg font-semibold mb-3 flex items-center">
                 <Clock className="h-5 w-5 mr-2 text-primary" />
                 {t('view_history_title')}
               </h3>
-              
               {isLoadingHistory && <p className="text-sm text-muted-foreground">Loading view history...</p>}
               {isErrorHistory && <p className="text-sm text-red-500">Error loading view history.</p>}
-              
               {!isLoadingHistory && !isErrorHistory && (
                 <>
-                  {/* Viewed Status Indicator */}
-                  <div className="mb-4 p-3 rounded-lg border"
-                       style={{ backgroundColor: isViewed ? 'hsl(var(--primary) / 0.1)' : 'hsl(var(--muted) / 0.5)' }}>
+                  <div className="mb-4 p-3 rounded-lg border" style={{ backgroundColor: isViewed ? 'hsl(var(--primary) / 0.1)' : 'hsl(var(--muted) / 0.5)' }}>
                     <p className="text-sm font-medium flex items-center">
                       {isViewed ? (
-                        <>
-                          <CheckCircle className="h-4 w-4 mr-2 text-primary" />
-                          {t('viewed_status')}: <span className="ml-1 font-bold text-primary">{t('viewed')}</span>
-                        </>
+                        <><CheckCircle className="h-4 w-4 mr-2 text-primary" />{t('viewed_status')}: <span className="ml-1 font-bold text-primary">{t('viewed')}</span></>
                       ) : (
-                        <>
-                          <Eye className="h-4 w-4 mr-2 text-muted-foreground" />
-                          {t('viewed_status')}: <span className="ml-1 font-bold text-muted-foreground">{t('not_yet_viewed')}</span>
-                        </>
+                        <><Eye className="h-4 w-4 mr-2 text-muted-foreground" />{t('viewed_status')}: <span className="ml-1 font-bold text-muted-foreground">{t('not_yet_viewed')}</span></>
                       )}
                     </p>
                   </div>
-
-                  {/* Viewer List */}
                   {isViewed && (
                     <div className="space-y-2">
                       <p className="text-sm font-medium text-muted-foreground">{t('viewed_by')}:</p>
@@ -217,16 +183,11 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({ report, isOpen, o
                         <div key={log.id} className="flex items-center justify-between p-2 bg-secondary/50 rounded-md">
                           <div className="flex items-center">
                             <User className="h-4 w-4 mr-2 text-accent" />
-                            <span className="text-sm font-medium">
-                              {/* Safely access profile properties */}
-                              {log.viewer_profile?.first_name || 'Unknown'} {log.viewer_profile?.last_name || ''}
-                            </span>
+                            <span className="text-sm font-medium">{log.viewer_profile?.first_name || 'Unknown'} {log.viewer_profile?.last_name || ''}</span>
                           </div>
                           <div className="text-right">
                             <Badge variant="secondary" className="text-xs mr-2">{log.viewer_profile?.role || 'Unknown Role'}</Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {t('viewed_on')} {format(new Date(log.viewed_at), 'MMM dd, HH:mm')}
-                            </span>
+                            <span className="text-xs text-muted-foreground">{t('viewed_on')} {format(new Date(log.viewed_at), 'MMM dd, HH:mm')}</span>
                           </div>
                         </div>
                       ))}
