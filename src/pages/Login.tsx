@@ -25,7 +25,8 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md dark:neon-glow overflow-hidden border-border/40">
+      {/* Kartu dengan latar belakang 10% lebih gelap (menggunakan black/40 overlay atau warna spesifik yang lebih gelap) */}
+      <Card className="w-full max-w-md dark:neon-glow overflow-hidden border-border/40 bg-black/40 backdrop-blur-sm">
         <CardHeader className="pb-2">
           <CardTitle className="text-2xl sm:text-3xl text-center tracking-widest text-gradient font-black">
             AO DAILY REPORTS
@@ -49,7 +50,7 @@ const Login = () => {
                       brandAccent: 'hsl(var(--accent))',
                       defaultButtonBackground: 'hsl(var(--secondary))',
                       defaultButtonBackgroundHover: 'hsl(var(--secondary)/0.8)',
-                      inputBackground: 'hsl(var(--input))',
+                      inputBackground: 'rgba(0,0,0,0.3)', // Input juga dibuat lebih gelap
                       inputBorder: 'hsl(var(--border))',
                       inputBorderHover: 'hsl(var(--primary))',
                       inputBorderFocus: 'hsl(var(--primary))',
