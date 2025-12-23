@@ -12,10 +12,10 @@
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    /* Primary: Energetic Blue/Indigo (240 80% 50% for deeper indigo) */
+    /* Primary: Energetic Blue/Indigo */
     --primary: 240 80% 50%;
     --primary-foreground: 210 40% 98%;
-    /* Accent: Electric Cyan (190 90% 50% for electric blue/cyan) */
+    /* Accent: Electric Cyan */
     --accent: 190 90% 50%;
     --accent-foreground: 222.2 47.4% 11.2%;
     --secondary: 210 40% 96.1%;
@@ -26,8 +26,8 @@
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 240 80% 50%; /* Primary color ring */
-    --radius: 0.75rem; /* Slightly larger radius (12px) */
+    --ring: 240 80% 50%;
+    --radius: 0.75rem;
     /* Sidebar (Light) */
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 222.2 84% 4.9%;
@@ -40,17 +40,16 @@
   }
 
   .dark {
-    /* Dark Mode (Deep Charcoal/Slate 900) */
-    --background: 220 10% 10%; /* Dark background */
-    --foreground: 210 20% 95%; /* Light text */
-    --card: 220 10% 15%; /* Slightly lighter card */
+    /* Dark Mode (Deep Charcoal) */
+    --background: 220 10% 10%;
+    --foreground: 210 20% 95%;
+    --card: 220 10% 15%;
     --card-foreground: 210 20% 95%;
     --popover: 220 10% 15%;
     --popover-foreground: 210 20% 95%;
-    /* Primary: Deep Indigo/Violet */
-    --primary: 250 80% 60%; /* Violet/Purple */
-    --primary-foreground: 210 20% 95%; /* Accent: Electric Blue/Cyan */
-    --accent: 190 80% 50%; /* Electric Cyan */
+    --primary: 250 80% 60%;
+    --primary-foreground: 210 20% 95%;
+    --accent: 190 80% 50%;
     --accent-foreground: 220 10% 10%;
     --secondary: 220 10% 20%;
     --secondary-foreground: 210 20% 95%;
@@ -60,7 +59,7 @@
     --destructive-foreground: 210 20% 95%;
     --border: 220 10% 25%;
     --input: 220 10% 20%;
-    --ring: 250 80% 60%; /* Primary color ring */
+    --ring: 250 80% 60%;
     /* Sidebar (Dark) */
     --sidebar-background: 220 10% 10%;
     --sidebar-foreground: 210 20% 95%;
@@ -78,10 +77,8 @@
     @apply border-border;
   }
   body {
-    /* Use a modern font stack */
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground font-sans antialiased;
   }
-  /* Custom class for gradient text */
   .text-gradient {
     background-image: linear-gradient(to right, hsl(var(--primary)) 30%, hsl(var(--accent)) 70%);
     -webkit-background-clip: text;
@@ -89,38 +86,21 @@
   }
 }
 
-/* Custom utility for neon glow effect (soft shadow) */
 .neon-glow {
   box-shadow: 0 0 8px hsl(var(--accent) / 0.3), 0 0 15px hsl(var(--accent) / 0.15);
 }
 
-/* Custom utility for subtle glass effect */
 .glass-effect {
-  background-color: hsl(var(--card) / 0.5);
-  backdrop-filter: blur(10px);
-  border: 1px solid hsl(var(--border) / 0.5);
+  background-color: hsl(var(--card) / 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid hsl(var(--border) / 0.3);
 }
 
-/* Force consistent sidebar width - FIXED WIDTH 256px */
-.md\:flex.flex-col.w-64.border-r.border-border.bg-card.h-screen.sticky.top-0.shadow-2xl.dark\:shadow-primary\/10 {
-  width: 256px !important;
-  min-width: 256px !important;
-  max-width: 256px !important;
+/* Hide scrollbars for cleaner mobile look while keeping functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
-
-/* Alternative selector for sidebar if the above doesn't catch it */
-div[class*="sidebar"] {
-  width: 256px !important;
-  min-width: 256px !important;
-  max-width: 256px !important;
-}
-
-/* Force modern styling with rounded corners */
-.rounded-xl {
-  border-radius: 16px !important;
-}
-
-/* Ensure cards have modern styling */
-.bg-card {
-  border-radius: 16px !important;
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
