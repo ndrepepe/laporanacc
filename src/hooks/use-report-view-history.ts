@@ -10,7 +10,7 @@ export interface ReportViewLog {
     report_type: string;
     report_id: string;
     viewed_at: string;
-    viewer_profile: Pick<Profile, 'first_name' | 'last_name' | 'role'>;
+    viewer_profile: Pick<Profile, 'first_name' | 'last_name' | 'role'> | null; // Added null possibility
 }
 
 const fetchReportViewHistory = async (reportId: string): Promise<ReportViewLog[]> => {
@@ -29,11 +29,9 @@ const fetchReportViewHistory = async (reportId: string): Promise<ReportViewLog[]
         throw error;
     }
     
-    // Map data to ensure viewer_profile is correctly typed
-    return data.map(log => ({
-        ...log,
-        viewer_profile: log.viewer_profile as Pick<Profile, 'first_name' | 'last_name' | 'role'>
-    })) as ReportViewLog[];
+    // The data structure returned by Supabase already matches the interface due to the alias 'viewer_profile:viewer_id'.
+    // We cast directly.
+    return data as ReportViewLog[];
 };
 
 export const useReportViewHistory = (reportId: string | null) => {
