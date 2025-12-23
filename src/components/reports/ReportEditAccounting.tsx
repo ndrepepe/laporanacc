@@ -13,6 +13,7 @@ import { REPORT_TABLE_MAP } from "@/lib/report-constants";
 import { useQueryClient } from "@tanstack/react-query";
 import { AccountingReport, DailyReport } from "@/lib/types";
 import { AccountingFormSchema } from "@/lib/report-schemas";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type AccountingFormValues = z.infer<typeof AccountingFormSchema>;
 
@@ -22,6 +23,7 @@ interface ReportEditAccountingProps {
 }
 
 const ReportEditAccounting: React.FC<ReportEditAccountingProps> = ({ report, onSuccess }) => {
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   
   const defaultValues: AccountingFormValues = {
@@ -58,27 +60,29 @@ const ReportEditAccounting: React.FC<ReportEditAccountingProps> = ({ report, onS
       showError("Failed to update report.");
     } else {
       showSuccess("Accounting Report updated successfully!");
-      
-      // Invalidate queries to refresh the list and the single report view
       queryClient.invalidateQueries({ queryKey: ['dailyReports'] });
       queryClient.invalidateQueries({ queryKey: ['singleReport', report.id] });
       onSuccess();
     }
   };
 
+  const handleIntChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+    const value = e.target.value;
+    field.onChange(value === "" ? 0 : parseInt(value));
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="new_customers_count"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Number of New Customers Entered</FormLabel>
+                <FormLabel>{t('new_customers_count_label')}</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field} onChange={e => field.onChange(e.target.value === "" ? 0 : parseInt(e.target.value))} />
+                  <Input type="number" {...field} onChange={e => handleIntChange(e, field)} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -89,9 +93,9 @@ const ReportEditAccounting: React.FC<ReportEditAccountingProps> = ({ report, onS
             name="new_sales_count"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Number of New Sales Entered</FormLabel>
+                <FormLabel>{t('new_sales_count_label')}</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field} onChange={e => field.onChange(e.target.value === "" ? 0 : parseInt(e.target.value))} />
+                  <Input type="number" {...field} onChange={e => handleIntChange(e, field)} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -104,7 +108,7 @@ const ReportEditAccounting: React.FC<ReportEditAccountingProps> = ({ report, onS
           name="new_customers_names"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>New Customer Names (List them)</FormLabel>
+              <FormLabel>{t('new_customer_names_label')}</FormLabel>
               <FormControl>
                 <Textarea placeholder="e.g., John Doe, Jane Smith" {...field} rows={3} />
               </FormControl>
@@ -118,7 +122,7 @@ const ReportEditAccounting: React.FC<ReportEditAccountingProps> = ({ report, onS
           name="new_sales_names"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>New Sales Names (List them)</FormLabel>
+              <FormLabel>{t('new_sales_names_label')}</FormLabel>
               <FormControl>
                 <Textarea placeholder="e.g., Sale A, Sale B" {...field} rows={3} />
               </FormControl>
@@ -132,7 +136,7 @@ const ReportEditAccounting: React.FC<ReportEditAccountingProps> = ({ report, onS
           name="worked_on_lph"
           render={({ field }) => (
             <FormItem className="space-y-3">
-              <FormLabel>Did you work on LPH today?</FormLabel>
+              <FormLabel>{t('worked_on_lph_label')}</FormLabel>
               <FormControl>
                 <RadioGroup
                   onValueChange={field.onChange}
@@ -140,16 +144,12 @@ const ReportEditAccounting: React.FC<ReportEditAccountingProps> = ({ report, onS
                   className="flex space-x-4"
                 >
                   <FormItem className="flex items-center space-x-3 space-y-0">
-                    <FormControl>
-                      <RadioGroupItem value="Yes" />
-                    </FormControl>
-                    <FormLabel className="font-normal">Yes</FormLabel>
+                    <FormControl><RadioGroupItem value="Yes" /></FormControl>
+                    <FormLabel className="font-normal">{t('yes')}</FormLabel>
                   </FormItem>
                   <FormItem className="flex items-center space-x-3 space-y-0">
-                    <FormControl>
-                      <RadioGroupItem value="No" />
-                    </FormControl>
-                    <FormLabel className="font-normal">No</FormLabel>
+                    <FormControl><RadioGroupItem value="No" /></FormControl>
+                    <FormLabel className="font-normal">{t('no')}</FormLabel>
                   </FormItem>
                 </RadioGroup>
               </FormControl>
@@ -163,7 +163,7 @@ const ReportEditAccounting: React.FC<ReportEditAccountingProps> = ({ report, onS
           name="customer_confirmation_status"
           render={({ field }) => (
             <FormItem className="space-y-3">
-              <FormLabel>Customer Confirmation Status</FormLabel>
+              <FormLabel>{t('customer_confirmation_status_label')}</FormLabel>
               <FormControl>
                 <RadioGroup
                   onValueChange={field.onChange}
@@ -171,15 +171,11 @@ const ReportEditAccounting: React.FC<ReportEditAccountingProps> = ({ report, onS
                   className="flex space-x-4"
                 >
                   <FormItem className="flex items-center space-x-3 space-y-0">
-                    <FormControl>
-                      <RadioGroupItem value="Successful" />
-                    </FormControl>
+                    <FormControl><RadioGroupItem value="Successful" /></FormControl>
                     <FormLabel className="font-normal">Successful</FormLabel>
                   </FormItem>
                   <FormItem className="flex items-center space-x-3 space-y-0">
-                    <FormControl>
-                      <RadioGroupItem value="Failed" />
-                    </FormControl>
+                    <FormControl><RadioGroupItem value="Failed" /></FormControl>
                     <FormLabel className="font-normal">Failed</FormLabel>
                   </FormItem>
                 </RadioGroup>
@@ -189,7 +185,7 @@ const ReportEditAccounting: React.FC<ReportEditAccountingProps> = ({ report, onS
           )}
         />
 
-        <Button type="submit" variant="gradient">Save Changes</Button>
+        <Button type="submit" variant="gradient">{t('save_changes')}</Button>
       </form>
     </Form>
   );

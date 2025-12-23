@@ -6,7 +6,6 @@ import ReportFormAccounting from "@/components/reports/ReportFormAccounting";
 import ReportFormCashier from "@/components/reports/ReportFormCashier";
 import ReportFormConsignmentStaff from "@/components/reports/ReportFormConsignmentStaff";
 import ReportFormSupervisorManager from "@/components/reports/ReportFormSupervisorManager";
-import ReportFormCashierIncentive from "@/components/reports/ReportFormCashierIncentive";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -44,9 +43,8 @@ const SubmitReport = () => {
       case 'Accounting Staff':
         return <ReportFormAccounting />;
       case 'Cashier':
-        return <ReportFormCashier />;
       case 'Cashier-Insentif':
-        return <ReportFormCashierIncentive />;
+        return <ReportFormCashier />;
       case 'Consignment Staff':
         return <ReportFormConsignmentStaff />;
       case 'Consignment Supervisor':

@@ -11,6 +11,7 @@ import { REPORT_TABLE_MAP } from "@/lib/report-constants";
 import { useQueryClient } from "@tanstack/react-query";
 import { DailyReport, SupervisorManagerReport } from "@/lib/types";
 import { SupervisorManagerFormSchema } from "@/lib/report-schemas";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type SupervisorManagerFormValues = z.infer<typeof SupervisorManagerFormSchema>;
 
@@ -20,6 +21,7 @@ interface ReportEditSupervisorManagerProps {
 }
 
 const ReportEditSupervisorManager: React.FC<ReportEditSupervisorManagerProps> = ({ report, onSuccess }) => {
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   
   const defaultValues: SupervisorManagerFormValues = {
@@ -50,8 +52,6 @@ const ReportEditSupervisorManager: React.FC<ReportEditSupervisorManagerProps> = 
       showError("Failed to update report.");
     } else {
       showSuccess("Supervisor/Manager Report updated successfully!");
-      
-      // Invalidate queries to refresh the list and the single report view
       queryClient.invalidateQueries({ queryKey: ['dailyReports'] });
       queryClient.invalidateQueries({ queryKey: ['singleReport', report.id] });
       onSuccess();
@@ -61,15 +61,14 @@ const ReportEditSupervisorManager: React.FC<ReportEditSupervisorManagerProps> = 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        
         <FormField
           control={form.control}
           name="tasks_completed"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tasks Completed Today</FormLabel>
+              <FormLabel>{t('tasks_completed_today')}</FormLabel>
               <FormControl>
-                <Textarea placeholder="Describe your completed tasks..." {...field} rows={5} />
+                <Textarea placeholder={t('describe_completed_tasks')} {...field} rows={5} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -81,9 +80,9 @@ const ReportEditSupervisorManager: React.FC<ReportEditSupervisorManagerProps> = 
           name="issues_encountered"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Issues Encountered</FormLabel>
+              <FormLabel>{t('issues_encountered')}</FormLabel>
               <FormControl>
-                <Textarea placeholder="Describe any issues encountered..." {...field} rows={5} />
+                <Textarea placeholder={t('describe_issues_encountered')} {...field} rows={5} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -95,16 +94,16 @@ const ReportEditSupervisorManager: React.FC<ReportEditSupervisorManagerProps> = 
           name="suggestions"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Suggestions and Recommendations (Optional)</FormLabel>
+              <FormLabel>{t('suggestions_recommendations')}</FormLabel>
               <FormControl>
-                <Textarea placeholder="Enter suggestions..." {...field} rows={3} />
+                <Textarea placeholder={t('enter_suggestions')} {...field} rows={3} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <Button type="submit" variant="gradient">Save Changes</Button>
+        <Button type="submit" variant="gradient">{t('save_changes')}</Button>
       </form>
     </Form>
   );
